@@ -1,5 +1,6 @@
--- Internal helper used by flowcore_list_my_invitations, flowcore_mark_invitation_registered,
--- accept/reject paths, etc. (defined in 018; add here if 018 was skipped on the project.)
+-- Idempotent refresh of _flowcore_sync_invitations_for_user_email (same body as in 023).
+-- Uses direct INSERT into notifications (base columns) so it does not depend on
+-- _flowcore_insert_notification from migration 013.
 
 CREATE OR REPLACE FUNCTION public._flowcore_sync_invitations_for_user_email(
   p_uid uuid,
@@ -48,13 +49,12 @@ BEGIN
       FROM public.users u
       WHERE u.id = p_uid;
 
-      PERFORM public._flowcore_insert_notification(
+      INSERT INTO public.notifications (organization_id, user_id, message, link)
+      VALUES (
         rec.organization_id,
         rec.invited_by,
-        coalesce(v_invitee, 'Someone') || ' has registered for your invitation',
-        v_link,
-        'invitation',
-        rec.id
+        left(coalesce(v_invitee, 'Someone') || ' has registered for your invitation', 2000),
+        v_link
       );
     END IF;
 

@@ -1,8 +1,69 @@
 -- Ensures flowcore_list_my_invitations() exists for the invitations inbox.
--- If you see PostgREST: "Could not find the function ... without parameters in the schema cache",
--- apply this migration (or full 018+) and/or reload the API schema in the Supabase dashboard.
---
--- Depends on: public._flowcore_sync_invitations_for_user_email (018 or migration 024).
+-- Sync helper is defined FIRST so this file applies cleanly even when 018/024 were skipped.
+-- Notifications use a direct INSERT (base columns only) so _flowcore_insert_notification is not required.
+
+CREATE OR REPLACE FUNCTION public._flowcore_sync_invitations_for_user_email(
+  p_uid uuid,
+  p_email text
+)
+RETURNS int
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+  rec RECORD;
+  n int := 0;
+  v_link text := '/invitations';
+  v_invitee text;
+BEGIN
+  IF p_uid IS NULL OR p_email IS NULL OR trim(p_email) = '' THEN
+    RETURN 0;
+  END IF;
+
+  FOR rec IN
+    SELECT i.*
+    FROM public.invitations i
+    WHERE lower(trim(i.email)) = lower(trim(p_email))
+      AND i.status = 'invited'
+    FOR UPDATE OF i
+  LOOP
+    UPDATE public.invitations
+    SET status = 'registered'
+    WHERE id = rec.id;
+
+    IF rec.participant_id IS NOT NULL THEN
+      UPDATE public.case_participants cp
+      SET
+        user_id = p_uid,
+        email = NULL,
+        type = 'internal'
+      WHERE cp.id = rec.participant_id
+        AND cp.case_id IS NOT DISTINCT FROM rec.case_id
+        AND cp.organization_id = rec.organization_id;
+    END IF;
+
+    IF rec.invited_by IS NOT NULL THEN
+      SELECT coalesce(nullif(trim(u.name), ''), nullif(trim(u.email), ''), trim(rec.email))
+      INTO v_invitee
+      FROM public.users u
+      WHERE u.id = p_uid;
+
+      INSERT INTO public.notifications (organization_id, user_id, message, link)
+      VALUES (
+        rec.organization_id,
+        rec.invited_by,
+        left(coalesce(v_invitee, 'Someone') || ' has registered for your invitation', 2000),
+        v_link
+      );
+    END IF;
+
+    n := n + 1;
+  END LOOP;
+
+  RETURN n;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.flowcore_list_my_invitations()
 RETURNS jsonb
