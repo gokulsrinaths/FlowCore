@@ -81,6 +81,7 @@ export async function fetchPendingInvitations(
     id: string;
     email: string;
     role: OrgRole;
+    status: "invited" | "registered";
     expires_at: string;
     created_at: string;
   }[]
@@ -88,9 +89,9 @@ export async function fetchPendingInvitations(
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("invitations")
-    .select("id, email, role, expires_at, created_at")
+    .select("id, email, role, status, expires_at, created_at")
     .eq("organization_id", organizationId)
-    .is("accepted_at", null)
+    .in("status", ["invited", "registered"])
     .order("created_at", { ascending: false });
 
   if (error) throw supabaseErrorToError(error);
@@ -98,6 +99,7 @@ export async function fetchPendingInvitations(
     id: string;
     email: string;
     role: OrgRole;
+    status: "invited" | "registered";
     expires_at: string;
     created_at: string;
   }[];

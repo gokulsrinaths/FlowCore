@@ -136,6 +136,8 @@ export default async function CaseDetailPage({ params }: PageProps) {
           organizationId={orgId}
           orgSlug={orgSlug}
           caseId={caseRow.id}
+          caseTitle={caseRow.title?.trim() ? caseRow.title : "Case"}
+          orgName={membership.organization.name?.trim() ? membership.organization.name : orgSlug}
           participants={participants}
           orgUsers={users}
         />

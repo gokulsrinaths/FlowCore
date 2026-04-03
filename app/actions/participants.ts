@@ -2,9 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { buildInviteUrl } from "@/lib/app-url";
 import { fetchCaseParticipants } from "@/lib/db";
-import { fetchCaseById } from "@/lib/cases";
-import { getAppBaseUrl, sendInviteEmail } from "@/lib/email";
 import { parseFlowcoreRpc } from "@/lib/supabase-rpc";
 import type { OrgRole } from "@/types";
 
@@ -80,8 +79,7 @@ export async function createCaseInvitationAction(
 ): Promise<
   ParticipantActionResult & {
     token?: string;
-    emailSent?: boolean;
-    emailError?: string;
+    inviteUrl?: string;
   }
 > {
   try {
@@ -97,32 +95,10 @@ export async function createCaseInvitationAction(
     const r = parseFlowcoreRpc(data);
     if (!r.ok) return { ok: false, error: r.error };
     const token = (r as { token?: string }).token;
-    let emailSent: boolean | undefined;
-    let emailError: string | undefined;
-    if (token) {
-      const [{ data: orgRow }, caseRow] = await Promise.all([
-        supabase.from("organizations").select("name").eq("id", organizationId).maybeSingle(),
-        fetchCaseById(organizationId, caseId),
-      ]);
-      const base = getAppBaseUrl();
-      const inviteLink = `${base}/invite/${token}`;
-      const send = await sendInviteEmail({
-        to: trimmedEmail,
-        inviteLink,
-        caseTitle: caseRow?.title?.trim() ? caseRow.title : "Case",
-        orgName: (orgRow?.name as string | undefined)?.trim()
-          ? String(orgRow?.name)
-          : "Workspace",
-      });
-      emailSent = send.ok;
-      if (!send.ok) {
-        emailError = send.error;
-        console.warn("[createCaseInvitationAction] Email:", send.error);
-      }
-    }
+    const inviteUrl = token ? buildInviteUrl(token) : undefined;
     revalidatePath(`/${orgSlug}/cases/${caseId}`);
     revalidatePath(`/${orgSlug}/activity`);
-    return { ok: true, token, emailSent, emailError };
+    return { ok: true, token, inviteUrl };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Failed" };
   }

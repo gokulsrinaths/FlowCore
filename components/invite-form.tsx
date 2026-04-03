@@ -39,14 +39,14 @@ export function InviteForm({
       fd.set("role", role);
       const res = await createInvitationAction(organizationId, orgSlug, fd);
       if (res.ok) {
-        if (res.emailSent === false) {
-          toast.error(
-            res.emailError
-              ? `Invite saved but email failed: ${res.emailError}`
-              : "Invite saved but email was not sent (check RESEND_API_KEY and server logs)."
-          );
-        } else {
-          toast.success("Invitation sent");
+        toast.success("Invitation created — share the link manually with your teammate.");
+        if (res.inviteUrl) {
+          try {
+            await navigator.clipboard.writeText(res.inviteUrl);
+            toast.message("Invite link copied to clipboard");
+          } catch {
+            /* ignore */
+          }
         }
         setEmail("");
         router.refresh();
@@ -85,7 +85,7 @@ export function InviteForm({
         </Select>
       </div>
       <Button type="submit" disabled={pending}>
-        {pending ? "Sending…" : "Send invite"}
+        {pending ? "Creating…" : "Create invite"}
       </Button>
     </form>
   );

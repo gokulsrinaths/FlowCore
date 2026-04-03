@@ -141,8 +141,10 @@ export type CaseParticipant = {
   user_email?: string | null;
   /** From users.department when internal */
   department?: string | null;
-  /** True when a pending case invitation exists for this participant row */
-  invited?: boolean;
+  /** Latest invitation status for this participant row (case invites), if any */
+  invite_status?: "invited" | "registered" | "accepted" | "rejected" | string | null;
+  /** Token for open case invitation (invited/registered), for share/mailto links */
+  invite_token?: string | null;
 };
 
 /** Item with joined assignee/creator names for UI */
@@ -196,11 +198,11 @@ export type InvitationRow = {
   created_at: string;
   case_id?: string | null;
   participant_id?: string | null;
-  status?: "pending" | "accepted" | "rejected";
+  status?: "invited" | "registered" | "accepted" | "rejected";
 };
 
-/** Pending rows from `flowcore_list_my_pending_invitations`. */
-export type PendingInvitationRow = {
+/** Rows from `flowcore_list_my_invitations`. */
+export type InvitationListRow = {
   id: string;
   organization_id: string;
   organization_name: string;
@@ -213,7 +215,13 @@ export type PendingInvitationRow = {
   created_at: string;
   expires_at: string;
   token: string;
-  status: "pending";
+  status: "invited" | "registered" | "accepted" | "rejected";
+};
+
+export type UserInvitationsGrouped = {
+  pending: InvitationListRow[];
+  accepted: InvitationListRow[];
+  rejected: InvitationListRow[];
 };
 
 export type SubscriptionRow = {

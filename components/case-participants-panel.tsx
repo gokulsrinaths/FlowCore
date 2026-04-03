@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { publicInviteUrl } from "@/lib/invite-link";
+import { generateInviteMailto } from "@/lib/mailto";
 import type { CaseParticipant, OrgRole, UserRow } from "@/types";
 
 const NONE_USER = "__none__";
@@ -47,23 +49,57 @@ function internalLine(p: CaseParticipant) {
   );
 }
 
-function externalStatus(p: CaseParticipant) {
-  if (p.invited) return "Invited";
-  return "Active";
+function inviteStatusLabel(status: string | null | undefined): string {
+  if (!status) return "";
+  if (status === "invited") return "Invited";
+  if (status === "registered") return "Registered";
+  if (status === "accepted") return "Accepted";
+  if (status === "rejected") return "Rejected";
+  return status;
 }
 
 type CaseParticipantsPanelProps = {
   organizationId: string;
   orgSlug: string;
   caseId: string;
+  caseTitle: string;
+  orgName: string;
   participants: CaseParticipant[];
   orgUsers: UserRow[];
 };
+
+function openExternalInviteMailto(
+  p: CaseParticipant,
+  caseTitle: string,
+  orgName: string
+): void {
+  const to = p.email?.trim();
+  if (!to) {
+    toast.error("No email on this participant");
+    return;
+  }
+  const inviteLink = p.invite_token?.trim()
+    ? publicInviteUrl(p.invite_token)
+    : `${(process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "") || window.location.origin}/invitations`;
+  window.location.href = generateInviteMailto({ to, inviteLink, caseTitle, orgName });
+}
+
+function copyExternalInviteLink(p: CaseParticipant): void {
+  const tok = p.invite_token?.trim();
+  if (!tok) {
+    toast.error("No open invite link for this participant");
+    return;
+  }
+  void navigator.clipboard.writeText(publicInviteUrl(tok));
+  toast.success("Invite link copied");
+}
 
 export function CaseParticipantsPanel({
   organizationId,
   orgSlug,
   caseId,
+  caseTitle,
+  orgName,
   participants,
   orgUsers,
 }: CaseParticipantsPanelProps) {
@@ -143,18 +179,18 @@ export function CaseParticipantsPanel({
         inviteRole
       );
       if (res.ok) {
-        if (res.emailSent === false) {
-          toast.error(
-            res.emailError
-              ? `Invite saved but email failed: ${res.emailError}`
-              : "Invite saved but email was not sent (check RESEND_API_KEY)."
-          );
-        } else {
-          toast.success("Invitation sent");
+        toast.success("Invitation created — share the link manually.");
+        if (res.inviteUrl) {
+          try {
+            await navigator.clipboard.writeText(res.inviteUrl);
+            toast.message("Invite link copied to clipboard");
+          } catch {
+            /* ignore */
+          }
         }
         setInviteEmail("");
         refresh();
-      } else toast.error(res.error ?? "Could not send invite");
+      } else toast.error(res.error ?? "Could not create invite");
     });
   }
 
@@ -191,8 +227,24 @@ export function CaseParticipantsPanel({
     });
   }
 
-  const internal = participants.filter((p) => p.type === "internal");
-  const external = participants.filter((p) => p.type === "external");
+  const pendingCaseInvite = participants.filter((p) => {
+    const st = p.invite_status;
+    return st === "invited" || st === "registered";
+  });
+
+  const internal = participants.filter((p) => {
+    if (p.type !== "internal") return false;
+    const st = p.invite_status;
+    if (st === "invited" || st === "registered") return false;
+    return true;
+  });
+
+  const external = participants.filter((p) => {
+    if (p.type !== "external") return false;
+    const st = p.invite_status;
+    if (st === "invited" || st === "registered") return false;
+    return true;
+  });
 
   return (
     <Card>
@@ -286,6 +338,70 @@ export function CaseParticipantsPanel({
         </div>
 
         <div>
+          <h4 className="text-sm font-medium mb-2">Pending invitation</h4>
+          <p className="text-xs text-muted-foreground mb-2">
+            Invited (email only) or registered (signed in, not yet accepted).
+          </p>
+          <ul className="text-sm space-y-1">
+            {pendingCaseInvite.length === 0 ? (
+              <li className="text-muted-foreground">—</li>
+            ) : (
+              pendingCaseInvite.map((p) => (
+                <li key={p.id} className="flex justify-between gap-2 items-center">
+                  <span className="min-w-0">
+                    {p.type === "internal" ? internalLine(p) : p.email}
+                    <span className="text-muted-foreground text-xs ml-2">
+                      {ROLE_LABEL[p.role ?? "external"] ?? "External"}
+                    </span>
+                  </span>
+                  <span className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+                    <Badge variant="outline" className="text-[10px]">
+                      {inviteStatusLabel(p.invite_status)}
+                    </Badge>
+                    {p.type === "external" && p.email?.trim() ? (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs"
+                          disabled={pending}
+                          onClick={() => openExternalInviteMailto(p, caseTitle, orgName)}
+                        >
+                          📧 Send Invite Email
+                        </Button>
+                        {p.invite_token?.trim() ? (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            className="h-7 text-xs"
+                            disabled={pending}
+                            onClick={() => copyExternalInviteLink(p)}
+                          >
+                            📋 Copy invite link
+                          </Button>
+                        ) : null}
+                      </>
+                    ) : null}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      disabled={pending}
+                      onClick={() => remove(p.id)}
+                    >
+                      Remove
+                    </Button>
+                  </span>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+
+        <div>
           <h4 className="text-sm font-medium mb-2">External</h4>
           <ul className="text-sm space-y-1">
             {external.length === 0 ? (
@@ -299,10 +415,32 @@ export function CaseParticipantsPanel({
                       {ROLE_LABEL[p.role ?? "external"] ?? "External"}
                     </span>
                   </span>
-                  <span className="flex items-center gap-2 shrink-0">
-                    <Badge variant={p.invited ? "outline" : "secondary"} className="text-[10px]">
-                      {externalStatus(p)}
+                  <span className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+                    <Badge variant="secondary" className="text-[10px]">
+                      Active
                     </Badge>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      disabled={pending}
+                      onClick={() => openExternalInviteMailto(p, caseTitle, orgName)}
+                    >
+                      📧 Send Invite Email
+                    </Button>
+                    {p.invite_token?.trim() ? (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="h-7 text-xs"
+                        disabled={pending}
+                        onClick={() => copyExternalInviteLink(p)}
+                      >
+                        📋 Copy invite link
+                      </Button>
+                    ) : null}
                     <Button
                       type="button"
                       variant="ghost"
@@ -323,8 +461,9 @@ export function CaseParticipantsPanel({
         <div className="border-t border-border/60 pt-4 space-y-3">
           <h4 className="text-sm font-medium">Invite by email</h4>
           <p className="text-xs text-muted-foreground">
-            Creates a case participant, an organization invitation, and an activity log. When they
-            sign up with this email, they join the workspace and this case automatically.
+            Creates a case participant and invitation. Share the invite link manually. After they
+            sign in with that email they can accept from Invitations — they are not on the case
+            until they accept.
           </p>
           <div className="flex flex-col sm:flex-row gap-2 items-end">
             <div className="flex-1 space-y-2 w-full">
@@ -357,7 +496,7 @@ export function CaseParticipantsPanel({
               </Select>
             </div>
             <Button type="button" onClick={sendCaseInvite} disabled={pending}>
-              Send invite
+              Create invite
             </Button>
           </div>
         </div>

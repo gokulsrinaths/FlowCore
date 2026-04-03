@@ -76,6 +76,8 @@ async function completePostAuthRedirect(
     return { ok: false, error: r.error };
   }
 
+  await supabase.rpc("flowcore_mark_invitation_registered");
+
   const preferred = safeNextPath(nextPath);
   if (preferred) {
     return { ok: true, path: preferred };
@@ -160,7 +162,7 @@ export async function signUpAction(formData: FormData): Promise<AuthActionResult
 
     const supabase = await createSupabaseServerClient();
     const origin = await getRequestOrigin();
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -170,6 +172,10 @@ export async function signUpAction(formData: FormData): Promise<AuthActionResult
     });
     if (error) {
       return { ok: false, error: error.message };
+    }
+
+    if (signUpData.session) {
+      await supabase.rpc("flowcore_mark_invitation_registered");
     }
 
     return { ok: true };

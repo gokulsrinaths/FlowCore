@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getAppBaseUrl, sendOrgInviteEmail } from "@/lib/email";
+import { buildInviteUrl } from "@/lib/app-url";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { parseFlowcoreRpc } from "@/lib/supabase-rpc";
 import { canCreateInvite } from "@/lib/usage";
@@ -13,9 +13,8 @@ export type OrgActionResult =
       slug?: string;
       id?: string;
       token?: string;
-      /** False when RESEND failed or was not configured (invite row still created) */
-      emailSent?: boolean;
-      emailError?: string;
+      /** Share manually with the invitee */
+      inviteUrl?: string;
     }
   | { ok: false; error: string };
 
@@ -101,32 +100,10 @@ export async function createInvitationAction(
     if (!r.ok) return { ok: false, error: r.error };
 
     const tok = (r as { token?: string }).token;
-    let emailSent: boolean | undefined;
-    let emailError: string | undefined;
-    if (tok) {
-      const { data: orgRow } = await supabase
-        .from("organizations")
-        .select("name")
-        .eq("id", organizationId)
-        .maybeSingle();
-      const orgName =
-        (orgRow?.name as string | undefined)?.trim() || "Workspace";
-      const base = getAppBaseUrl();
-      const inviteLink = `${base}/invite/${tok}`;
-      const send = await sendOrgInviteEmail({
-        to: email,
-        inviteLink,
-        orgName,
-      });
-      emailSent = send.ok;
-      if (!send.ok) {
-        emailError = send.error;
-        console.warn("[createInvitationAction] Email not sent:", send.error);
-      }
-    }
+    const inviteUrl = tok ? buildInviteUrl(tok) : undefined;
 
     revalidatePath(`/${orgSlug}/settings/team`);
-    return { ok: true, token: tok, emailSent, emailError };
+    return { ok: true, token: tok, inviteUrl };
   } catch (e) {
     return catchErr(e);
   }

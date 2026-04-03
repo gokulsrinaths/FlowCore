@@ -43,7 +43,8 @@ export default async function TeamSettingsPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="text-base">Invite people</CardTitle>
             <CardDescription>
-              Send an email invite. They must sign in with that email to accept.
+              Create an invite and share the link yourself. They sign in with that email, then
+              accept from Invitations.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -72,7 +73,10 @@ export default async function TeamSettingsPage({ params }: PageProps) {
       {invites.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Pending invitations</CardTitle>
+            <CardTitle className="text-base">Open invitations</CardTitle>
+            <CardDescription className="text-xs">
+              Invited = not signed up yet; registered = signed in, pending accept.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             {invites.map((inv) => (
@@ -80,8 +84,10 @@ export default async function TeamSettingsPage({ params }: PageProps) {
                 key={inv.id}
                 className="flex justify-between gap-4 border-b border-border/60 pb-2 last:border-0"
               >
-                <span>{inv.email}</span>
-                <span className="text-muted-foreground">{inv.role}</span>
+                <span className="font-mono text-xs break-all">{inv.email}</span>
+                <span className="text-muted-foreground shrink-0 capitalize">
+                  {inv.role.replace("org_", "")} · {inv.status}
+                </span>
               </div>
             ))}
           </CardContent>

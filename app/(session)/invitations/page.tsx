@@ -42,8 +42,8 @@ export default async function InvitationsPage() {
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Invitations</h1>
           <p className="text-muted-foreground text-sm text-pretty">
-            Accept or decline invitations to workspaces and cases. You are only added after you
-            accept.
+            Invitations move from invited → registered when you sign in with the invited email,
+            then you can accept or decline. You are only added after you accept.
           </p>
         </div>
         <PendingInvitationsList initial={res.invitations} />

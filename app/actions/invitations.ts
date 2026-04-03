@@ -3,50 +3,70 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { parseFlowcoreRpc } from "@/lib/supabase-rpc";
-import type { OrgRole, PendingInvitationRow } from "@/types";
+import type { InvitationListRow, OrgRole, UserInvitationsGrouped } from "@/types";
 
 export type InvitationActionResult =
   | { ok: true; slug?: string }
   | { ok: false; error: string };
 
-function parseInvitationListRpc(data: unknown): PendingInvitationRow[] {
-  if (data == null || typeof data !== "object") return [];
+function parseInvitationRow(row: unknown): InvitationListRow | null {
+  if (row == null || typeof row !== "object") return null;
+  const x = row as Record<string, unknown>;
+  const id = x.id != null ? String(x.id) : "";
+  if (!id) return null;
+  return {
+    id,
+    organization_id: String(x.organization_id ?? ""),
+    organization_name: String(x.organization_name ?? ""),
+    case_id: x.case_id != null ? String(x.case_id) : null,
+    case_title: x.case_title != null ? String(x.case_title) : null,
+    role: x.role as OrgRole,
+    invited_by_name: String(x.invited_by_name ?? ""),
+    invited_by_email: String(x.invited_by_email ?? ""),
+    email: String(x.email ?? ""),
+    created_at: String(x.created_at ?? ""),
+    expires_at: String(x.expires_at ?? ""),
+    token: String(x.token ?? ""),
+    status: String(x.status ?? "invited") as InvitationListRow["status"],
+  };
+}
+
+function parseGroupedInvitations(data: unknown): UserInvitationsGrouped {
+  const empty: UserInvitationsGrouped = {
+    pending: [],
+    accepted: [],
+    rejected: [],
+  };
+  if (data == null || typeof data !== "object") return empty;
   const o = data as Record<string, unknown>;
-  const raw = o.invitations;
-  if (!Array.isArray(raw)) return [];
-  return raw.map((row) => {
-    const x = row as Record<string, unknown>;
-    return {
-      id: String(x.id),
-      organization_id: String(x.organization_id),
-      organization_name: String(x.organization_name ?? ""),
-      case_id: x.case_id != null ? String(x.case_id) : null,
-      case_title: x.case_title != null ? String(x.case_title) : null,
-      role: x.role as OrgRole,
-      invited_by_name: String(x.invited_by_name ?? ""),
-      invited_by_email: String(x.invited_by_email ?? ""),
-      email: String(x.email ?? ""),
-      created_at: String(x.created_at ?? ""),
-      expires_at: String(x.expires_at ?? ""),
-      token: String(x.token ?? ""),
-      status: String(x.status ?? "pending") as PendingInvitationRow["status"],
-    };
-  });
+  function arr(key: string): InvitationListRow[] {
+    const raw = o[key];
+    if (!Array.isArray(raw)) return [];
+    const out: InvitationListRow[] = [];
+    for (const row of raw) {
+      const p = parseInvitationRow(row);
+      if (p) out.push(p);
+    }
+    return out;
+  }
+  return {
+    pending: arr("pending"),
+    accepted: arr("accepted"),
+    rejected: arr("rejected"),
+  };
 }
 
 export async function fetchUserInvitationsAction(): Promise<
-  | { ok: true; invitations: PendingInvitationRow[] }
+  | { ok: true; invitations: UserInvitationsGrouped }
   | { ok: false; error: string }
 > {
   try {
     const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase.rpc(
-      "flowcore_list_my_pending_invitations"
-    );
+    const { data, error } = await supabase.rpc("flowcore_list_my_invitations");
     if (error) return { ok: false, error: error.message };
     const r = parseFlowcoreRpc(data);
     if (!r.ok) return { ok: false, error: r.error };
-    return { ok: true, invitations: parseInvitationListRpc(data) };
+    return { ok: true, invitations: parseGroupedInvitations(data) };
   } catch (e) {
     return {
       ok: false,
@@ -83,7 +103,7 @@ export async function acceptInvitationAction(
   }
 }
 
-/** Accept from email/token link (`/invite/[token]`). */
+/** Accept from invite link (`/invite/[token]`). */
 export async function acceptInvitationByTokenAction(
   token: string
 ): Promise<InvitationActionResult> {
