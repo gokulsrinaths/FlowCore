@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FlowCore
 
-## Getting Started
+Production-style **workflow operating system** for teams, built with **Next.js (App Router)**, **Tailwind CSS + shadcn/ui**, and **Supabase** (Auth + Postgres).
 
-First, run the development server:
+## Features
+
+- **Auth**: Email/password via Supabase Auth; middleware protects app routes.
+- **Workspaces**: Organizations with slugs, membership, and **org roles** (`org_owner`, `org_admin`, `org_manager`, `org_worker`).
+- **Invites**: Owners/admins invite by email; accept at `/invite/[token]` (must sign in with invited email).
+- **Onboarding**: `/onboarding` creates a workspace after first login if the user has no orgs.
+- **Workflow**: Items move `created` → `in_progress` → `under_review` → `completed` with **RPC-enforced** transitions.
+- **Kanban**: Drag-and-drop (`@dnd-kit`) plus per-card status control (role-aware).
+- **Audit**: `activity_logs` per organization; system events for role changes, etc.
+- **Comments**: Per item, org-scoped.
+- **Settings**: General (rename workspace), Team (members + invites), Billing (plan placeholder + upgrade CTA).
+- **Marketing**: `/`, `/pricing`, `/help`.
+
+## Prerequisites
+
+- Node.js 20+
+- A [Supabase](https://supabase.com) project
+
+## 1. Install
+
+```bash
+npm install
+```
+
+## 2. Supabase configuration
+
+1. Create a project in the Supabase dashboard.
+2. Under **Project Settings → API**, copy:
+   - **Project URL**
+   - **anon public** key
+3. In the repo root, copy env template and fill values:
+
+```bash
+copy .env.local.example .env.local
+```
+
+Set:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+4. In **Authentication → Providers**, ensure **Email** is enabled (password sign-in).
+
+5. Open **SQL Editor** and run migrations **in order**:
+
+   - `supabase/migrations/001_flowcore.sql` — base tables, triggers, baseline RLS.
+   - `supabase/migrations/002_flowcore_production.sql` — strict RLS, `flowcore_*` RPCs (pre–multi-tenant signatures are replaced by `003`).
+   - `supabase/migrations/003_flowcore_saas.sql` — **organizations**, **members**, **invitations**, **subscriptions**, `organization_id` on items/comments/activity_logs, org-scoped RLS, updated `flowcore_*` RPCs.
+
+6. Sign up once, then open the app. After login you’ll hit **onboarding** if you have no workspace, or your first workspace dashboard at `/{slug}/dashboard`.
+
+If your Postgres version rejects `EXECUTE FUNCTION` on triggers, replace it with `EXECUTE PROCEDURE` for the trigger definitions in `001_flowcore.sql`.
+
+## Security model
+
+- **RLS** scopes data by **organization membership**. Users only see peers in shared orgs (`users` SELECT policy).
+- **Writes** to items, comments, activity logs, memberships, and orgs go through **`flowcore_*` SECURITY DEFINER RPCs** (Server Actions). Direct table mutations from the client are denied where migration `003` defines blocking policies.
+
+## 3. Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Public: `/`, `/pricing`, `/help`
+- Auth: `/login`, `/onboarding`, `/invite/[token]`, `/{orgSlug}/...`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 4. Production build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Project layout (high level)
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  page.tsx                 # Marketing landing
+  pricing/, help/
+  login/
+  onboarding/
+  invite/[token]/
+  (app)/[orgSlug]/         # Authenticated workspace routes
+    dashboard/, items/, activity/, search/, settings/...
+  actions/                   # Server Actions
+components/
+  app-shell.tsx, org-switcher.tsx, sidebar-nav.tsx, ...
+lib/
+  button-variants.ts       # Shared cva (safe on server + client)
+  organizations.ts, usage.ts, billing.ts, db.ts, permissions.ts, ...
+supabase/migrations/
+  001_flowcore.sql
+  002_flowcore_production.sql
+  003_flowcore_saas.sql
+middleware.ts
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command         | Description        |
+|----------------|--------------------|
+| `npm run dev`  | Development server |
+| `npm run build`| Production build   |
+| `npm run start`| Production server  |
+| `npm run lint` | ESLint             |

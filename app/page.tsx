@@ -1,65 +1,115 @@
-import Image from "next/image";
+import Link from "next/link";
+import { buttonVariants } from "@/lib/button-variants";
+import { cn } from "@/lib/utils";
 
-export default function Home() {
+export default function MarketingHome() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen flex flex-col">
+      <header className="border-b border-border/80 bg-card/50 backdrop-blur-sm">
+        <div className="mx-auto max-w-6xl flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
+          <span className="font-semibold tracking-tight">FlowCore</span>
+          <nav className="flex items-center gap-3 text-sm">
+            <Link href="/pricing" className="text-muted-foreground hover:text-foreground">
+              Pricing
+            </Link>
+            <Link href="/help" className="text-muted-foreground hover:text-foreground">
+              Help
+            </Link>
+            <Link href="/login" className={cn(buttonVariants({ size: "sm", variant: "outline" }))}>
+              Sign in
+            </Link>
+            <Link
+              href="/login?signup=1"
+              className={cn(buttonVariants({ size: "sm" }))}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              Get started
+            </Link>
+          </nav>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </header>
+      <main className="flex-1">
+        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+          <div className="max-w-2xl space-y-6">
+            <p className="text-sm font-medium text-primary">Workflow operating system</p>
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-balance">
+              Structured team operations, without the spreadsheet chaos.
+            </h1>
+            <p className="text-lg text-muted-foreground text-pretty">
+              FlowCore is a workflow OS for teams that need clear stages, role-based handoffs,
+              and an audit trail — Kanban, comments, and permissions enforced in the database.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Link href="/login" className={cn(buttonVariants({ size: "lg" }))}>
+                Start for free
+              </Link>
+              <Link href="/pricing" className={cn(buttonVariants({ size: "lg", variant: "outline" }))}>
+                See pricing
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-border/60 bg-muted/20 py-16">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <h2 className="text-2xl font-semibold mb-8">How it works</h2>
+            <ol className="grid gap-6 sm:grid-cols-3 text-sm">
+              <li className="rounded-xl border border-border/80 bg-card p-5 space-y-2">
+                <span className="text-xs font-medium text-primary">1</span>
+                <p className="font-medium">Create a workspace</p>
+                <p className="text-muted-foreground">
+                  Invite your team; everyone gets org-scoped roles.
+                </p>
+              </li>
+              <li className="rounded-xl border border-border/80 bg-card p-5 space-y-2">
+                <span className="text-xs font-medium text-primary">2</span>
+                <p className="font-medium">Run items through stages</p>
+                <p className="text-muted-foreground">
+                  Created → In progress → Under review → Completed, with strict transitions.
+                </p>
+              </li>
+              <li className="rounded-xl border border-border/80 bg-card p-5 space-y-2">
+                <span className="text-xs font-medium text-primary">3</span>
+                <p className="font-medium">Trust the audit trail</p>
+                <p className="text-muted-foreground">
+                  Every change is logged — built for operational accountability.
+                </p>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <section className="py-16 mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-2xl font-semibold mb-6">Built for</h2>
+          <ul className="grid sm:grid-cols-2 gap-4 text-sm text-muted-foreground">
+            <li className="rounded-lg border border-dashed border-border/80 p-4">
+              Ops & intake teams routing requests through review.
+            </li>
+            <li className="rounded-lg border border-dashed border-border/80 p-4">
+              Agencies coordinating delivery without losing context.
+            </li>
+            <li className="rounded-lg border border-dashed border-border/80 p-4">
+              Internal compliance-style queues with clear ownership.
+            </li>
+            <li className="rounded-lg border border-dashed border-border/80 p-4">
+              Any team that outgrew shared inboxes and static task lists.
+            </li>
+          </ul>
+        </section>
       </main>
+      <footer className="border-t border-border/80 py-8 text-center text-xs text-muted-foreground">
+        © {new Date().getFullYear()} FlowCore ·{" "}
+        <Link href="/login" className="underline-offset-4 hover:underline">
+          Sign in
+        </Link>
+        {" · "}
+        <Link href="/login?signup=1" className="underline-offset-4 hover:underline">
+          Create account
+        </Link>
+        {" · "}
+        <Link href="/help" className="underline-offset-4 hover:underline">
+          Help
+        </Link>
+      </footer>
     </div>
   );
 }
