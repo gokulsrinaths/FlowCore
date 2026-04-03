@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Bell,
   Layers,
+  Mail,
   MessageSquare,
   UserPlus,
   Zap,
@@ -64,6 +65,11 @@ function notificationVisual(n: NotificationRow): { icon: ReactNode; label: strin
       return {
         icon: <Layers className="size-4 text-blue-600 shrink-0" />,
         label: "Case updates",
+      };
+    case "invitation":
+      return {
+        icon: <Mail className="size-4 text-rose-600 shrink-0" />,
+        label: "Invitation",
       };
     default:
       return {
@@ -125,6 +131,7 @@ export function NotificationBell({ orgSlug }: { orgSlug: string }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationRow[]>([]);
   const [unread, setUnread] = useState(0);
+  const [pendingInvites, setPendingInvites] = useState(0);
   const [, start] = useTransition();
 
   const sections = useMemo(() => groupNotificationsForDisplay(items), [items]);
@@ -134,6 +141,7 @@ export function NotificationBell({ orgSlug }: { orgSlug: string }) {
     if (res.ok) {
       setItems(res.notifications);
       setUnread(res.unreadCount);
+      setPendingInvites(res.pendingInvitationCount ?? 0);
     }
   }, []);
 
@@ -176,20 +184,23 @@ export function NotificationBell({ orgSlug }: { orgSlug: string }) {
         aria-label="Notifications"
       >
         <Bell className="size-4" />
-        {unread > 0 && (
+        {(unread > 0 || pendingInvites > 0) && (
           <span
             className={cn(
               "absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-[10px] font-medium text-primary-foreground flex items-center justify-center"
             )}
           >
-            {unread > 99 ? "99+" : unread}
+            {unread + pendingInvites > 99
+              ? "99+"
+              : unread + pendingInvites}
           </span>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 max-h-[min(70vh,420px)] overflow-y-auto">
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex items-center justify-between gap-2 font-normal">
-            <span>Notifications</span>
+          <DropdownMenuLabel className="flex flex-col gap-1.5 font-normal">
+            <div className="flex items-center justify-between gap-2 w-full">
+              <span>Notifications</span>
             {unread > 0 && (
               <button
                 type="button"
@@ -201,6 +212,17 @@ export function NotificationBell({ orgSlug }: { orgSlug: string }) {
               >
                 Mark all read
               </button>
+            )}
+            </div>
+            {pendingInvites > 0 && (
+              <Link
+                href="/invitations"
+                className="text-xs text-primary hover:underline w-full text-left"
+                onClick={() => setOpen(false)}
+              >
+                You have {pendingInvites} pending invitation
+                {pendingInvites === 1 ? "" : "s"} — open Invitations
+              </Link>
             )}
           </DropdownMenuLabel>
         </DropdownMenuGroup>

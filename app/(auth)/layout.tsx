@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { acceptPendingInvitations, getSessionUser } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 
 /**
- * Auth-only routes (e.g. onboarding). Ensures session and applies pending invitations.
+ * Auth-only routes (e.g. onboarding). Ensures session.
  */
 export default async function AuthGroupLayout({
   children,
@@ -13,6 +13,5 @@ export default async function AuthGroupLayout({
   if (!user) {
     redirect("/login");
   }
-  await acceptPendingInvitations();
   return <>{children}</>;
 }

@@ -94,20 +94,6 @@ export function toUser(profile: UserRow): User {
 }
 
 /**
- * Accept pending org/case invitations for the current auth email (idempotent).
- * Cached once per request.
- */
-export const acceptPendingInvitations = cache(async (): Promise<void> => {
-  const user = await getSessionUser();
-  if (!user) return;
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.rpc("flowcore_accept_pending_invitations");
-  if (error) {
-    console.warn("flowcore_accept_pending_invitations:", error.message);
-  }
-});
-
-/**
  * Throws if not authenticated — use in Server Actions that must be protected.
  */
 export async function requireAuthUser() {

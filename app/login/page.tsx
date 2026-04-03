@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  acceptPendingInvitations,
   getCurrentUserProfile,
   getSessionUser,
   userOnboardingCompleted,
@@ -27,7 +26,6 @@ export default async function LoginPage() {
   let continueHref = "/onboarding";
   if (user) {
     try {
-      await acceptPendingInvitations();
       const profile = await getCurrentUserProfile();
       if (!userOnboardingCompleted(profile)) {
         continueHref = "/onboarding";

@@ -52,10 +52,13 @@ export default async function InvitePage({ params }: PageProps) {
     <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Case invitation</CardTitle>
+          <CardTitle>Invitation</CardTitle>
           <CardDescription>
-            You’ve been invited to collaborate in FlowCore. Use the invited email when you sign in
-            or create an account.
+            Sign in with the invited email, then accept or decline from{" "}
+            <Link href="/invitations" className="text-primary underline-offset-4 hover:underline">
+              Invitations
+            </Link>{" "}
+            or tap Accept below.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -82,7 +85,7 @@ export default async function InvitePage({ params }: PageProps) {
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">
                 Sign in or create an account with <strong>{preview.email}</strong>, then accept
-                below.
+                here or on the Invitations page.
               </p>
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Link

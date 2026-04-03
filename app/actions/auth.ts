@@ -76,8 +76,6 @@ async function completePostAuthRedirect(
     return { ok: false, error: r.error };
   }
 
-  await supabase.rpc("flowcore_accept_pending_invitations");
-
   const preferred = safeNextPath(nextPath);
   if (preferred) {
     return { ok: true, path: preferred };

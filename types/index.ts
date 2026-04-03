@@ -196,6 +196,24 @@ export type InvitationRow = {
   created_at: string;
   case_id?: string | null;
   participant_id?: string | null;
+  status?: "pending" | "accepted" | "rejected";
+};
+
+/** Pending rows from `flowcore_list_my_pending_invitations`. */
+export type PendingInvitationRow = {
+  id: string;
+  organization_id: string;
+  organization_name: string;
+  case_id: string | null;
+  case_title: string | null;
+  role: OrgRole;
+  invited_by_name: string;
+  invited_by_email: string;
+  email: string;
+  created_at: string;
+  expires_at: string;
+  token: string;
+  status: "pending";
 };
 
 export type SubscriptionRow = {

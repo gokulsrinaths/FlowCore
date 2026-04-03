@@ -6,6 +6,7 @@ import {
   Briefcase,
   Kanban,
   LayoutDashboard,
+  Mail,
   ScrollText,
   Settings,
   Users,
@@ -19,6 +20,7 @@ const ICONS = {
   activity: ScrollText,
   team: Users,
   settings: Settings,
+  invitations: Mail,
 } as const;
 
 export function SidebarNav({
@@ -35,7 +37,9 @@ export function SidebarNav({
       {items.map(({ href, label, icon }) => {
         const Icon = ICONS[icon];
         let active = false;
-        if (label === "Team") {
+        if (label === "Invitations") {
+          active = pathname === "/invitations" || pathname.startsWith("/invitations/");
+        } else if (label === "Team") {
           active = pathname.startsWith(`${base}/settings/team`);
         } else if (label === "Cases") {
           active = pathname.startsWith(`${base}/cases`);

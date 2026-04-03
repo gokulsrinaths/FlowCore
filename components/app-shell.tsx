@@ -21,6 +21,7 @@ export async function AppShell({
   const allOrgs = await getOrganizationsForUser();
   const base = `/${organization.slug}`;
   const nav = [
+    { href: "/invitations", label: "Invitations", icon: "invitations" as const },
     { href: `${base}/dashboard`, label: "Dashboard", icon: "dashboard" as const },
     { href: `${base}/cases`, label: "Cases", icon: "cases" as const },
     { href: `${base}/items`, label: "Items", icon: "items" as const },

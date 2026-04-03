@@ -115,12 +115,13 @@ export async function sendInviteEmail({
 
   const safeOrg = escapeHtml(orgName);
   const safeCase = escapeHtml(caseTitle);
+  const base = getAppBaseUrl();
+  const invitationsUrl = `${base}/invitations`;
   const plain = [
-    `You've been invited to join ${orgName}.`,
-    `Case: ${caseTitle}`,
-    `Accept: ${inviteLink}`,
-    "",
-    "If you did not expect this, you can ignore this email.",
+    `You've been invited to a case in FlowCore.`,
+    `Workspace: ${orgName}. Case: ${caseTitle}.`,
+    `Log in and accept or reject: ${invitationsUrl}`,
+    `Invite link: ${inviteLink}`,
   ].join("\n");
 
   try {
@@ -131,10 +132,11 @@ export async function sendInviteEmail({
       text: plain,
       html: `
       <h2>You've been invited</h2>
-      <p>You were invited to join <b>${safeOrg}</b>.</p>
-      <p>Case: <b>${safeCase}</b></p>
-      <p><a href="${inviteLink.replace(/"/g, "&quot;")}">Accept invitation</a></p>
-      <p style="color:#666;font-size:12px;margin-top:24px">If you did not expect this, you can ignore this email.</p>
+      <p>You've been invited to join a case in FlowCore.</p>
+      <p>Workspace: <b>${safeOrg}</b><br/>Case: <b>${safeCase}</b></p>
+      <p>Please log in and accept or reject the invitation.</p>
+      <p><a href="${invitationsUrl.replace(/"/g, "&quot;")}">View invitations</a></p>
+      <p style="color:#666;font-size:12px;margin-top:12px">Or open your invite link: <a href="${inviteLink.replace(/"/g, "&quot;")}">${inviteLink.replace(/"/g, "&quot;")}</a></p>
     `,
     })) as ResendSendResult;
     const parsed = parseResendSendResult(result, "case invite");
@@ -171,11 +173,13 @@ export async function sendOrgInviteEmail({
   }
 
   const safeOrg = escapeHtml(orgName);
+  const base = getAppBaseUrl();
+  const invitationsUrl = `${base}/invitations`;
   const plain = [
-    `You've been invited to join ${orgName} on FlowCore.`,
-    `Accept invitation: ${inviteLink}`,
-    "",
-    "If you did not expect this, you can ignore this email.",
+    `You've been invited to a workspace on FlowCore.`,
+    `Workspace: ${orgName}.`,
+    `Log in and accept or reject: ${invitationsUrl}`,
+    `Invite link: ${inviteLink}`,
   ].join("\n");
 
   try {
@@ -186,9 +190,10 @@ export async function sendOrgInviteEmail({
       text: plain,
       html: `
       <h2>You've been invited</h2>
-      <p>You were invited to join the workspace <b>${safeOrg}</b> on FlowCore.</p>
-      <p><a href="${inviteLink.replace(/"/g, "&quot;")}">Accept invitation</a></p>
-      <p style="color:#666;font-size:12px;margin-top:24px">If you did not expect this, you can ignore this email.</p>
+      <p>You've been invited to join the workspace <b>${safeOrg}</b> on FlowCore.</p>
+      <p>Please log in and accept or reject the invitation.</p>
+      <p><a href="${invitationsUrl.replace(/"/g, "&quot;")}">View invitations</a></p>
+      <p style="color:#666;font-size:12px;margin-top:12px">Or open your invite link: <a href="${inviteLink.replace(/"/g, "&quot;")}">${inviteLink.replace(/"/g, "&quot;")}</a></p>
     `,
     })) as ResendSendResult;
     const parsed = parseResendSendResult(result, "org invite");

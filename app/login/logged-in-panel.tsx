@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/lib/button-variants";
+import { cn } from "@/lib/utils";
 import { ContinueWorkspaceButton } from "./continue-workspace-button";
 import {
   Card,
@@ -28,6 +30,12 @@ export function LoggedInPanel({ continueHref }: { continueHref: string }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <ContinueWorkspaceButton href={continueHref} />
+        <Link
+          href="/invitations"
+          className={cn(buttonVariants({ variant: "outline" }), "w-full inline-flex justify-center")}
+        >
+          View invitations
+        </Link>
         <form action={signOutAction}>
           <Button type="submit" variant="outline" className="w-full">
             Sign out

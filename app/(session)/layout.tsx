@@ -1,16 +1,12 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { parseFlowcoreRpc } from "@/lib/supabase-rpc";
-import {
-  getCurrentUserProfile,
-  getSessionUser,
-  userOnboardingCompleted,
-} from "@/lib/auth";
+import { getCurrentUserProfile, getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 /**
- * Authenticated app shell (org routes). Ensures public.users exists after auth.
+ * Authenticated routes that must work before org onboarding completes (e.g. accept invites).
  */
-export default async function AppGroupLayout({
+export default async function SessionGroupLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -25,7 +21,6 @@ export default async function AppGroupLayout({
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.rpc("flowcore_ensure_profile");
     if (error) {
-      // Session is valid; /login would loop — send to onboarding to finish setup
       redirect("/onboarding");
     }
     const r = parseFlowcoreRpc(data);
@@ -36,10 +31,6 @@ export default async function AppGroupLayout({
   }
 
   if (!profile) {
-    redirect("/onboarding");
-  }
-
-  if (!userOnboardingCompleted(profile)) {
     redirect("/onboarding");
   }
 

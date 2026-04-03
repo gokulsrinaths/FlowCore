@@ -13,7 +13,13 @@ function rpcOk(data: unknown): { ok: boolean; error?: string } {
 }
 
 export type NotificationsResult =
-  | { ok: true; notifications: NotificationRow[]; unreadCount: number }
+  | {
+      ok: true;
+      notifications: NotificationRow[];
+      unreadCount: number;
+      /** Pending workspace/case invitations (separate from in-app notification rows). */
+      pendingInvitationCount: number;
+    }
   | { ok: false; error: string };
 
 function parseNotificationList(data: unknown): NotificationRow[] {
@@ -46,26 +52,39 @@ export async function fetchNotificationsAction(
 ): Promise<NotificationsResult> {
   try {
     const supabase = await createSupabaseServerClient();
-    const [{ data: listData, error: le }, { data: countData, error: ce }] =
-      await Promise.all([
-        supabase.rpc("flowcore_list_my_notifications", { p_limit: limit }),
-        supabase.rpc("flowcore_notification_unread_count"),
-      ]);
+    const [
+      { data: listData, error: le },
+      { data: countData, error: ce },
+      { data: invCountData, error: ie },
+    ] = await Promise.all([
+      supabase.rpc("flowcore_list_my_notifications", { p_limit: limit }),
+      supabase.rpc("flowcore_notification_unread_count"),
+      supabase.rpc("flowcore_count_my_pending_invitations"),
+    ]);
     if (le) return { ok: false, error: le.message };
     if (ce) return { ok: false, error: ce.message };
+    if (ie) return { ok: false, error: ie.message };
     const lr = rpcOk(listData);
     if (!lr.ok) return { ok: false, error: lr.error ?? "Failed" };
     const cr = rpcOk(countData);
     if (!cr.ok) return { ok: false, error: cr.error ?? "Failed" };
+    const ir = rpcOk(invCountData);
+    if (!ir.ok) return { ok: false, error: ir.error ?? "Failed" };
     const co = countData as Record<string, unknown> | null;
     const unread =
       typeof co?.count === "number"
         ? co.count
         : Number((co as { count?: string })?.count ?? 0);
+    const ico = invCountData as Record<string, unknown> | null;
+    const pendingInvitationCount =
+      typeof ico?.count === "number"
+        ? ico.count
+        : Number((ico as { count?: string })?.count ?? 0);
     return {
       ok: true,
       notifications: parseNotificationList(listData),
       unreadCount: unread,
+      pendingInvitationCount,
     };
   } catch (e) {
     return {

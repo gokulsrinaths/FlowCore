@@ -154,26 +154,6 @@ export async function cancelInvitationAction(
   }
 }
 
-export async function acceptInvitationAction(
-  token: string
-): Promise<OrgActionResult> {
-  try {
-    const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase.rpc("flowcore_accept_invitation", {
-      p_token: token.trim(),
-    });
-    if (error) return { ok: false, error: error.message };
-    const r = parseFlowcoreRpc(data);
-    if (!r.ok) return { ok: false, error: r.error };
-
-    const out = r as { slug?: string };
-    revalidatePath("/");
-    return { ok: true, slug: out.slug };
-  } catch (e) {
-    return catchErr(e);
-  }
-}
-
 export async function seedDemoItemsAction(
   organizationId: string,
   orgSlug: string
