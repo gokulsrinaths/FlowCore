@@ -2,7 +2,7 @@
 -- If you see PostgREST: "Could not find the function ... without parameters in the schema cache",
 -- apply this migration (or full 018+) and/or reload the API schema in the Supabase dashboard.
 --
--- Depends on: public._flowcore_sync_invitations_for_user_email (from 018_invitation_lifecycle_no_email.sql).
+-- Depends on: public._flowcore_sync_invitations_for_user_email (018 or migration 024).
 
 CREATE OR REPLACE FUNCTION public.flowcore_list_my_invitations()
 RETURNS jsonb
