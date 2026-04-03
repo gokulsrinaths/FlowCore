@@ -203,3 +203,40 @@ export async function signOutAction() {
   await supabase.auth.signOut();
   redirect("/");
 }
+
+export type ForgotPasswordResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+/**
+ * Sends Supabase password recovery email. Add `/auth/update-password` to Supabase Auth redirect URLs.
+ */
+export async function forgotPasswordAction(
+  formData: FormData
+): Promise<ForgotPasswordResult> {
+  try {
+    const email = String(formData.get("email") ?? "")
+      .trim()
+      .replace(/\r?\n/g, "");
+    if (!email) {
+      return { ok: false, error: "Email is required" };
+    }
+
+    const supabase = await createSupabaseServerClient();
+    const origin = await getRequestOrigin();
+    const redirectTo = `${origin}/auth/update-password`;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Something went wrong",
+    };
+  }
+}

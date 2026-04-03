@@ -4,6 +4,7 @@ import { CreateItemDialog } from "@/components/create-item-dialog";
 import { DeleteCaseButton } from "@/components/delete-case-button";
 import { EditCaseDialog } from "@/components/edit-case-dialog";
 import { KanbanBoard } from "@/components/kanban-board";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getCurrentUserProfile } from "@/lib/auth";
@@ -15,23 +16,20 @@ import {
   fetchUsersForOrg,
 } from "@/lib/db";
 import { CaseParticipantsPanel } from "@/components/case-participants-panel";
+import { CaseQuestionsPanel } from "@/components/case-questions-panel";
 import { fetchCaseById, fetchCasesForOrg } from "@/lib/cases";
+import { fetchCaseQuestions } from "@/lib/case-questions";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
 import { canDeleteCase } from "@/lib/permissions";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatAccusedForDisplay } from "@/lib/case-accused";
 
-type PageProps = { params: Promise<{ orgSlug: string; caseId: string }> };
-
-function formatAccused(accused: unknown): string {
-  if (accused == null) return "—";
-  if (typeof accused === "string") return accused;
-  try {
-    return JSON.stringify(accused, null, 2);
-  } catch {
-    return String(accused);
-  }
-}
+type PageProps = {
+  params: Promise<{ orgSlug: string; caseId: string }>;
+  searchParams: Promise<{ tab?: string }>;
+};
 
 function formatFinancial(n: number | string | null): string {
   if (n == null || n === "") return "—";
@@ -40,8 +38,10 @@ function formatFinancial(n: number | string | null): string {
   return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
-export default async function CaseDetailPage({ params }: PageProps) {
+export default async function CaseDetailPage({ params, searchParams }: PageProps) {
   const { orgSlug, caseId } = await params;
+  const { tab } = await searchParams;
+  const activeTab = tab === "questions" ? "questions" : "overview";
   const [membership, profile] = await Promise.all([
     getOrgMembershipBySlug(orgSlug),
     getCurrentUserProfile(),
@@ -54,14 +54,16 @@ export default async function CaseDetailPage({ params }: PageProps) {
   const caseRow = await fetchCaseById(orgId, caseId);
   if (!caseRow) notFound();
 
-  const [items, users, logs, comments, allCases, participants] = await Promise.all([
-    fetchItemsWithUsers(orgId, { caseId }),
-    fetchUsersForOrg(orgId),
-    fetchActivityForOrg(orgId, { limit: 200, filters: { caseId } }),
-    fetchCommentsForCase(orgId, caseId),
-    fetchCasesForOrg(orgId),
-    fetchCaseParticipants(orgId, caseId),
-  ]);
+  const [items, users, logs, comments, allCases, participants, caseQuestions] =
+    await Promise.all([
+      fetchItemsWithUsers(orgId, { caseId }),
+      fetchUsersForOrg(orgId),
+      fetchActivityForOrg(orgId, { limit: 200, filters: { caseId } }),
+      fetchCommentsForCase(orgId, caseId),
+      fetchCasesForOrg(orgId),
+      fetchCaseParticipants(orgId, caseId),
+      activeTab === "questions" ? fetchCaseQuestions(orgId, caseId) : Promise.resolve([]),
+    ]);
 
   const caseOptions = allCases.map((c) => ({ id: c.id, title: c.title }));
   const showDelete = canDeleteCase(orgRole);
@@ -72,13 +74,21 @@ export default async function CaseDetailPage({ params }: PageProps) {
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <CaseStatusBadge status={caseRow.status} />
+            {caseRow.all_questions_answered ? (
+              <Badge variant="secondary" className="text-xs">
+                All questions answered
+              </Badge>
+            ) : null}
             <span className="text-xs text-muted-foreground">
               Created {new Date(caseRow.created_at).toLocaleString()}
             </span>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">{caseRow.title}</h1>
-          {caseRow.crime_number && (
-            <p className="text-sm text-muted-foreground">Reference: {caseRow.crime_number}</p>
+          {(caseRow.district || caseRow.crime_number) && (
+            <p className="text-sm text-muted-foreground">
+              District / crime number:{" "}
+              {[caseRow.district, caseRow.crime_number].filter(Boolean).join(" · ")}
+            </p>
           )}
         </div>
         <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
@@ -103,29 +113,69 @@ export default async function CaseDetailPage({ params }: PageProps) {
         </div>
       </div>
 
+      <nav className="flex flex-wrap gap-2 border-b border-border/80 pb-2">
+        <Link
+          href={`/${orgSlug}/cases/${caseId}`}
+          className={cn(
+            "inline-flex min-h-10 touch-manipulation items-center rounded-md px-3 text-sm font-medium transition-colors",
+            activeTab === "overview"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Overview
+        </Link>
+        <Link
+          href={`/${orgSlug}/cases/${caseId}?tab=questions`}
+          className={cn(
+            "inline-flex min-h-10 touch-manipulation items-center rounded-md px-3 text-sm font-medium transition-colors",
+            activeTab === "questions"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Questions
+        </Link>
+      </nav>
+
+      {activeTab === "questions" ? (
+        <CaseQuestionsPanel
+          organizationId={orgId}
+          orgSlug={orgSlug}
+          caseId={caseId}
+          participants={participants}
+          questions={caseQuestions}
+          currentUserId={profile.id}
+        />
+      ) : null}
+
+      {activeTab === "overview" ? (
+        <>
       <section className="space-y-3">
         <h2 className="text-lg font-medium">Case info</h2>
         <Card>
           <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">Description</p>
+            <div className="sm:col-span-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                Complainant details
+              </p>
               <p className="text-sm mt-1 whitespace-pre-wrap">
                 {caseRow.description?.trim() ? caseRow.description : "—"}
               </p>
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Financial impact
+                Accused details
               </p>
-              <p className="text-sm mt-1 tabular-nums">{formatFinancial(caseRow.financial_impact)}</p>
+              <pre className="text-sm mt-2 rounded-lg border border-border/80 bg-muted/30 p-3 overflow-x-auto whitespace-pre-wrap font-sans">
+                {formatAccusedForDisplay(caseRow.accused)}
+              </pre>
             </div>
             <div className="sm:col-span-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Accused / parties (JSON)
+                Defrauded amount
               </p>
-              <pre className="text-sm mt-2 rounded-lg border border-border/80 bg-muted/30 p-3 overflow-x-auto whitespace-pre-wrap font-mono">
-                {formatAccused(caseRow.accused)}
-              </pre>
+              <p className="text-sm mt-1 tabular-nums">{formatFinancial(caseRow.financial_impact)}</p>
             </div>
           </CardContent>
         </Card>
@@ -205,6 +255,8 @@ export default async function CaseDetailPage({ params }: PageProps) {
         <h2 className="text-lg font-medium">Activity</h2>
         <ActivityLog entries={logs} />
       </section>
+        </>
+      ) : null}
     </div>
   );
 }

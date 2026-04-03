@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageBackLink } from "@/components/page-back-link";
 import { searchOrg } from "@/lib/db";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
 import { notFound } from "next/navigation";
@@ -25,6 +26,7 @@ export default async function SearchPage({ params, searchParams }: PageProps) {
 
   return (
     <div className="space-y-8">
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Search</h1>
         <p className="text-muted-foreground text-sm mt-1">

@@ -17,6 +17,7 @@ import {
   countItemsByStatus,
   fetchActivityForOrg,
 } from "@/lib/db";
+import { fetchMyUnlockedCaseQuestions } from "@/lib/case-questions";
 import { countCasesForOrg, fetchRecentCasesForOrg } from "@/lib/cases";
 import { getCurrentUserProfile } from "@/lib/auth";
 import { fetchSubscription, getOrgMembershipBySlug } from "@/lib/organizations";
@@ -38,7 +39,7 @@ async function Stats({
   organizationId: string;
   userId: string;
 }) {
-  const [counts, assigned, workload, recent, sub, caseCounts, recentCases] =
+  const [counts, assigned, workload, recent, sub, caseCounts, recentCases, myCaseQuestions] =
     await Promise.all([
       countItemsByStatus(organizationId),
       countAssignedToUser(organizationId, userId),
@@ -47,6 +48,7 @@ async function Stats({
       fetchSubscription(organizationId),
       countCasesForOrg(organizationId),
       fetchRecentCasesForOrg(organizationId, 5),
+      fetchMyUnlockedCaseQuestions(organizationId),
     ]);
 
   const total = STATUS_ORDER.reduce((acc, s) => acc + counts[s], 0);
@@ -218,6 +220,36 @@ async function Stats({
           </CardContent>
         </Card>
       )}
+
+      {myCaseQuestions.length > 0 ? (
+        <Card className="border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-base">Your questions</CardTitle>
+            <CardDescription>
+              Case questions assigned to you with dependencies satisfied — answer on the case
+              Questions tab.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3 text-sm">
+              {myCaseQuestions.map((q) => (
+                <li key={q.id} className="border-border/60 border-b pb-3 last:border-0 last:pb-0">
+                  <Link
+                    href={`${base}/cases/${q.case_id}?tab=questions`}
+                    className="font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {q.case_title}
+                  </Link>
+                  <p className="text-foreground mt-1">{q.question_text}</p>
+                  {q.description ? (
+                    <p className="text-muted-foreground mt-1 line-clamp-2 text-xs">{q.description}</p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

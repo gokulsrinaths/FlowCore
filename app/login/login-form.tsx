@@ -151,7 +151,17 @@ export function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="password">Password</Label>
+              {mode === "signin" ? (
+                <Link
+                  href="/login/forgot-password"
+                  className="text-primary text-xs underline-offset-4 hover:underline touch-manipulation"
+                >
+                  Forgot password?
+                </Link>
+              ) : null}
+            </div>
             <Input
               id="password"
               name="password"

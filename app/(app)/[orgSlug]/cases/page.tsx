@@ -18,6 +18,7 @@ import { fetchCasesForOrg } from "@/lib/cases";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageBackLink } from "@/components/page-back-link";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -32,6 +33,7 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
 
   return (
     <>
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Cases</h1>
@@ -57,7 +59,7 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
-                <TableHead className="hidden sm:table-cell">Reference</TableHead>
+                <TableHead className="hidden sm:table-cell">District / crime number</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Tasks</TableHead>
                 <TableHead className="hidden md:table-cell text-right">Created</TableHead>
@@ -75,7 +77,7 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
                     </Link>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">
-                    {c.crime_number ?? "—"}
+                    {[c.district, c.crime_number].filter(Boolean).join(" · ") || "—"}
                   </TableCell>
                   <TableCell>
                     <CaseStatusBadge status={c.status} />

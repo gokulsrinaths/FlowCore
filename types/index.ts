@@ -117,6 +117,8 @@ export type CaseRow = {
   organization_id: string;
   title: string;
   crime_number: string | null;
+  /** Present after migration 027 */
+  district?: string | null;
   description: string | null;
   accused: unknown;
   financial_impact: number | string | null;
@@ -124,6 +126,46 @@ export type CaseRow = {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  /** True when every case question is answered (migration 028). */
+  all_questions_answered?: boolean;
+};
+
+export type CaseQuestionStatus = "pending" | "in_progress" | "answered";
+
+export type CaseQuestionLatestAnswer = {
+  answer_text: string;
+  reasoning: string | null;
+  answered_by: string | null;
+  created_at: string;
+};
+
+export type CaseQuestionRow = {
+  id: string;
+  case_id: string;
+  question_text: string;
+  description: string | null;
+  assigned_to_participant_id: string | null;
+  status: CaseQuestionStatus;
+  depends_on: string[];
+  order_index: number;
+  created_at: string;
+  deps_unlocked: boolean;
+  latest_answer: CaseQuestionLatestAnswer | null;
+};
+
+/** Unlocked questions assigned to the current user (dashboard). */
+export type MyCaseQuestionRow = {
+  id: string;
+  case_id: string;
+  case_title: string;
+  org_slug: string;
+  question_text: string;
+  description: string | null;
+  status: CaseQuestionStatus;
+  depends_on: string[];
+  order_index: number;
+  assigned_to_participant_id: string | null;
+  deps_unlocked: boolean;
 };
 
 /** Case roster: internal org members and/or external emails */

@@ -1,9 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { detailsToAccusedJson } from "@/lib/case-accused";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { parseFlowcoreRpc } from "@/lib/supabase-rpc";
 import type { CaseStatus } from "@/types";
+
+function accusedFromForm(formData: FormData): unknown | null {
+  const a1 = String(formData.get("accused_a1") ?? "");
+  const a2 = String(formData.get("accused_a2") ?? "");
+  const a3 = String(formData.get("accused_a3") ?? "");
+  return detailsToAccusedJson({ a1, a2, a3 });
+}
 
 export type CaseActionResult =
   | { ok: true; id?: string }
@@ -29,24 +37,17 @@ export async function createCaseAction(formData: FormData): Promise<CaseActionRe
     const orgSlug = String(formData.get("org_slug") ?? "").trim();
     const title = String(formData.get("title") ?? "").trim();
     const crimeNumber = String(formData.get("crime_number") ?? "").trim();
+    const district = String(formData.get("district") ?? "").trim();
     const description = String(formData.get("description") ?? "").trim();
-    const accusedRaw = String(formData.get("accused") ?? "").trim();
     const financialRaw = String(formData.get("financial_impact") ?? "").trim();
     const status = String(formData.get("status") ?? "open").trim() as CaseStatus;
 
-    let accused: unknown = null;
-    if (accusedRaw) {
-      try {
-        accused = JSON.parse(accusedRaw);
-      } catch {
-        accused = { raw: accusedRaw };
-      }
-    }
+    const accused = accusedFromForm(formData);
 
     const financial_impact =
       financialRaw === "" ? null : Number.parseFloat(financialRaw);
     if (financialRaw !== "" && Number.isNaN(financial_impact as number)) {
-      return { ok: false, error: "Financial impact must be a number" };
+      return { ok: false, error: "Defrauded amount must be a number" };
     }
 
     const supabase = await createSupabaseServerClient();
@@ -54,6 +55,7 @@ export async function createCaseAction(formData: FormData): Promise<CaseActionRe
       p_organization_id: orgId,
       p_title: title,
       p_crime_number: crimeNumber,
+      p_district: district,
       p_description: description,
       p_accused: accused,
       p_financial_impact: financial_impact,
@@ -81,24 +83,17 @@ export async function updateCaseAction(formData: FormData): Promise<CaseActionRe
     const caseId = String(formData.get("case_id") ?? "").trim();
     const title = String(formData.get("title") ?? "").trim();
     const crimeNumber = String(formData.get("crime_number") ?? "").trim();
+    const district = String(formData.get("district") ?? "").trim();
     const description = String(formData.get("description") ?? "").trim();
-    const accusedRaw = String(formData.get("accused") ?? "").trim();
     const financialRaw = String(formData.get("financial_impact") ?? "").trim();
     const status = String(formData.get("status") ?? "").trim() as CaseStatus;
 
-    let accused: unknown = null;
-    if (accusedRaw) {
-      try {
-        accused = JSON.parse(accusedRaw);
-      } catch {
-        accused = { raw: accusedRaw };
-      }
-    }
+    const accused = accusedFromForm(formData);
 
     const financial_impact =
       financialRaw === "" ? null : Number.parseFloat(financialRaw);
     if (financialRaw !== "" && Number.isNaN(financial_impact as number)) {
-      return { ok: false, error: "Financial impact must be a number" };
+      return { ok: false, error: "Defrauded amount must be a number" };
     }
 
     const supabase = await createSupabaseServerClient();
@@ -107,6 +102,7 @@ export async function updateCaseAction(formData: FormData): Promise<CaseActionRe
       p_case_id: caseId,
       p_title: title,
       p_crime_number: crimeNumber,
+      p_district: district,
       p_description: description,
       p_accused: accused,
       p_financial_impact: financial_impact,
