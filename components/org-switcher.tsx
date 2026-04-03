@@ -1,8 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { Building2, ChevronsUpDown, Loader2 } from "lucide-react";
+import { Building2, ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +18,9 @@ import type { OrganizationWithRole } from "@/types";
 /**
  * Keep the same area (cases, items, settings, …) when changing workspace instead of
  * always jumping to dashboard — feels much smoother.
+ *
+ * First segment match is case-insensitive so we still rewrite the URL if the path casing
+ * differs from `current.slug`.
  */
 function hrefForWorkspaceSwitch(
   pathname: string,
@@ -28,7 +30,7 @@ function hrefForWorkspaceSwitch(
   const trimmed = pathname.split("?")[0] ?? pathname;
   const parts = trimmed.split("/").filter(Boolean);
   if (parts.length === 0) return `/${nextSlug}/dashboard`;
-  if (parts[0] === currentSlug) {
+  if (parts[0].toLowerCase() === currentSlug.toLowerCase()) {
     parts[0] = nextSlug;
     return "/" + parts.join("/");
   }
@@ -44,31 +46,25 @@ export function OrgSwitcher({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [pending, startTransition] = useTransition();
 
   function goToWorkspace(slug: string) {
+    if (slug.toLowerCase() === current.slug.toLowerCase()) return;
     const href = hrefForWorkspaceSwitch(pathname, current.slug, slug);
-    startTransition(() => {
-      router.push(href);
-    });
+    // Full navigation — soft router.push often fails to refresh `[orgSlug]` layout params
+    // (same issue as login "Continue to workspace"). Hard assign guarantees the new org.
+    window.location.assign(href);
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        disabled={pending}
         className={cn(
           buttonVariants({ variant: "outline" }),
-          "w-full justify-between gap-2 h-auto py-2 px-2.5 font-normal",
-          pending && "opacity-80 pointer-events-none"
+          "w-full justify-between gap-2 h-auto py-2 px-2.5 font-normal"
         )}
       >
         <span className="flex items-center gap-2 min-w-0">
-          {pending ? (
-            <Loader2 className="size-4 shrink-0 text-muted-foreground animate-spin" />
-          ) : (
-            <Building2 className="size-4 shrink-0 text-muted-foreground" />
-          )}
+          <Building2 className="size-4 shrink-0 text-muted-foreground" />
           <span className="truncate text-left text-sm font-medium">{current.name}</span>
         </span>
         <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
@@ -84,7 +80,6 @@ export function OrgSwitcher({
               <DropdownMenuItem
                 key={o.id}
                 className={o.id === current.id ? "bg-accent" : ""}
-                disabled={pending}
                 onSelect={() => goToWorkspace(o.slug)}
                 onMouseEnter={() => router.prefetch(href)}
               >
@@ -94,14 +89,7 @@ export function OrgSwitcher({
           })}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          disabled={pending}
-          onSelect={() =>
-            startTransition(() => {
-              router.push("/onboarding");
-            })
-          }
-        >
+        <DropdownMenuItem onSelect={() => router.push("/onboarding")}>
           Create workspace
         </DropdownMenuItem>
       </DropdownMenuContent>
