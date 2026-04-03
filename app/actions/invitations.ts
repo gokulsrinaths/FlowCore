@@ -113,7 +113,20 @@ export async function fetchUserInvitationsAction(): Promise<
   try {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.rpc("flowcore_list_my_invitations");
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      const msg = error.message;
+      if (
+        /flowcore_list_my_invitations|schema cache/i.test(msg) &&
+        /function|schema cache/i.test(msg)
+      ) {
+        return {
+          ok: false,
+          error:
+            "Database is missing RPC flowcore_list_my_invitations (or the API schema cache is stale). Apply Supabase migrations through 018 or run migration 023, then in the Supabase dashboard use API settings to reload the schema if the error persists.",
+        };
+      }
+      return { ok: false, error: msg };
+    }
     const r = parseFlowcoreRpc(data);
     if (!r.ok) return { ok: false, error: r.error };
     return { ok: true, invitations: parseGroupedInvitations(data) };
