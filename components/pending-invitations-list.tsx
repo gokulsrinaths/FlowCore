@@ -64,9 +64,12 @@ function InvitationCard({
             <dt className="text-muted-foreground">Role</dt>
             <dd className="font-medium">{displayOrgRoleLabel(inv.role)}</dd>
           </div>
-          <div>
-            <dt className="text-muted-foreground">Invited email</dt>
-            <dd className="font-mono text-xs break-all">{inv.email}</dd>
+          <div className="sm:col-span-2">
+            <dt className="text-muted-foreground">Address → status</dt>
+            <dd className="text-sm">
+              <span className="font-mono text-xs break-all">{inv.email}</span>
+              <span className="text-muted-foreground"> → {statusLabel(inv.status)}</span>
+            </dd>
           </div>
           <div className="sm:col-span-2">
             <dt className="text-muted-foreground">Invited by</dt>
@@ -78,10 +81,6 @@ function InvitationCard({
                 </span>
               ) : null}
             </dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Status</dt>
-            <dd>{statusLabel(inv.status)}</dd>
           </div>
         </dl>
         <div className="flex flex-wrap gap-2">
@@ -213,8 +212,8 @@ export function PendingInvitationsList({
         <div>
           <h2 className="text-lg font-semibold">Pending</h2>
           <p className="text-sm text-muted-foreground text-pretty">
-            Invited or registered — complete sign-in with the invited email, then accept or
-            decline when status is Registered.
+            Invited + registered (same inbox). Sign in with the invited email to become registered,
+            then use Accept or Reject when status is Registered.
           </p>
         </div>
         {groups.pending.length === 0 ? (

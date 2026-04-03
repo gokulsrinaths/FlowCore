@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -38,24 +39,41 @@ const ROLE_LABEL: Record<string, string> = {
 
 const INVITE_ROLES: OrgRole[] = ["org_worker", "org_manager", "org_admin"];
 
-function internalLine(p: CaseParticipant) {
+/** Pending invite row: Email → Invited / Email → Registered / Name → Registered */
+function pendingParticipantLabel(p: CaseParticipant): string {
+  const st = p.invite_status;
+  if (st === "invited") {
+    const id =
+      p.type === "external"
+        ? (p.email?.trim() ?? "")
+        : (p.user_name ?? p.user_email ?? p.email ?? "").trim();
+    return id ? `${id} → Invited` : "Invited";
+  }
+  if (st === "registered") {
+    if (p.type === "internal") {
+      const n = (p.user_name ?? p.user_email ?? "User").trim();
+      return `${n} → Registered`;
+    }
+    const em = p.email?.trim() ?? "";
+    return em ? `${em} → Registered` : "Registered";
+  }
+  return p.email?.trim() || p.user_email || "—";
+}
+
+/** Roster internal line with Name → Accepted / Name → Rejected when invitation closed */
+function internalRosterLine(p: CaseParticipant): ReactNode {
   const name = p.user_name ?? p.user_email ?? p.user_id ?? "—";
   const dept = p.department?.trim();
+  const st = p.invite_status;
+  const suffix =
+    st === "accepted" ? " → Accepted" : st === "rejected" ? " → Rejected" : "";
   return (
     <span>
       {name}
+      {suffix ? <span className="text-muted-foreground">{suffix}</span> : null}
       {dept ? <span className="text-muted-foreground"> · {dept}</span> : null}
     </span>
   );
-}
-
-function inviteStatusLabel(status: string | null | undefined): string {
-  if (!status) return "";
-  if (status === "invited") return "Invited";
-  if (status === "registered") return "Registered";
-  if (status === "accepted") return "Accepted";
-  if (status === "rejected") return "Rejected";
-  return status;
 }
 
 type CaseParticipantsPanelProps = {
@@ -266,7 +284,7 @@ export function CaseParticipantsPanel({
                   .filter((p) => p.role === "sp")
                   .map((p) => (
                     <li key={p.id} className="flex justify-between gap-2 items-start">
-                      <span className="min-w-0">{internalLine(p)}</span>
+                      <span className="min-w-0">{internalRosterLine(p)}</span>
                       <Button
                         type="button"
                         variant="ghost"
@@ -292,7 +310,7 @@ export function CaseParticipantsPanel({
                   .filter((p) => p.role === "dsp")
                   .map((p) => (
                     <li key={p.id} className="flex justify-between gap-2 items-start">
-                      <span className="min-w-0">{internalLine(p)}</span>
+                      <span className="min-w-0">{internalRosterLine(p)}</span>
                       <Button
                         type="button"
                         variant="ghost"
@@ -320,7 +338,7 @@ export function CaseParticipantsPanel({
                 .filter((p) => p.role === "officer")
                 .map((p) => (
                   <li key={p.id} className="flex justify-between gap-2 items-start">
-                    <span className="min-w-0">{internalLine(p)}</span>
+                    <span className="min-w-0">{internalRosterLine(p)}</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -338,9 +356,9 @@ export function CaseParticipantsPanel({
         </div>
 
         <div>
-          <h4 className="text-sm font-medium mb-2">Pending invitation</h4>
+          <h4 className="text-sm font-medium mb-2">Pending</h4>
           <p className="text-xs text-muted-foreground mb-2">
-            Invited (email only) or registered (signed in, not yet accepted).
+            Invited + registered (not accepted yet). Labels: email → Invited / name → Registered.
           </p>
           <ul className="text-sm space-y-1">
             {pendingCaseInvite.length === 0 ? (
@@ -349,15 +367,12 @@ export function CaseParticipantsPanel({
               pendingCaseInvite.map((p) => (
                 <li key={p.id} className="flex justify-between gap-2 items-center">
                   <span className="min-w-0">
-                    {p.type === "internal" ? internalLine(p) : p.email}
+                    <span className="font-medium">{pendingParticipantLabel(p)}</span>
                     <span className="text-muted-foreground text-xs ml-2">
                       {ROLE_LABEL[p.role ?? "external"] ?? "External"}
                     </span>
                   </span>
                   <span className="flex flex-wrap items-center justify-end gap-2 shrink-0">
-                    <Badge variant="outline" className="text-[10px]">
-                      {inviteStatusLabel(p.invite_status)}
-                    </Badge>
                     {p.type === "external" && p.email?.trim() ? (
                       <>
                         <Button
@@ -402,7 +417,7 @@ export function CaseParticipantsPanel({
         </div>
 
         <div>
-          <h4 className="text-sm font-medium mb-2">External</h4>
+          <h4 className="text-sm font-medium mb-2">External (no open invite)</h4>
           <ul className="text-sm space-y-1">
             {external.length === 0 ? (
               <li className="text-muted-foreground">—</li>
@@ -410,7 +425,11 @@ export function CaseParticipantsPanel({
               external.map((p) => (
                 <li key={p.id} className="flex justify-between gap-2 items-center">
                   <span className="min-w-0">
-                    {p.email}
+                    <span className="font-medium">
+                      {p.invite_status === "rejected" && p.email
+                        ? `${p.email} → Rejected`
+                        : (p.email ?? "—")}
+                    </span>
                     <span className="text-muted-foreground text-xs ml-2">
                       {ROLE_LABEL[p.role ?? "external"] ?? "External"}
                     </span>
@@ -566,7 +585,8 @@ export function CaseParticipantsPanel({
         <form onSubmit={submitRequisition} className="border-t border-border/60 pt-4 space-y-3">
           <h4 className="text-sm font-medium">Add requisition / email</h4>
           <p className="text-xs text-muted-foreground">
-            Records the participant and logs that an email was sent (no mailer yet).
+            Records activity in the app only. Use 📧 Send Invite Email on a participant row if you want
+            a mailto draft.
           </p>
           <div className="space-y-2">
             <Label htmlFor="req-email">Email</Label>

@@ -12,10 +12,10 @@ export function generateInviteMailto({
   caseTitle: string;
   orgName: string;
 }): string {
-  const subject = encodeURIComponent(`Invitation to join ${orgName}`);
+  const subject = encodeURIComponent(`Join ${orgName}`);
 
   const body = encodeURIComponent(
-    `Hi,\n\nYou've been invited to a case in ${orgName}.\n\nCase: ${caseTitle}\n\nPlease register and accept the invitation here:\n${inviteLink}\n\nThanks`
+    `Hi,\n\nYou've been invited to a case in ${orgName}.\n\nCase: ${caseTitle}\n\nRegister here:\n${inviteLink}\n\nAfter registering, accept the invite inside the app.\n\nThanks`
   );
 
   return `mailto:${encodeURIComponent(to.trim())}?subject=${subject}&body=${body}`;
