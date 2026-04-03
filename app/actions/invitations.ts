@@ -38,11 +38,13 @@ function parseInvitationRow(row: unknown): InvitationListRow | null {
 }
 
 function mapListRowToInboxItem(row: InvitationListRow): InvitationInboxItem {
+  const slug = row.organization_slug?.trim();
   return {
     id: row.id,
     status: row.status,
     case_title: row.case_title,
     org_name: row.organization_name,
+    org_slug: slug ? slug : undefined,
     created_at: row.created_at,
     token: row.token?.trim() ? row.token : undefined,
   };
@@ -153,7 +155,9 @@ export async function acceptInvitationAction(
     if (!r.ok) return { ok: false, error: r.error };
     const out = r as { slug?: string };
     revalidatePath("/invitations");
-    revalidatePath("/");
+    // Bust cached shells for *all* org routes so the workspace switcher picks up the new membership
+    // (revalidating only /{slug} leaves the current org’s layout stale).
+    revalidatePath("/", "layout");
     if (out.slug) {
       revalidatePath(`/${out.slug}`, "layout");
     }
@@ -180,7 +184,7 @@ export async function acceptInvitationByTokenAction(
     if (!r.ok) return { ok: false, error: r.error };
     const out = r as { slug?: string };
     revalidatePath("/invitations");
-    revalidatePath("/");
+    revalidatePath("/", "layout");
     if (out.slug) {
       revalidatePath(`/${out.slug}`, "layout");
     }

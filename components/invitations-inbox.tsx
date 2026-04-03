@@ -8,7 +8,9 @@ import {
   rejectInvitationAction,
 } from "@/app/actions/invitations";
 import { publicInviteUrl } from "@/lib/invite-link";
+import { buttonVariants } from "@/lib/button-variants";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -115,7 +117,17 @@ function InboxCard({
         ) : null}
 
         {section === "accepted" ? (
-          <p className="text-sm font-medium text-muted-foreground">Joined</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-medium text-muted-foreground">Joined</p>
+            {inv.org_slug ? (
+              <a
+                href={`/${inv.org_slug}/dashboard`}
+                className={cn(buttonVariants({ size: "sm", variant: "secondary" }))}
+              >
+                Open workspace
+              </a>
+            ) : null}
+          </div>
         ) : null}
 
         {section === "rejected" ? (

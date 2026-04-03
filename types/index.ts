@@ -206,6 +206,8 @@ export type InvitationListRow = {
   id: string;
   organization_id: string;
   organization_name: string;
+  /** Workspace URL segment from organizations.slug (list RPC). */
+  organization_slug?: string;
   case_id: string | null;
   case_title: string | null;
   role: OrgRole;
@@ -230,6 +232,8 @@ export type InvitationInboxItem = {
   status: "invited" | "registered" | "accepted" | "rejected";
   case_title: string | null;
   org_name: string;
+  /** Present when list RPC includes organization_slug (migration 026+). */
+  org_slug?: string;
   created_at: string;
   token?: string;
 };

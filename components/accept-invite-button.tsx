@@ -1,13 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { acceptInvitationByTokenAction } from "@/app/actions/invitations";
 import { Button } from "@/components/ui/button";
 
 export function AcceptInviteButton({ token }: { token: string }) {
-  const router = useRouter();
   const [pending, start] = useTransition();
 
   function run() {
@@ -15,8 +13,7 @@ export function AcceptInviteButton({ token }: { token: string }) {
       const res = await acceptInvitationByTokenAction(token);
       if (res.ok && res.slug) {
         toast.success("Joined workspace");
-        router.push(`/${res.slug}/dashboard`);
-        router.refresh();
+        window.location.assign(`/${res.slug}/dashboard`);
       } else {
         toast.error(!res.ok ? res.error : "Could not accept invite");
       }
