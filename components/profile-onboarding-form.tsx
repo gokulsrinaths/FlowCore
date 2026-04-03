@@ -37,7 +37,7 @@ export function ProfileOnboardingForm() {
   return (
     <form
       action={onSubmit}
-      className="rounded-xl border border-border/80 bg-card p-6 space-y-4 shadow-sm"
+      className="space-y-4 rounded-xl border border-border/80 bg-card p-4 shadow-sm sm:p-6"
     >
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>

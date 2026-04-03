@@ -52,13 +52,14 @@ export function ItemDetailActions({
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
       {canEdit && (
         <>
           <Button
             type="button"
             variant="outline"
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => {
               setEditKey((k) => k + 1);
               setEditOpen(true);
@@ -82,6 +83,7 @@ export function ItemDetailActions({
             type="button"
             variant="destructive"
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => setDeleteOpen(true)}
           >
             Delete

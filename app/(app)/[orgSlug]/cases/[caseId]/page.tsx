@@ -81,7 +81,7 @@ export default async function CaseDetailPage({ params }: PageProps) {
             <p className="text-sm text-muted-foreground">Reference: {caseRow.crime_number}</p>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
           <CreateItemDialog
             users={users}
             profile={profile}

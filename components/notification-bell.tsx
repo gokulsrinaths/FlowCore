@@ -179,7 +179,7 @@ export function NotificationBell({ orgSlug }: { orgSlug: string }) {
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "ghost", size: "sm" }),
-          "relative gap-1.5 text-muted-foreground"
+          "relative min-h-11 min-w-11 touch-manipulation gap-1.5 text-muted-foreground"
         )}
         aria-label="Notifications"
       >
@@ -196,7 +196,10 @@ export function NotificationBell({ orgSlug }: { orgSlug: string }) {
           </span>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 max-h-[min(70vh,420px)] overflow-y-auto">
+      <DropdownMenuContent
+        align="end"
+        className="w-[min(100vw-2rem,20rem)] max-w-[calc(100vw-2rem)] sm:w-80 max-h-[min(70vh,420px)] overflow-y-auto"
+      >
         <DropdownMenuGroup>
           <DropdownMenuLabel className="flex flex-col gap-1.5 font-normal">
             <div className="flex items-center justify-between gap-2 w-full">

@@ -46,7 +46,7 @@ export function ItemCard({ item, orgSlug }: ItemCardProps) {
       <CardHeader className="flex flex-row items-start gap-2 space-y-0 pb-2 pt-3 px-3">
         <button
           type="button"
-          className="mt-0.5 cursor-grab touch-none text-muted-foreground hover:text-foreground"
+          className="-m-2 mt-0.5 flex min-h-11 min-w-11 cursor-grab touch-manipulation items-center justify-center rounded-md text-muted-foreground hover:bg-muted/80 hover:text-foreground active:cursor-grabbing"
           aria-label="Drag to move"
           {...listeners}
           {...attributes}

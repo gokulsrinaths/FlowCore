@@ -34,7 +34,10 @@ export function OnboardingForm() {
   }
 
   return (
-    <form action={onSubmit} className="rounded-xl border border-border/80 bg-card p-6 space-y-4 shadow-sm">
+    <form
+      action={onSubmit}
+      className="space-y-4 rounded-xl border border-border/80 bg-card p-4 shadow-sm sm:p-6"
+    >
       <div className="space-y-2">
         <Label htmlFor="name">Workspace name</Label>
         <Input id="name" name="name" required placeholder="Acme Ops" />
@@ -63,7 +66,7 @@ export function OnboardingForm() {
         <select
           id="primary_use_case"
           name="primary_use_case"
-          className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 text-sm"
+          className="flex h-11 min-h-11 w-full touch-manipulation rounded-lg border border-input bg-background px-3 py-2 text-sm sm:h-9 sm:min-h-9 sm:py-1"
           defaultValue="operations"
         >
           {USE_CASES.map((u) => (

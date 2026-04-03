@@ -50,7 +50,10 @@ export default async function GeneralSettingsPage({ params }: PageProps) {
         <CardContent>
           <Link
             href="/invitations"
-            className={cn(buttonVariants({ variant: "outline" }), "inline-flex")}
+            className={cn(
+              buttonVariants({ variant: "outline" }),
+              "inline-flex w-full justify-center sm:w-auto"
+            )}
           >
             View invitations →
           </Link>

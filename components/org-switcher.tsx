@@ -60,7 +60,7 @@ export function OrgSwitcher({
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "outline" }),
-          "w-full justify-between gap-2 h-auto py-2 px-2.5 font-normal"
+          "min-h-11 w-full touch-manipulation justify-between gap-2 py-2.5 pl-3 pr-2 font-normal h-auto"
         )}
       >
         <span className="flex items-center gap-2 min-w-0">

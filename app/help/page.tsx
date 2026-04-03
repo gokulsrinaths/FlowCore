@@ -4,23 +4,32 @@ export default function HelpPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-border/80 bg-card/50">
-        <div className="mx-auto max-w-3xl flex items-center justify-between px-4 py-4 sm:px-6">
-          <Link href="/" className="font-semibold tracking-tight">
+        <div className="mx-auto max-w-3xl flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center font-semibold tracking-tight touch-manipulation"
+          >
             FlowCore
           </Link>
-          <span className="flex items-center gap-3 text-sm">
-            <Link href="/login" className="text-primary hover:underline">
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            <Link
+              href="/login"
+              className="inline-flex min-h-11 items-center text-primary hover:underline touch-manipulation"
+            >
               Sign in
             </Link>
-            <Link href="/login?signup=1" className="text-muted-foreground hover:text-foreground">
+            <Link
+              href="/login?signup=1"
+              className="inline-flex min-h-11 items-center text-muted-foreground hover:text-foreground touch-manipulation"
+            >
               Create account
             </Link>
-          </span>
+          </nav>
         </div>
       </header>
-      <main className="flex-1 mx-auto max-w-3xl px-4 py-12 sm:px-6 space-y-10">
+      <main className="flex-1 mx-auto max-w-3xl px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-12 space-y-8 sm:space-y-10">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Help & docs</h1>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Help & docs</h1>
           <p className="text-muted-foreground mt-2">
             Quick answers for getting started with FlowCore.
           </p>

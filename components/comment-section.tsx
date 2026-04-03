@@ -70,7 +70,12 @@ export function CommentSection({
           onChange={(e) => setText(e.target.value)}
           disabled={pending}
         />
-        <Button type="button" onClick={submit} disabled={pending || !text.trim()}>
+        <Button
+          type="button"
+          className="w-full sm:w-auto"
+          onClick={submit}
+          disabled={pending || !text.trim()}
+        >
           Post comment
         </Button>
       </div>
@@ -93,8 +98,8 @@ export function CommentSection({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon"
-                    className="shrink-0 size-8"
+                    size="icon-sm"
+                    className="shrink-0"
                     onClick={() => remove(c.id)}
                     aria-label="Delete comment"
                   >

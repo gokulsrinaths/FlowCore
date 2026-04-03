@@ -69,7 +69,13 @@ export function EditCaseDialog({ organizationId, orgSlug, caseRow }: EditCaseDia
 
   return (
     <>
-      <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="w-full justify-center gap-2 sm:w-auto"
+        onClick={() => setOpen(true)}
+      >
         <Pencil className="size-4" />
         Edit
       </Button>

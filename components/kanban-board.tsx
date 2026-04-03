@@ -4,6 +4,7 @@ import {
   DndContext,
   DragEndEvent,
   PointerSensor,
+  TouchSensor,
   closestCorners,
   useDroppable,
   useSensor,
@@ -61,7 +62,7 @@ function KanbanColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex min-h-[420px] flex-1 flex-col gap-3 rounded-xl border border-border/80 bg-muted/20 p-3 min-w-[240px]",
+        "flex min-h-[min(420px,70vh)] w-[min(100%,320px)] shrink-0 snap-start flex-col gap-3 rounded-xl border border-border/80 bg-muted/20 p-3 md:min-h-[420px] md:w-auto md:min-w-0 md:flex-1",
         isOver && "ring-2 ring-primary/25 bg-muted/40"
       )}
     >
@@ -94,7 +95,10 @@ export function KanbanBoard({
   const [isPending, startTransition] = useTransition();
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 6 },
+    })
   );
 
   const filtered = useMemo(() => {
@@ -178,17 +182,17 @@ export function KanbanBoard({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-md flex-1">
-          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+        <div className="relative w-full max-w-md flex-1">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search items…"
-            className="pl-9"
+            className="min-h-11 pl-9"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
             <span className="text-sm text-muted-foreground whitespace-nowrap">
               Assignee
             </span>
@@ -196,7 +200,7 @@ export function KanbanBoard({
               value={assigneeFilter}
               onValueChange={(v) => setAssigneeFilter(v ?? "all")}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="h-11 w-full min-w-0 sm:h-9 sm:w-[180px]">
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent>
@@ -214,7 +218,7 @@ export function KanbanBoard({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
             <span className="text-sm text-muted-foreground whitespace-nowrap">
               Priority
             </span>
@@ -222,7 +226,7 @@ export function KanbanBoard({
               value={priorityFilter}
               onValueChange={(v) => setPriorityFilter(v ?? "all")}
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="h-11 w-full min-w-0 sm:h-9 sm:w-[160px]">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
@@ -242,7 +246,7 @@ export function KanbanBoard({
         collisionDetection={closestCorners}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid gap-4 lg:grid-cols-4 md:grid-cols-2">
+        <div className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-visible px-1 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-4">
           {STATUS_ORDER.map((status) => (
             <KanbanColumn key={status} status={status}>
               {grouped[status].length === 0 && (
@@ -264,7 +268,7 @@ export function KanbanBoard({
                     >
                       <SelectTrigger
                         size="sm"
-                        className="w-full h-8 text-xs"
+                        className="h-11 w-full text-xs sm:h-8"
                         aria-label="Change status"
                       >
                         <SelectValue placeholder="Status" />

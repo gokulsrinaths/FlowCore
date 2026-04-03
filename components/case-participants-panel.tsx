@@ -283,13 +283,16 @@ export function CaseParticipantsPanel({
                 internal
                   .filter((p) => p.role === "sp")
                   .map((p) => (
-                    <li key={p.id} className="flex justify-between gap-2 items-start">
+                    <li
+                      key={p.id}
+                      className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+                    >
                       <span className="min-w-0">{internalRosterLine(p)}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-xs shrink-0"
+                        className="h-auto min-h-10 self-start py-2 text-xs sm:h-7 sm:min-h-0 sm:py-0"
                         disabled={pending}
                         onClick={() => remove(p.id)}
                       >
@@ -309,13 +312,16 @@ export function CaseParticipantsPanel({
                 internal
                   .filter((p) => p.role === "dsp")
                   .map((p) => (
-                    <li key={p.id} className="flex justify-between gap-2 items-start">
+                    <li
+                      key={p.id}
+                      className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+                    >
                       <span className="min-w-0">{internalRosterLine(p)}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-7 text-xs shrink-0"
+                        className="h-auto min-h-10 self-start py-2 text-xs sm:h-7 sm:min-h-0 sm:py-0"
                         disabled={pending}
                         onClick={() => remove(p.id)}
                       >
@@ -337,13 +343,16 @@ export function CaseParticipantsPanel({
               internal
                 .filter((p) => p.role === "officer")
                 .map((p) => (
-                  <li key={p.id} className="flex justify-between gap-2 items-start">
+                  <li
+                    key={p.id}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+                  >
                     <span className="min-w-0">{internalRosterLine(p)}</span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-7 text-xs shrink-0"
+                      className="h-auto min-h-10 self-start py-2 text-xs sm:h-7 sm:min-h-0 sm:py-0"
                       disabled={pending}
                       onClick={() => remove(p.id)}
                     >
@@ -365,21 +374,24 @@ export function CaseParticipantsPanel({
               <li className="text-muted-foreground">—</li>
             ) : (
               pendingCaseInvite.map((p) => (
-                <li key={p.id} className="flex justify-between gap-2 items-center">
+                <li
+                  key={p.id}
+                  className="flex flex-col gap-3 border-b border-border/40 pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-2 sm:border-0 sm:pb-0"
+                >
                   <span className="min-w-0">
                     <span className="font-medium">{pendingParticipantLabel(p)}</span>
-                    <span className="text-muted-foreground text-xs ml-2">
+                    <span className="text-muted-foreground ml-2 text-xs">
                       {ROLE_LABEL[p.role ?? "external"] ?? "External"}
                     </span>
                   </span>
-                  <span className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+                  <span className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                     {p.type === "external" && p.email?.trim() ? (
                       <>
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 text-xs"
+                          className="h-auto min-h-10 w-full py-2 text-xs sm:w-auto sm:py-0"
                           disabled={pending}
                           onClick={() => openExternalInviteMailto(p, caseTitle, orgName)}
                         >
@@ -390,7 +402,7 @@ export function CaseParticipantsPanel({
                             type="button"
                             variant="secondary"
                             size="sm"
-                            className="h-7 text-xs"
+                            className="h-auto min-h-10 w-full py-2 text-xs sm:w-auto sm:py-0"
                             disabled={pending}
                             onClick={() => copyExternalInviteLink(p)}
                           >
@@ -403,7 +415,7 @@ export function CaseParticipantsPanel({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-7 text-xs"
+                      className="h-auto min-h-10 w-full py-2 text-xs sm:w-auto sm:py-0"
                       disabled={pending}
                       onClick={() => remove(p.id)}
                     >
@@ -423,26 +435,29 @@ export function CaseParticipantsPanel({
               <li className="text-muted-foreground">—</li>
             ) : (
               external.map((p) => (
-                <li key={p.id} className="flex justify-between gap-2 items-center">
+                <li
+                  key={p.id}
+                  className="flex flex-col gap-3 border-b border-border/40 pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-2 sm:border-0 sm:pb-0"
+                >
                   <span className="min-w-0">
                     <span className="font-medium">
                       {p.invite_status === "rejected" && p.email
                         ? `${p.email} → Rejected`
                         : (p.email ?? "—")}
                     </span>
-                    <span className="text-muted-foreground text-xs ml-2">
+                    <span className="text-muted-foreground ml-2 text-xs">
                       {ROLE_LABEL[p.role ?? "external"] ?? "External"}
                     </span>
                   </span>
-                  <span className="flex flex-wrap items-center justify-end gap-2 shrink-0">
-                    <Badge variant="secondary" className="text-[10px]">
+                  <span className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+                    <Badge variant="secondary" className="w-fit text-[10px]">
                       Active
                     </Badge>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="h-7 text-xs"
+                      className="h-auto min-h-10 w-full py-2 text-xs sm:w-auto sm:py-0"
                       disabled={pending}
                       onClick={() => openExternalInviteMailto(p, caseTitle, orgName)}
                     >
@@ -453,7 +468,7 @@ export function CaseParticipantsPanel({
                         type="button"
                         variant="secondary"
                         size="sm"
-                        className="h-7 text-xs"
+                        className="h-auto min-h-10 w-full py-2 text-xs sm:w-auto sm:py-0"
                         disabled={pending}
                         onClick={() => copyExternalInviteLink(p)}
                       >
@@ -464,7 +479,7 @@ export function CaseParticipantsPanel({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-7 text-xs"
+                      className="h-auto min-h-10 w-full py-2 text-xs sm:w-auto sm:py-0"
                       disabled={pending}
                       onClick={() => remove(p.id)}
                     >
@@ -514,7 +529,12 @@ export function CaseParticipantsPanel({
                 </SelectContent>
               </Select>
             </div>
-            <Button type="button" onClick={sendCaseInvite} disabled={pending}>
+            <Button
+              type="button"
+              className="w-full shrink-0 sm:w-auto"
+              onClick={sendCaseInvite}
+              disabled={pending}
+            >
               Create invite
             </Button>
           </div>
@@ -523,7 +543,7 @@ export function CaseParticipantsPanel({
         <div className="border-t border-border/60 pt-4 space-y-3">
           <h4 className="text-sm font-medium">Add participant</h4>
           {departments.length > 0 && (
-            <div className="space-y-2 max-w-xs">
+            <div className="w-full max-w-full space-y-2 sm:max-w-xs">
               <Label>Filter by department</Label>
               <Select value={deptFilter} onValueChange={(v) => setDeptFilter(v ?? ALL_DEPTS)}>
                 <SelectTrigger>
@@ -576,7 +596,13 @@ export function CaseParticipantsPanel({
                 type="email"
               />
             </div>
-            <Button type="button" variant="secondary" onClick={addExternal} disabled={pending}>
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full shrink-0 sm:w-auto"
+              onClick={addExternal}
+              disabled={pending}
+            >
               Add email
             </Button>
           </div>
@@ -609,7 +635,12 @@ export function CaseParticipantsPanel({
               placeholder="Brief note"
             />
           </div>
-          <Button type="submit" variant="outline" disabled={pending}>
+          <Button
+            type="submit"
+            variant="outline"
+            className="w-full sm:w-auto"
+            disabled={pending}
+          >
             Save requisition
           </Button>
         </form>

@@ -19,10 +19,10 @@ export default async function OnboardingPage() {
 
   if (done && orgs.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
+      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-6">
         <div className="w-full max-w-lg space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight">Create your workspace</h1>
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Create your workspace</h1>
             <p className="text-sm text-muted-foreground">
               FlowCore organizes work by workspace. You can invite teammates after setup.
             </p>
@@ -34,10 +34,10 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-6">
       <div className="w-full max-w-lg space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Complete your profile</h1>
+          <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Complete your profile</h1>
           <p className="text-sm text-muted-foreground">
             A few details help teammates recognize you on cases and tasks.
           </p>

@@ -120,7 +120,11 @@ export function CreateItemDialog({
 
   return (
     <>
-      <Button type="button" className="gap-2" onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        className="min-h-11 w-full touch-manipulation gap-2 sm:w-auto"
+        onClick={() => setOpen(true)}
+      >
         <Plus className="size-4" />
         New item
       </Button>

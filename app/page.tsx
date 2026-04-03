@@ -34,20 +34,20 @@ export default function MarketingHome() {
       />
 
       <header className="relative z-10 border-b border-cyan-500/10 bg-[rgba(3,5,8,0.75)] backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
           <span className="font-medium tracking-tight text-slate-100">
             Flow<span className="text-cyan-400">Core</span>
           </span>
-          <nav className="flex items-center gap-2 text-sm sm:gap-3">
+          <nav className="flex flex-wrap items-center gap-2 text-sm sm:gap-3">
             <Link
               href="/pricing"
-              className="text-slate-400 transition-colors hover:text-cyan-300"
+              className="inline-flex min-h-11 items-center text-slate-400 transition-colors hover:text-cyan-300 touch-manipulation"
             >
               Pricing
             </Link>
             <Link
               href="/help"
-              className="text-slate-400 transition-colors hover:text-cyan-300"
+              className="inline-flex min-h-11 items-center text-slate-400 transition-colors hover:text-cyan-300 touch-manipulation"
             >
               Help
             </Link>
@@ -55,7 +55,7 @@ export default function MarketingHome() {
               href="/login"
               className={cn(
                 buttonVariants({ size: "sm", variant: "outline" }),
-                "border-cyan-500/30 bg-transparent text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-200"
+                "w-full justify-center border-cyan-500/30 bg-transparent text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-200 sm:w-auto"
               )}
             >
               Sign in
@@ -64,7 +64,7 @@ export default function MarketingHome() {
               href="/login?signup=1"
               className={cn(
                 buttonVariants({ size: "sm" }),
-                "bg-cyan-500 text-[#030508] shadow-[0_0_24px_rgba(46,230,255,0.25)] hover:bg-cyan-400"
+                "w-full justify-center bg-cyan-500 text-[#030508] shadow-[0_0_24px_rgba(46,230,255,0.25)] hover:bg-cyan-400 sm:w-auto"
               )}
             >
               Get started

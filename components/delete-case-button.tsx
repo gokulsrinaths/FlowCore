@@ -45,7 +45,7 @@ export function DeleteCaseButton({
       type="button"
       variant="ghost"
       size="sm"
-      className="text-destructive hover:text-destructive gap-2"
+      className="w-full justify-center gap-2 text-destructive hover:text-destructive sm:w-auto"
       disabled={pending}
       onClick={onClick}
     >

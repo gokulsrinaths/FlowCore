@@ -23,7 +23,10 @@ export default async function InvitationsPage() {
     return (
       <div className="max-w-2xl mx-auto space-y-6 px-4 py-8">
         <p className="text-sm text-destructive">{res.error}</p>
-        <Link href={backHref} className={cn(buttonVariants({ variant: "outline" }))}>
+        <Link
+          href={backHref}
+          className={cn(buttonVariants({ variant: "outline" }), "inline-flex w-full justify-center sm:w-auto")}
+        >
           Go back
         </Link>
       </div>
@@ -31,14 +34,14 @@ export default async function InvitationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/20">
-      <div className="max-w-2xl mx-auto space-y-8 px-4 py-8">
+    <div className="min-h-screen bg-muted/20 pb-[max(2rem,env(safe-area-inset-bottom))]">
+      <div className="max-w-2xl mx-auto space-y-8 px-4 py-8 pt-[max(1.5rem,env(safe-area-inset-top))]">
         <div className="space-y-2">
           <Link
             href={backHref}
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
-              "gap-2 -ml-2 text-muted-foreground"
+              "gap-2 -ml-2 min-h-11 touch-manipulation text-muted-foreground sm:min-h-0"
             )}
           >
             <ArrowLeft className="size-4" />

@@ -47,7 +47,11 @@ export function GeneralSettingsForm({
           disabled={disabled || pending}
         />
       </div>
-      <Button type="submit" disabled={disabled || pending}>
+      <Button
+        type="submit"
+        className="w-full sm:w-auto"
+        disabled={disabled || pending}
+      >
         Save
       </Button>
       {disabled && (

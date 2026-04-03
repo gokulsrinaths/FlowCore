@@ -46,11 +46,11 @@ export default async function SearchPage({ params, searchParams }: PageProps) {
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium capitalize">{r.type}</CardTitle>
             </CardHeader>
-            <CardContent className="text-sm">
+            <CardContent className="min-w-0 text-sm">
               {r.type === "item" && (
                 <Link
                   href={`${base}/items/${r.id}`}
-                  className="font-medium hover:underline"
+                  className="inline-block min-h-11 max-w-full py-2 font-medium break-words hover:underline sm:min-h-0 sm:py-0"
                 >
                   {r.title}
                 </Link>
@@ -60,7 +60,7 @@ export default async function SearchPage({ params, searchParams }: PageProps) {
                   <p className="text-muted-foreground line-clamp-2">{r.snippet}</p>
                   <Link
                     href={`${base}/items/${r.item_id}`}
-                    className="text-primary text-xs mt-1 inline-block"
+                    className="mt-1 inline-flex min-h-11 items-center text-xs text-primary sm:min-h-0"
                   >
                     View item
                   </Link>

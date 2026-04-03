@@ -112,7 +112,7 @@ export function LoginForm() {
             role="tab"
             aria-selected={mode === "signin"}
             className={cn(
-              "flex-1 rounded-md py-2 px-3 font-medium transition-colors",
+              "flex-1 touch-manipulation rounded-md py-2.5 px-3 text-sm font-medium transition-colors min-h-11 sm:min-h-0 sm:py-2",
               mode === "signin"
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -126,7 +126,7 @@ export function LoginForm() {
             role="tab"
             aria-selected={mode === "signup"}
             className={cn(
-              "flex-1 rounded-md py-2 px-3 font-medium transition-colors",
+              "flex-1 touch-manipulation rounded-md py-2.5 px-3 text-sm font-medium transition-colors min-h-11 sm:min-h-0 sm:py-2",
               mode === "signup"
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"

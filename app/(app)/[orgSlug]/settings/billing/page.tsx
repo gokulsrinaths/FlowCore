@@ -39,7 +39,10 @@ export default async function BillingSettingsPage({ params }: PageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
-          <Link href="/pricing" className={cn(buttonVariants())}>
+          <Link
+            href="/pricing"
+            className={cn(buttonVariants(), "inline-flex w-full justify-center sm:w-auto")}
+          >
             View plans & upgrade
           </Link>
         </CardContent>

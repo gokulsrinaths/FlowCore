@@ -84,7 +84,7 @@ export function InviteForm({
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" className="w-full sm:w-auto" disabled={pending}>
         {pending ? "Creating…" : "Create invite"}
       </Button>
     </form>

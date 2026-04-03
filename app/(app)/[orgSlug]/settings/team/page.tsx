@@ -30,7 +30,7 @@ export default async function TeamSettingsPage({ params }: PageProps) {
   const showRoleMgmt = canManageTeam(role);
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8 w-full max-w-3xl">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Team</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -82,10 +82,10 @@ export default async function TeamSettingsPage({ params }: PageProps) {
             {invites.map((inv) => (
               <div
                 key={inv.id}
-                className="flex justify-between gap-4 border-b border-border/60 pb-2 last:border-0"
+                className="flex flex-col gap-1 border-b border-border/60 pb-3 last:border-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:pb-2"
               >
-                <span className="font-mono text-xs break-all">{inv.email}</span>
-                <span className="text-muted-foreground shrink-0 capitalize">
+                <span className="min-w-0 font-mono text-xs break-all">{inv.email}</span>
+                <span className="text-muted-foreground text-sm capitalize sm:shrink-0">
                   {inv.role.replace("org_", "")} · {inv.status}
                 </span>
               </div>

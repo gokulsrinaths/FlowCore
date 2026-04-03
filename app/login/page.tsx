@@ -41,7 +41,7 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-muted/30">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-6">
       {user ? (
         <LoggedInPanel continueHref={continueHref} />
       ) : (

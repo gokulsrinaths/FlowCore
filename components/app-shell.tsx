@@ -1,10 +1,8 @@
-import Link from "next/link";
 import { LogOut, Search } from "lucide-react";
+import { AppChrome } from "@/components/app-chrome";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationBell } from "@/components/notification-bell";
-import { SidebarNav } from "@/components/sidebar-nav";
-import { OrgSwitcher } from "@/components/org-switcher";
 import { signOutAction } from "@/app/actions/auth";
 import { getPendingInvitationCountForNav } from "@/app/actions/invitations";
 import { getOrganizationsForUser } from "@/lib/organizations";
@@ -40,48 +38,46 @@ export async function AppShell({
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-background">
-      <aside className="border-b md:border-b-0 md:border-r border-border/80 bg-card/40 md:w-56 shrink-0 md:min-h-screen flex flex-col">
-        <div className="p-4 border-b border-border/60 flex items-center justify-between gap-2">
-          <Link href={`${base}/dashboard`} className="font-semibold tracking-tight">
-            FlowCore
-          </Link>
-        </div>
-        <div className="p-3 border-b border-border/60">
-          <OrgSwitcher current={organization} organizations={allOrgs} />
-        </div>
-        <nav className="flex-1 p-3 space-y-1">
-          <SidebarNav items={nav} base={base} />
-        </nav>
-        <div className="p-3 border-t border-border/60 text-xs text-muted-foreground truncate">
-          {profile.name ?? profile.email ?? "Signed in"}
-        </div>
-      </aside>
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="border-b border-border/80 bg-card/30 backdrop-blur-sm sticky top-0 z-40">
-          <div className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
-            <form action={`${base}/search`} method="get" className="flex-1 min-w-[200px] max-w-md">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-                <Input
-                  name="q"
-                  placeholder="Search items, comments, people…"
-                  className="pl-9 h-9 bg-background/80"
-                  type="search"
-                />
-              </div>
-            </form>
+    <AppChrome
+      organization={organization}
+      profile={profile}
+      allOrgs={allOrgs}
+      nav={nav}
+      base={base}
+    >
+      <header className="sticky top-12 z-40 border-b border-border/80 bg-card/30 backdrop-blur-sm md:top-0">
+        <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-3">
+          <form
+            action={`${base}/search`}
+            method="get"
+            className="min-w-0 flex-1 basis-full sm:basis-auto sm:max-w-md"
+          >
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                name="q"
+                placeholder="Search…"
+                className="bg-background/80 pl-9"
+                type="search"
+                autoComplete="off"
+                enterKeyHint="search"
+              />
+            </div>
+          </form>
+          <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
             <NotificationBell orgSlug={organization.slug} />
-            <form action={signOutAction}>
+            <form action={signOutAction} className="hidden sm:block">
               <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground">
                 <LogOut className="size-4 sm:mr-2" />
                 <span className="hidden sm:inline">Sign out</span>
               </Button>
             </form>
           </div>
-        </header>
-        <main className="flex-1 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">{children}</main>
-      </div>
-    </div>
+        </div>
+      </header>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-3 py-6 sm:px-6 sm:py-8">
+        {children}
+      </main>
+    </AppChrome>
   );
 }

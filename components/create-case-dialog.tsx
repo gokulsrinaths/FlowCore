@@ -57,7 +57,11 @@ export function CreateCaseDialog({ organizationId, orgSlug }: CreateCaseDialogPr
 
   return (
     <>
-      <Button type="button" className="gap-2" onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        className="w-full justify-center gap-2 sm:w-auto"
+        onClick={() => setOpen(true)}
+      >
         <Plus className="size-4" />
         New case
       </Button>

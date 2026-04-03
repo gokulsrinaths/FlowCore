@@ -53,7 +53,7 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
         </Card>
       ) : (
         <div className="rounded-xl border border-border/80 overflow-hidden">
-          <Table>
+          <Table className="min-w-[22rem] sm:min-w-0">
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>

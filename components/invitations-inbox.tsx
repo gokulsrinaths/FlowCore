@@ -89,14 +89,21 @@ function InboxCard({
         ) : null}
 
         {section === "pending" && inv.status === "registered" ? (
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" disabled={busy} onClick={() => onAccept(inv.id)}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Button
+              type="button"
+              size="sm"
+              className="w-full sm:w-auto"
+              disabled={busy}
+              onClick={() => onAccept(inv.id)}
+            >
               Accept
             </Button>
             <Button
               type="button"
               size="sm"
               variant="outline"
+              className="w-full sm:w-auto"
               disabled={busy}
               onClick={() => onReject(inv.id)}
             >
@@ -107,6 +114,7 @@ function InboxCard({
                 type="button"
                 size="sm"
                 variant="secondary"
+                className="w-full sm:w-auto"
                 disabled={busy}
                 onClick={() => onCopy(inv.token!)}
               >
@@ -117,12 +125,15 @@ function InboxCard({
         ) : null}
 
         {section === "accepted" ? (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <p className="text-sm font-medium text-muted-foreground">Joined</p>
             {inv.org_slug ? (
               <a
                 href={`/${inv.org_slug}/dashboard`}
-                className={cn(buttonVariants({ size: "sm", variant: "secondary" }))}
+                className={cn(
+                  buttonVariants({ size: "sm", variant: "secondary" }),
+                  "inline-flex w-full justify-center sm:w-auto"
+                )}
               >
                 Open workspace
               </a>

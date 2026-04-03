@@ -92,7 +92,7 @@ export function TeamMembersTable({
 
   return (
     <div className="rounded-xl border border-border/80 overflow-hidden">
-      <Table>
+      <Table className="min-w-[40rem]">
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
@@ -126,7 +126,7 @@ export function TeamMembersTable({
                     }}
                     disabled={pending}
                   >
-                    <SelectTrigger className="w-[160px]">
+                    <SelectTrigger className="w-full min-w-[10rem] max-w-[14rem] md:w-[160px] md:max-w-none">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -161,7 +161,14 @@ export function TeamMembersTable({
         </TableBody>
       </Table>
       <div className="p-4 border-t border-border/60">
-        <Button type="button" variant="outline" size="sm" onClick={onLeave} disabled={pending}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full sm:w-auto"
+          onClick={onLeave}
+          disabled={pending}
+        >
           Leave workspace
         </Button>
         {currentOrgRole === "org_owner" && (

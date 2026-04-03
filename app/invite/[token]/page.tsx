@@ -25,7 +25,7 @@ export default async function InvitePage({ params }: PageProps) {
 
   if (!preview.ok) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
+      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-6">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Invitation unavailable</CardTitle>
@@ -49,7 +49,7 @@ export default async function InvitePage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Invitation</CardTitle>

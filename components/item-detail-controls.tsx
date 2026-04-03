@@ -244,30 +244,33 @@ export function ItemDetailControls({
       <div className="sm:col-span-2 space-y-2">
         <Label htmlFor={`due-date-${item.id}`}>Due date</Label>
         {canEditDueDate ? (
-          <div className="flex flex-wrap items-end gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
             <Input
               ref={dueInputRef}
               id={`due-date-${item.id}`}
               type="datetime-local"
-              className="max-w-xs"
+              className="w-full max-w-md"
               defaultValue={toDatetimeLocalValue(item.due_date)}
               disabled={pending}
             />
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              disabled={pending}
-              onClick={onSaveDueDate}
-            >
-              Save due date
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={pending}
-              onClick={() => {
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="w-full sm:w-auto"
+                disabled={pending}
+                onClick={onSaveDueDate}
+              >
+                Save due date
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="w-full sm:w-auto"
+                disabled={pending}
+                onClick={() => {
                 if (dueInputRef.current) dueInputRef.current.value = "";
                 startTransition(async () => {
                   const res = await setItemDueDate(
@@ -285,6 +288,7 @@ export function ItemDetailControls({
             >
               Clear
             </Button>
+            </div>
           </div>
         ) : (
           <p className="text-sm text-muted-foreground py-1">

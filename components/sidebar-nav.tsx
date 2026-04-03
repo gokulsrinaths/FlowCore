@@ -27,9 +27,12 @@ const ICONS = {
 export function SidebarNav({
   items,
   base,
+  onNavigate,
 }: {
   items: { href: string; label: string; icon: keyof typeof ICONS; badge?: number }[];
   base: string;
+  /** Close mobile drawer after navigation */
+  onNavigate?: () => void;
 }) {
   const pathname = usePathname();
 
@@ -59,8 +62,9 @@ export function SidebarNav({
           <li key={href}>
             <Link
               href={href}
+              onClick={() => onNavigate?.()}
               className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors w-full",
+                "flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors w-full touch-manipulation",
                 active
                   ? "bg-accent text-foreground font-medium"
                   : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"

@@ -78,17 +78,29 @@ async function Stats({
             )}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Link
             href={`${base}/search`}
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "w-full justify-center sm:w-auto"
+            )}
           >
             Search
           </Link>
-          <Link href={`${base}/cases`} className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+          <Link
+            href={`${base}/cases`}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "w-full justify-center sm:w-auto"
+            )}
+          >
             Cases
           </Link>
-          <Link href={`${base}/items`} className={cn(buttonVariants({ size: "sm" }))}>
+          <Link
+            href={`${base}/items`}
+            className={cn(buttonVariants({ size: "sm" }), "w-full justify-center sm:w-auto")}
+          >
             Open items board
           </Link>
         </div>
@@ -152,14 +164,17 @@ async function Stats({
 
       {recentCases.length > 0 && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <CardHeader className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <div>
               <CardTitle className="text-base">Recent cases</CardTitle>
               <CardDescription>Latest case files in this workspace</CardDescription>
             </div>
             <Link
               href={`${base}/cases`}
-              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "w-full justify-center sm:w-auto"
+              )}
             >
               View all
             </Link>
@@ -205,14 +220,17 @@ async function Stats({
       )}
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <CardHeader className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div>
             <CardTitle className="text-base">Recent activity</CardTitle>
             <CardDescription>Latest changes in this workspace</CardDescription>
           </div>
           <Link
             href={`${base}/activity`}
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "w-full justify-center sm:w-auto"
+            )}
           >
             View all
           </Link>
@@ -223,12 +241,12 @@ async function Stats({
           ) : (
             <ul className="space-y-2 text-sm">
               {recent.map((a) => (
-                <li key={a.id} className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">
+                <li key={a.id} className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4">
+                  <span className="min-w-0 text-muted-foreground">
                     <span className="text-foreground font-medium">{a.action}</span>
                     {a.user?.name && ` · ${a.user.name}`}
                   </span>
-                  <span className="text-xs text-muted-foreground shrink-0">
+                  <span className="text-xs text-muted-foreground sm:shrink-0">
                     {new Date(a.created_at).toLocaleString()}
                   </span>
                 </li>
