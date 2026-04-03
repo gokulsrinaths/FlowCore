@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { finalizeSignInSessionAction, signUpAction } from "@/app/actions/auth";
-import { createSupabaseBrowserClient } from "@/lib/supabase-client";
+import { signInAction, signUpAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +23,6 @@ type AuthMode = "signin" | "signup";
  * Open /login for sign-in, /login?signup=1 for create account.
  */
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
@@ -46,24 +44,19 @@ export function LoginForm() {
         fd.set("email", email.trim());
         fd.set("password", password);
         if (mode === "signin") {
-          const supabase = createSupabaseBrowserClient();
-          const { error: signInErr } = await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password,
-          });
-          if (signInErr) {
-            toast.error(signInErr.message);
-            return;
-          }
-          await router.refresh();
           const next = searchParams.get("next");
-          const result = await finalizeSignInSessionAction(next);
+          const result = await signInAction(fd, next);
           if (!result.ok) {
             toast.error(result.error);
             return;
           }
-          router.push(result.path);
-          router.refresh();
+          toast.success("Signed in");
+          // Full navigation so the browser reliably sends new session cookies (router.push can feel like “nothing happened”).
+          const path =
+            result.path.startsWith("/") && !result.path.startsWith("//")
+              ? result.path
+              : "/onboarding";
+          window.location.assign(path);
         } else {
           const result = await signUpAction(fd);
           if (!result.ok) {
@@ -79,7 +72,7 @@ export function LoginForm() {
         setLoading(false);
       }
     },
-    [email, password, mode, router, searchParams]
+    [email, password, mode, searchParams]
   );
 
   return (

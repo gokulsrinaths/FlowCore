@@ -1,5 +1,27 @@
 import { Resend } from "resend";
 
+const RESEND_DOMAINS_URL = "https://resend.com/domains";
+
+/** Default sender uses Resend's test domain — only delivers to your Resend account email until you verify your own domain. */
+function getResendFromAddress(): string {
+  const from = process.env.RESEND_FROM_EMAIL?.trim();
+  if (from) return from;
+  if (process.env.VERCEL) {
+    console.warn(
+      `[email] RESEND_FROM_EMAIL is unset; using test sender. To email anyone else, verify a domain at ${RESEND_DOMAINS_URL} and set RESEND_FROM_EMAIL (Vercel + local .env).`
+    );
+  }
+  return "FlowCore <onboarding@resend.dev>";
+}
+
+/** Append setup hint when Resend rejects non-test recipients. */
+function enrichResendUserError(message: string): string {
+  if (/verify a domain|only send testing emails/i.test(message)) {
+    return `${message} Set RESEND_FROM_EMAIL to an address on your verified domain (see ${RESEND_DOMAINS_URL}).`;
+  }
+  return message;
+}
+
 /** Resend SDK returns `{ data, error }` from fetch; errors may not have `.message` shape we expect */
 function formatResendError(error: unknown): string {
   if (error == null) return "Unknown Resend error";
@@ -25,7 +47,7 @@ function parseResendSendResult(
   context: string
 ): { ok: true; id: string } | { ok: false; error: string } {
   if (result.error != null) {
-    const msg = formatResendError(result.error);
+    const msg = enrichResendUserError(formatResendError(result.error));
     console.error(`[email] ${context} Resend error:`, result.error);
     return { ok: false, error: msg };
   }
@@ -81,8 +103,7 @@ export async function sendInviteEmail({
   orgName: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const resend = getResend();
-  const from =
-    process.env.RESEND_FROM_EMAIL ?? "FlowCore <onboarding@resend.dev>";
+  const from = getResendFromAddress();
 
   if (!resend) {
     console.warn(
@@ -120,7 +141,9 @@ export async function sendInviteEmail({
     if (!parsed.ok) return { ok: false, error: parsed.error };
     return { ok: true };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Send failed";
+    const msg = enrichResendUserError(
+      e instanceof Error ? e.message : "Send failed"
+    );
     console.error("[email]", msg);
     return { ok: false, error: msg };
   }
@@ -137,8 +160,7 @@ export async function sendOrgInviteEmail({
   orgName: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const resend = getResend();
-  const from =
-    process.env.RESEND_FROM_EMAIL ?? "FlowCore <onboarding@resend.dev>";
+  const from = getResendFromAddress();
 
   if (!resend) {
     console.warn(
@@ -173,7 +195,9 @@ export async function sendOrgInviteEmail({
     if (!parsed.ok) return { ok: false, error: parsed.error };
     return { ok: true };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Send failed";
+    const msg = enrichResendUserError(
+      e instanceof Error ? e.message : "Send failed"
+    );
     console.error("[email]", msg);
     return { ok: false, error: msg };
   }
@@ -191,8 +215,7 @@ export async function sendTaskAssignmentEmail({
   link: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const resend = getResend();
-  const from =
-    process.env.RESEND_FROM_EMAIL ?? "FlowCore <onboarding@resend.dev>";
+  const from = getResendFromAddress();
 
   if (!resend) {
     console.warn("[email] RESEND_API_KEY not set; skipping task assignment email");
@@ -218,7 +241,12 @@ export async function sendTaskAssignmentEmail({
     if (!parsed.ok) return { ok: false, error: parsed.error };
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Send failed" };
+    return {
+      ok: false,
+      error: enrichResendUserError(
+        e instanceof Error ? e.message : "Send failed"
+      ),
+    };
   }
 }
 
@@ -234,8 +262,7 @@ export async function sendDueReminderEmail({
   link: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const resend = getResend();
-  const from =
-    process.env.RESEND_FROM_EMAIL ?? "FlowCore <onboarding@resend.dev>";
+  const from = getResendFromAddress();
 
   if (!resend) {
     return { ok: false, error: "Email not configured" };
@@ -260,7 +287,12 @@ export async function sendDueReminderEmail({
     if (!parsed.ok) return { ok: false, error: parsed.error };
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Send failed" };
+    return {
+      ok: false,
+      error: enrichResendUserError(
+        e instanceof Error ? e.message : "Send failed"
+      ),
+    };
   }
 }
 
@@ -277,8 +309,7 @@ export async function sendEscalationEmail({
   link: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const resend = getResend();
-  const from =
-    process.env.RESEND_FROM_EMAIL ?? "FlowCore <onboarding@resend.dev>";
+  const from = getResendFromAddress();
 
   if (!resend) {
     return { ok: false, error: "Email not configured" };
@@ -303,6 +334,11 @@ export async function sendEscalationEmail({
     if (!parsed.ok) return { ok: false, error: parsed.error };
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Send failed" };
+    return {
+      ok: false,
+      error: enrichResendUserError(
+        e instanceof Error ? e.message : "Send failed"
+      ),
+    };
   }
 }

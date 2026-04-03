@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { parseFlowcoreRpc } from "@/lib/supabase-rpc";
+import { getRequestOrigin } from "@/lib/request-origin";
 
 export type AuthActionResult =
   | { ok: true }
@@ -33,6 +34,8 @@ export type FinalizeSignInResult =
   | { ok: true; path: string }
   | { ok: false; error: string };
 
+type SupabaseServer = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
 /**
  * Only allow same-origin relative paths (e.g. /invite/abc, /onboarding).
  */
@@ -46,25 +49,12 @@ function safeNextPath(raw: string | null | undefined): string | null {
 }
 
 /**
- * Call after the browser client has signed in (cookies are set in the browser).
- * Server-only sign-in did not reliably persist refresh tokens; client sign-in + this
- * keeps sessions across refresh and returning visits.
- *
- * @param nextPath — optional redirect from `?next=` (e.g. return to `/invite/[token]`).
+ * After a session exists on the server client (cookies set), ensure profile and return where to go.
  */
-export async function finalizeSignInSessionAction(
+async function completePostAuthRedirect(
+  supabase: SupabaseServer,
   nextPath?: string | null
 ): Promise<FinalizeSignInResult> {
-  let supabase;
-  try {
-    supabase = await createSupabaseServerClient();
-  } catch (e) {
-    return {
-      ok: false,
-      error: e instanceof Error ? e.message : "Something went wrong",
-    };
-  }
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -106,6 +96,60 @@ export async function finalizeSignInSessionAction(
   return { ok: true, path: `/${orgs[0].slug}/dashboard` };
 }
 
+/**
+ * Password sign-in on the server so session cookies are set in the same request.
+ * (Client signIn + server finalize often races: server never sees cookies yet.)
+ */
+export async function signInAction(
+  formData: FormData,
+  nextPath?: string | null
+): Promise<FinalizeSignInResult> {
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .replace(/\r?\n/g, "");
+  const password = String(formData.get("password") ?? "");
+  if (!email || !password) {
+    return { ok: false, error: "Email and password are required" };
+  }
+
+  let supabase: SupabaseServer;
+  try {
+    supabase = await createSupabaseServerClient();
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Something went wrong",
+    };
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return completePostAuthRedirect(supabase, nextPath);
+}
+
+/**
+ * Use when the session was already established in this cookie store (e.g. OAuth callback).
+ * Prefer {@link signInAction} for email/password.
+ */
+export async function finalizeSignInSessionAction(
+  nextPath?: string | null
+): Promise<FinalizeSignInResult> {
+  let supabase: SupabaseServer;
+  try {
+    supabase = await createSupabaseServerClient();
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Something went wrong",
+    };
+  }
+
+  return completePostAuthRedirect(supabase, nextPath);
+}
+
 export async function signUpAction(formData: FormData): Promise<AuthActionResult> {
   try {
     const email = String(formData.get("email") ?? "")
@@ -117,10 +161,12 @@ export async function signUpAction(formData: FormData): Promise<AuthActionResult
     }
 
     const supabase = await createSupabaseServerClient();
+    const origin = await getRequestOrigin();
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${origin}/login`,
         data: { name: email.split("@")[0] },
       },
     });
