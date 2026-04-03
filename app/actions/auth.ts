@@ -31,10 +31,19 @@ function parseOrgList(data: unknown): { slug: string }[] {
 }
 
 export type FinalizeSignInResult =
-  | { ok: true; path: string }
+  | { ok: true; path: string; pendingInvitationCount?: number }
   | { ok: false; error: string };
 
 type SupabaseServer = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
+async function countPendingInvitations(supabase: SupabaseServer): Promise<number> {
+  const { data, error } = await supabase.rpc("flowcore_count_my_pending_invitations");
+  if (error || data == null) return 0;
+  const r = parseFlowcoreRpc(data);
+  if (!r.ok) return 0;
+  const o = data as Record<string, unknown>;
+  return typeof o.count === "number" ? o.count : Number(o.count ?? 0);
+}
 
 /**
  * Only allow same-origin relative paths (e.g. /invite/abc, /onboarding).
@@ -77,10 +86,11 @@ async function completePostAuthRedirect(
   }
 
   await supabase.rpc("flowcore_mark_invitation_registered");
+  const pendingInvitationCount = await countPendingInvitations(supabase);
 
   const preferred = safeNextPath(nextPath);
   if (preferred) {
-    return { ok: true, path: preferred };
+    return { ok: true, path: preferred, pendingInvitationCount };
   }
 
   const { data: orgData, error: orgErr } = await supabase.rpc(
@@ -91,9 +101,13 @@ async function completePostAuthRedirect(
   }
   const orgs = parseOrgList(orgData);
   if (orgs.length === 0) {
-    return { ok: true, path: "/onboarding" };
+    return { ok: true, path: "/onboarding", pendingInvitationCount };
   }
-  return { ok: true, path: `/${orgs[0].slug}/dashboard` };
+  return {
+    ok: true,
+    path: `/${orgs[0].slug}/dashboard`,
+    pendingInvitationCount,
+  };
 }
 
 /**

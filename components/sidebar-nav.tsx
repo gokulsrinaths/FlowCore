@@ -11,6 +11,7 @@ import {
   Settings,
   Users,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const ICONS = {
@@ -27,14 +28,14 @@ export function SidebarNav({
   items,
   base,
 }: {
-  items: { href: string; label: string; icon: keyof typeof ICONS }[];
+  items: { href: string; label: string; icon: keyof typeof ICONS; badge?: number }[];
   base: string;
 }) {
   const pathname = usePathname();
 
   return (
     <ul className="space-y-0.5" aria-label="Workspace">
-      {items.map(({ href, label, icon }) => {
+      {items.map(({ href, label, icon, badge }) => {
         const Icon = ICONS[icon];
         let active = false;
         if (label === "Invitations") {
@@ -59,14 +60,22 @@ export function SidebarNav({
             <Link
               href={href}
               className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+                "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors w-full",
                 active
                   ? "bg-accent text-foreground font-medium"
                   : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
               )}
             >
               <Icon className="size-4 shrink-0" />
-              {label}
+              <span className="flex-1 min-w-0 truncate">{label}</span>
+              {badge != null && badge > 0 ? (
+                <Badge
+                  variant="secondary"
+                  className="shrink-0 text-[10px] px-1.5 py-0 h-5 min-w-5 justify-center tabular-nums"
+                >
+                  {badge > 99 ? "99+" : badge}
+                </Badge>
+              ) : null}
             </Link>
           </li>
         );

@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { fetchUserInvitationsAction } from "@/app/actions/invitations";
-import { PendingInvitationsList } from "@/components/pending-invitations-list";
+import { fetchUserInvitationsInboxAction } from "@/app/actions/invitations";
+import { InvitationsInbox } from "@/components/invitations-inbox";
 import { buttonVariants } from "@/lib/button-variants";
 import { getOrganizationsForUser } from "@/lib/organizations";
 import { cn } from "@/lib/utils";
 
+/**
+ * Global invitations inbox (session route so users can open it before org onboarding).
+ * URL: /invitations
+ */
 export default async function InvitationsPage() {
   const [res, orgs] = await Promise.all([
-    fetchUserInvitationsAction(),
+    fetchUserInvitationsInboxAction(),
     getOrganizationsForUser(),
   ]);
 
@@ -42,11 +46,11 @@ export default async function InvitationsPage() {
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Invitations</h1>
           <p className="text-muted-foreground text-sm text-pretty">
-            Invitations move from invited → registered when you sign in with the invited email,
-            then you can accept or decline. You are only added after you accept.
+            Everything here is tied to your signed-in email. Accepting joins the workspace (and case,
+            if any). Nothing is applied until you click Accept.
           </p>
         </div>
-        <PendingInvitationsList initial={res.invitations} />
+        <InvitationsInbox initial={res.invitations} />
       </div>
     </div>
   );

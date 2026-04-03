@@ -224,6 +224,22 @@ export type UserInvitationsGrouped = {
   rejected: InvitationListRow[];
 };
 
+/** Inbox view (RPC-backed; same rows as list, trimmed for UI). */
+export type InvitationInboxItem = {
+  id: string;
+  status: "invited" | "registered" | "accepted" | "rejected";
+  case_title: string | null;
+  org_name: string;
+  created_at: string;
+  token?: string;
+};
+
+export type UserInvitationsInbox = {
+  pending: InvitationInboxItem[];
+  accepted: InvitationInboxItem[];
+  rejected: InvitationInboxItem[];
+};
+
 export type SubscriptionRow = {
   organization_id: string;
   plan: PlanTier;

@@ -51,6 +51,14 @@ export function LoginForm() {
             return;
           }
           toast.success("Signed in");
+          if (
+            result.pendingInvitationCount != null &&
+            result.pendingInvitationCount > 0
+          ) {
+            toast.message("You have pending invitations", {
+              description: `Open Invitations in the sidebar (${result.pendingInvitationCount}).`,
+            });
+          }
           // Full navigation so the browser reliably sends new session cookies (router.push can feel like “nothing happened”).
           const path =
             result.path.startsWith("/") && !result.path.startsWith("//")

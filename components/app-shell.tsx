@@ -6,6 +6,7 @@ import { NotificationBell } from "@/components/notification-bell";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { OrgSwitcher } from "@/components/org-switcher";
 import { signOutAction } from "@/app/actions/auth";
+import { getPendingInvitationCountForNav } from "@/app/actions/invitations";
 import { getOrganizationsForUser } from "@/lib/organizations";
 import type { OrganizationWithRole, UserRow } from "@/types";
 
@@ -18,10 +19,18 @@ export async function AppShell({
   organization: OrganizationWithRole;
   profile: UserRow;
 }) {
-  const allOrgs = await getOrganizationsForUser();
+  const [allOrgs, invitationBadge] = await Promise.all([
+    getOrganizationsForUser(),
+    getPendingInvitationCountForNav(),
+  ]);
   const base = `/${organization.slug}`;
   const nav = [
-    { href: "/invitations", label: "Invitations", icon: "invitations" as const },
+    {
+      href: "/invitations",
+      label: "Invitations",
+      icon: "invitations" as const,
+      badge: invitationBadge > 0 ? invitationBadge : undefined,
+    },
     { href: `${base}/dashboard`, label: "Dashboard", icon: "dashboard" as const },
     { href: `${base}/cases`, label: "Cases", icon: "cases" as const },
     { href: `${base}/items`, label: "Items", icon: "items" as const },

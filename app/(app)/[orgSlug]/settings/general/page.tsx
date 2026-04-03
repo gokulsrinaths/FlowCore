@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GeneralSettingsForm } from "@/components/settings-general-form";
+import { buttonVariants } from "@/lib/button-variants";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
+import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
 type PageProps = { params: Promise<{ orgSlug: string }> };
@@ -34,6 +37,23 @@ export default async function GeneralSettingsPage({ params }: PageProps) {
             initialName={membership.organization.name}
             disabled={!canEdit}
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Your invitations</CardTitle>
+          <CardDescription>
+            Accept or reject workspace and case invites sent to your email.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link
+            href="/invitations"
+            className={cn(buttonVariants({ variant: "outline" }), "inline-flex")}
+          >
+            View invitations →
+          </Link>
         </CardContent>
       </Card>
     </div>

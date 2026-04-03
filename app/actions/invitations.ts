@@ -3,7 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { parseFlowcoreRpc } from "@/lib/supabase-rpc";
-import type { InvitationListRow, OrgRole, UserInvitationsGrouped } from "@/types";
+import type {
+  InvitationInboxItem,
+  InvitationListRow,
+  OrgRole,
+  UserInvitationsGrouped,
+  UserInvitationsInbox,
+} from "@/types";
 
 export type InvitationActionResult =
   | { ok: true; slug?: string }
@@ -29,6 +35,50 @@ function parseInvitationRow(row: unknown): InvitationListRow | null {
     token: String(x.token ?? ""),
     status: String(x.status ?? "invited") as InvitationListRow["status"],
   };
+}
+
+function mapListRowToInboxItem(row: InvitationListRow): InvitationInboxItem {
+  return {
+    id: row.id,
+    status: row.status,
+    case_title: row.case_title,
+    org_name: row.organization_name,
+    created_at: row.created_at,
+    token: row.token?.trim() ? row.token : undefined,
+  };
+}
+
+function mapGroupedToInbox(g: UserInvitationsGrouped): UserInvitationsInbox {
+  return {
+    pending: g.pending.map(mapListRowToInboxItem),
+    accepted: g.accepted.map(mapListRowToInboxItem),
+    rejected: g.rejected.map(mapListRowToInboxItem),
+  };
+}
+
+/** Invitations for the signed-in user’s email (via RPC); org/case names included. */
+export async function fetchUserInvitationsInboxAction(): Promise<
+  | { ok: true; invitations: UserInvitationsInbox }
+  | { ok: false; error: string }
+> {
+  const res = await fetchUserInvitationsAction();
+  if (!res.ok) return res;
+  return { ok: true, invitations: mapGroupedToInbox(res.invitations) };
+}
+
+/** Pending count (invited + registered, non-expired) for nav badge. */
+export async function getPendingInvitationCountForNav(): Promise<number> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.rpc("flowcore_count_my_pending_invitations");
+    if (error || data == null) return 0;
+    const r = parseFlowcoreRpc(data);
+    if (!r.ok) return 0;
+    const o = data as Record<string, unknown>;
+    return typeof o.count === "number" ? o.count : Number(o.count ?? 0);
+  } catch {
+    return 0;
+  }
 }
 
 function parseGroupedInvitations(data: unknown): UserInvitationsGrouped {
@@ -142,6 +192,7 @@ export async function rejectInvitationAction(
     const r = parseFlowcoreRpc(data);
     if (!r.ok) return { ok: false, error: r.error };
     revalidatePath("/invitations");
+    revalidatePath("/", "layout");
     return { ok: true };
   } catch (e) {
     return {
