@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   createFormTemplateAction,
@@ -113,12 +113,6 @@ export function FormBuilderEditor({
     );
   }, []);
 
-  const parseOptions = (text: string): string[] =>
-    text
-      .split(/\r?\n/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-
   function save() {
     const t = title.trim();
     if (!t) {
@@ -130,7 +124,12 @@ export function FormBuilderEditor({
       label: f.label.trim() || "Untitled question",
       options:
         f.type === "mcq_single" || f.type === "mcq_multi"
-          ? (f.options?.length ? f.options : ["Option 1"])
+          ? (() => {
+              const cleaned = (f.options ?? [])
+                .map((s) => s.trim())
+                .filter((s) => s.length > 0);
+              return cleaned.length > 0 ? cleaned : ["Option 1"];
+            })()
           : undefined,
     }));
 
@@ -256,7 +255,6 @@ export function FormBuilderEditor({
                 onMove={moveField}
                 onRemove={removeField}
                 onPatch={patchField}
-                parseOptions={parseOptions}
               />
             </li>
           ))}
@@ -266,29 +264,99 @@ export function FormBuilderEditor({
   );
 }
 
-function McqOptionsTextarea({
-  fieldId,
-  optionsText,
-  onCommit,
+function McqOptionsListEditor({
+  field,
+  onPatch,
 }: {
-  fieldId: string;
-  optionsText: string;
-  onCommit: (text: string) => void;
+  field: FormTemplateField;
+  onPatch: (id: string, p: Partial<FormTemplateField>) => void;
 }) {
-  const [local, setLocal] = useState(optionsText);
-  useEffect(() => {
-    setLocal(optionsText);
-  }, [fieldId, optionsText]);
+  const opts = field.options ?? [];
+  const isSingle = field.type === "mcq_single";
+
+  function updateOption(index: number, value: string) {
+    const next = [...opts];
+    next[index] = value;
+    onPatch(field.id, { options: next });
+  }
+
+  function addOption() {
+    const n = opts.length + 1;
+    onPatch(field.id, { options: [...opts, `Option ${n}`] });
+  }
+
+  function removeOption(index: number) {
+    if (opts.length <= 1) return;
+    onPatch(field.id, { options: opts.filter((_, i) => i !== index) });
+  }
+
   return (
-    <div className="space-y-2">
-      <Label htmlFor={`opt-${fieldId}`}>Options (one per line)</Label>
-      <Textarea
-        id={`opt-${fieldId}`}
-        rows={4}
-        value={local}
-        onChange={(e) => setLocal(e.target.value)}
-        onBlur={() => onCommit(local)}
-      />
+    <div className="space-y-3 rounded-lg border border-border/60 bg-muted/15 p-4">
+      <div>
+        <Label className="text-foreground">Answer choices</Label>
+        <p className="text-muted-foreground mt-1 text-xs text-pretty">
+          {isSingle
+            ? "Responders see radio buttons and must pick one."
+            : "Responders see checkboxes and can select any number."}{" "}
+          Add or remove rows as needed.
+        </p>
+      </div>
+      <ul className="space-y-2" role="list">
+        {opts.map((opt, i) => (
+          <li key={`${field.id}-choice-${i}`} className="flex items-center gap-2">
+            <span
+              className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border/80 bg-background"
+              aria-hidden
+            >
+              {isSingle ? (
+                <input
+                  type="radio"
+                  disabled
+                  tabIndex={-1}
+                  className="size-4 accent-primary"
+                  aria-hidden
+                />
+              ) : (
+                <input
+                  type="checkbox"
+                  disabled
+                  tabIndex={-1}
+                  className="size-4 rounded border-input accent-primary"
+                  aria-hidden
+                />
+              )}
+            </span>
+            <Input
+              value={opt}
+              onChange={(e) => updateOption(i, e.target.value)}
+              placeholder={`Option ${i + 1}`}
+              className="min-w-0 flex-1 touch-manipulation"
+              aria-label={`Choice ${i + 1}`}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-9 shrink-0 text-muted-foreground hover:text-destructive touch-manipulation"
+              aria-label={`Remove option ${i + 1}`}
+              onClick={() => removeOption(i)}
+              disabled={opts.length <= 1}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </li>
+        ))}
+      </ul>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="touch-manipulation"
+        onClick={addOption}
+      >
+        <Plus className="size-4 mr-1" />
+        Add option
+      </Button>
     </div>
   );
 }
@@ -301,7 +369,6 @@ function FieldCard({
   onMove,
   onRemove,
   onPatch,
-  parseOptions,
 }: {
   field: FormTemplateField;
   index: number;
@@ -310,13 +377,7 @@ function FieldCard({
   onMove: (i: number, d: number) => void;
   onRemove: (id: string) => void;
   onPatch: (id: string, p: Partial<FormTemplateField>) => void;
-  parseOptions: (t: string) => string[];
 }) {
-  const optionsText = useMemo(
-    () => (field.options ?? []).join("\n"),
-    [field.options]
-  );
-
   const needsValue = useMemo(() => {
     const op = field.showWhen?.operator;
     return op !== "is_empty" && op !== "is_not_empty";
@@ -423,11 +484,7 @@ function FieldCard({
           />
         </div>
         {(field.type === "mcq_single" || field.type === "mcq_multi") && (
-          <McqOptionsTextarea
-            fieldId={field.id}
-            optionsText={optionsText}
-            onCommit={(text) => onPatch(field.id, { options: parseOptions(text) })}
-          />
+          <McqOptionsListEditor field={field} onPatch={onPatch} />
         )}
 
         <div className="rounded-lg border border-border/60 bg-muted/20 p-4 space-y-3">

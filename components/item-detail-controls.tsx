@@ -24,6 +24,7 @@ import {
   allowedNextStatuses,
   canAssign,
   canChangeStatus,
+  canOverrideQuestionnaireDrivenStatus,
   orgRoleToWorkflowRole,
   STATUS_LABELS,
   STATUS_ORDER,
@@ -81,9 +82,18 @@ export function ItemDetailControls({
   const wf = orgRoleToWorkflowRole(orgRole);
   const assignOk = canAssign(orgRole);
   const externalParticipants = caseParticipants.filter((p) => p.type === "external");
+  const questionnaireStatusLocked =
+    (item.itemQuestionnaires?.length ?? 0) > 0 &&
+    !canOverrideQuestionnaireDrivenStatus(orgRole);
 
   function onStatus(next: ItemStatus) {
     if (next === item.status) return;
+    if (questionnaireStatusLocked) {
+      toast.error(
+        "This item’s status follows the questionnaire workflow. Owners and admins can still change it."
+      );
+      return;
+    }
     if (!canChangeStatus(wf, item.status, next)) {
       toast.error("You cannot move this item to that stage");
       return;
@@ -180,7 +190,7 @@ export function ItemDetailControls({
           onValueChange={(v) => {
             if (v) onStatus(v as ItemStatus);
           }}
-          disabled={pending}
+          disabled={pending || questionnaireStatusLocked}
         >
           <SelectTrigger>
             <SelectValue />
@@ -197,6 +207,12 @@ export function ItemDetailControls({
             ))}
           </SelectContent>
         </Select>
+        {questionnaireStatusLocked ? (
+          <p className="text-xs text-muted-foreground">
+            Status is synced from item questionnaires until they finish. Workspace owners and
+            admins can override.
+          </p>
+        ) : null}
       </div>
       <div className="space-y-2">
         <Label>Assigned to</Label>

@@ -4,6 +4,7 @@ import type {
   ActivityLogWithUser,
   CaseParticipant,
   CommentWithUser,
+  ItemQuestionnairePreview,
   ItemStatus,
   ItemRow,
   ItemWithUsers,
@@ -121,7 +122,7 @@ export async function fetchItemsWithUsers(
   ];
   const partMap = await fetchParticipantRowsByIds(organizationId, partIds);
 
-  return itemRows.map((item) => {
+  const withUsers = itemRows.map((item) => {
     const row = item as ItemWithUsers;
     const assigneeParticipant = row.assigned_participant_id
       ? assigneeParticipantFromRow(
@@ -141,6 +142,50 @@ export async function fetchItemsWithUsers(
       creator: row.created_by ? map.get(row.created_by) ?? null : null,
     };
   });
+
+  return attachItemQuestionnairePreviews(supabase, organizationId, withUsers);
+}
+
+async function attachItemQuestionnairePreviews(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  organizationId: string,
+  items: ItemWithUsers[]
+): Promise<ItemWithUsers[]> {
+  if (items.length === 0) return items;
+  const ids = items.map((i) => i.id);
+  const { data: rows, error } = await supabase
+    .from("item_questionnaires")
+    .select("id,item_id,question_text,status,sort_order")
+    .eq("organization_id", organizationId)
+    .in("item_id", ids)
+    .order("sort_order", { ascending: true });
+
+  if (error || !rows?.length) {
+    return items.map((i) => ({ ...i, itemQuestionnaires: [] }));
+  }
+
+  const byItem = new Map<string, ItemQuestionnairePreview[]>();
+  for (const r of rows as {
+    id: string;
+    item_id: string;
+    question_text: string;
+    status: string;
+    sort_order: number;
+  }[]) {
+    const list = byItem.get(r.item_id) ?? [];
+    list.push({
+      id: r.id,
+      item_id: r.item_id,
+      question_text: r.question_text,
+      status: r.status as ItemQuestionnairePreview["status"],
+    });
+    byItem.set(r.item_id, list);
+  }
+
+  return items.map((i) => ({
+    ...i,
+    itemQuestionnaires: byItem.get(i.id) ?? [],
+  }));
 }
 
 export async function fetchItemById(
@@ -171,12 +216,15 @@ export async function fetchItemById(
     }
   }
 
-  return {
+  const one: ItemWithUsers = {
     ...row,
     assignee: row.assigned_to ? map.get(row.assigned_to) ?? null : null,
     assigneeParticipant,
     creator: row.created_by ? map.get(row.created_by) ?? null : null,
   };
+
+  const [withQ] = await attachItemQuestionnairePreviews(supabase, organizationId, [one]);
+  return withQ ?? one;
 }
 
 export async function fetchCaseParticipants(

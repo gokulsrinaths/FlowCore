@@ -41,6 +41,9 @@ export function OnboardingForm() {
       <div className="space-y-2">
         <Label htmlFor="name">Workspace name</Label>
         <Input id="name" name="name" required placeholder="Acme Ops" />
+        <p className="text-xs text-muted-foreground">
+          You will become the workspace owner and can invite teammates from settings.
+        </p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="slug">Workspace URL</Label>

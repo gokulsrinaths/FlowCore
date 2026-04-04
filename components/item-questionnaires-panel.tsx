@@ -1,0 +1,261 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import {
+  createItemQuestionnaireAction,
+  deleteItemQuestionnaireAction,
+  reviewItemQuestionnaireAction,
+} from "@/app/actions/item-questionnaires";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  canCreateItemQuestionnaire,
+  canManageItemQuestionnaires,
+  ITEM_QUESTIONNAIRE_STATUS_LABELS,
+} from "@/lib/permissions";
+import type { ItemQuestionnaireRow, ItemWithUsers, OrgRole, UserRow } from "@/types";
+
+function assigneeLabel(users: UserRow[], userId: string): string {
+  const u = users.find((x) => x.id === userId);
+  return u?.name ?? u?.email ?? userId;
+}
+
+export function ItemQuestionnairesPanel({
+  rows,
+  users,
+  organizationId,
+  orgSlug,
+  item,
+  orgRole,
+  currentUserId,
+}: {
+  rows: ItemQuestionnaireRow[];
+  users: UserRow[];
+  organizationId: string;
+  orgSlug: string;
+  item: ItemWithUsers;
+  orgRole: OrgRole;
+  currentUserId: string;
+}) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [questionText, setQuestionText] = useState("");
+  const [description, setDescription] = useState("");
+  const [assignTo, setAssignTo] = useState(users[0]?.id ?? "");
+
+  const canCreate = canCreateItemQuestionnaire(
+    orgRole,
+    { created_by: item.created_by, assigned_to: item.assigned_to },
+    currentUserId
+  );
+  const canManage = canManageItemQuestionnaires(orgRole);
+  const caseId = item.case_id ?? null;
+
+  return (
+    <div className="space-y-6">
+      {canCreate && users.length > 0 ? (
+        <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4">
+          <h3 className="text-sm font-medium">Add questionnaire</h3>
+          <p className="text-xs text-muted-foreground">
+            Assign a question to a teammate. They accept it, answer, and a manager or admin
+            reviews before the item can complete.
+          </p>
+          <div className="space-y-2">
+            <Label htmlFor="nq-text">Question</Label>
+            <Textarea
+              id="nq-text"
+              value={questionText}
+              onChange={(e) => setQuestionText(e.target.value)}
+              placeholder="What do you need answered?"
+              disabled={pending}
+              className="min-h-[72px]"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="nq-desc">Details (optional)</Label>
+            <Input
+              id="nq-desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Context or links"
+              disabled={pending}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Assign to</Label>
+            <Select
+              value={assignTo}
+              onValueChange={(v) => {
+                if (v) setAssignTo(v);
+              }}
+              disabled={pending}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Member" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name ?? u.email ?? u.id}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            disabled={pending || !assignTo}
+            onClick={() => {
+              const q = questionText.trim();
+              if (!q) {
+                toast.error("Question text is required");
+                return;
+              }
+              start(async () => {
+                const res = await createItemQuestionnaireAction(
+                  organizationId,
+                  orgSlug,
+                  item.id,
+                  q,
+                  description.trim(),
+                  assignTo,
+                  caseId
+                );
+                if (res.ok) {
+                  toast.success("Questionnaire added");
+                  setQuestionText("");
+                  setDescription("");
+                  router.refresh();
+                } else toast.error(res.error);
+              });
+            }}
+          >
+            Add questionnaire
+          </Button>
+        </div>
+      ) : null}
+
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No questionnaires on this item yet.</p>
+      ) : (
+        <ul className="space-y-4">
+          {rows.map((row) => (
+            <li
+              key={row.id}
+              className="rounded-lg border border-border/70 p-3 space-y-2 text-sm"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-medium">{row.question_text}</span>
+                <Badge variant="outline">{ITEM_QUESTIONNAIRE_STATUS_LABELS[row.status]}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Assigned to {assigneeLabel(users, row.assigned_to_user_id)}
+              </p>
+              {row.description ? (
+                <p className="text-muted-foreground whitespace-pre-wrap">{row.description}</p>
+              ) : null}
+              {row.answer_text ? (
+                <div className="rounded-md bg-muted/50 p-2 text-xs whitespace-pre-wrap">
+                  {row.answer_text}
+                </div>
+              ) : null}
+
+              {canManage && row.status === "under_review" ? (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="default"
+                    disabled={pending}
+                    onClick={() => {
+                      start(async () => {
+                        const res = await reviewItemQuestionnaireAction(
+                          organizationId,
+                          orgSlug,
+                          row.id,
+                          item.id,
+                          true,
+                          caseId
+                        );
+                        if (res.ok) {
+                          toast.success("Approved");
+                          router.refresh();
+                        } else toast.error(res.error);
+                      });
+                    }}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    disabled={pending}
+                    onClick={() => {
+                      start(async () => {
+                        const res = await reviewItemQuestionnaireAction(
+                          organizationId,
+                          orgSlug,
+                          row.id,
+                          item.id,
+                          false,
+                          caseId
+                        );
+                        if (res.ok) {
+                          toast.success("Sent back for revision");
+                          router.refresh();
+                        } else toast.error(res.error);
+                      });
+                    }}
+                  >
+                    Send back
+                  </Button>
+                </div>
+              ) : null}
+
+              {canManage ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                  disabled={pending}
+                  onClick={() => {
+                    start(async () => {
+                      const res = await deleteItemQuestionnaireAction(
+                        organizationId,
+                        orgSlug,
+                        row.id,
+                        item.id,
+                        caseId
+                      );
+                      if (res.ok) {
+                        toast.success("Removed");
+                        router.refresh();
+                      } else toast.error(res.error);
+                    });
+                  }}
+                >
+                  Remove
+                </Button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

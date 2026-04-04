@@ -3,6 +3,7 @@ import { CommentSection } from "@/components/comment-section";
 import { ItemCaseLink } from "@/components/item-case-link";
 import { ItemDetailActions } from "@/components/item-detail-actions";
 import { ItemDetailControls } from "@/components/item-detail-controls";
+import { ItemQuestionnairesPanel } from "@/components/item-questionnaires-panel";
 import { PageBackLink } from "@/components/page-back-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -15,6 +16,7 @@ import {
   fetchItemById,
   fetchUsersForOrg,
 } from "@/lib/db";
+import { fetchItemQuestionnaires } from "@/lib/item-questionnaires";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
 import { canDeleteItem, canEditItem, STATUS_LABELS } from "@/lib/permissions";
 import Link from "next/link";
@@ -31,12 +33,13 @@ export default async function ItemDetailPage({ params }: PageProps) {
   const orgId = membership.organization.id;
   const orgRole = membership.organization.role;
 
-  const [item, users, logs, comments, cases] = await Promise.all([
+  const [item, users, logs, comments, cases, questionnaires] = await Promise.all([
     fetchItemById(orgId, id),
     fetchUsersForOrg(orgId),
     fetchActivityForItem(orgId, id),
     fetchCommentsForItem(orgId, id),
     fetchCasesForOrg(orgId),
+    fetchItemQuestionnaires(orgId, id),
   ]);
 
   if (!item) {
@@ -92,6 +95,23 @@ export default async function ItemDetailPage({ params }: PageProps) {
             organizationId={orgId}
             orgSlug={orgSlug}
             canEditDueDate={canEdit}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Questionnaires</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ItemQuestionnairesPanel
+            rows={questionnaires}
+            users={users}
+            organizationId={orgId}
+            orgSlug={orgSlug}
+            item={item}
+            orgRole={orgRole}
+            currentUserId={profile.id}
           />
         </CardContent>
       </Card>

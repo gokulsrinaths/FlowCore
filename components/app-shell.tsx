@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationBell } from "@/components/notification-bell";
 import { signOutAction } from "@/app/actions/auth";
+import { getActionableQuestionnaireCountForNav } from "@/app/actions/item-questionnaires";
 import { getPendingInvitationCountForNav } from "@/app/actions/invitations";
 import { getOrganizationsForUser } from "@/lib/organizations";
 import type { OrganizationWithRole, UserRow } from "@/types";
@@ -18,9 +19,10 @@ export async function AppShell({
   organization: OrganizationWithRole;
   profile: UserRow;
 }) {
-  const [allOrgs, invitationBadge] = await Promise.all([
+  const [allOrgs, invitationBadge, questionnaireBadge] = await Promise.all([
     getOrganizationsForUser(),
     getPendingInvitationCountForNav(),
+    getActionableQuestionnaireCountForNav(organization.id),
   ]);
   const base = `/${organization.slug}`;
   const nav = [
@@ -29,6 +31,12 @@ export async function AppShell({
       label: "Invitations",
       icon: "invitations" as const,
       badge: invitationBadge > 0 ? invitationBadge : undefined,
+    },
+    {
+      href: `${base}/questionnaires`,
+      label: "Questionnaires",
+      icon: "questionnaires" as const,
+      badge: questionnaireBadge > 0 ? questionnaireBadge : undefined,
     },
     { href: `${base}/dashboard`, label: "Dashboard", icon: "dashboard" as const },
     { href: `${base}/search`, label: "Search", icon: "search" as const },

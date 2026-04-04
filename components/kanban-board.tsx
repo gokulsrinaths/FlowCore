@@ -27,6 +27,7 @@ import {
 import {
   allowedNextStatuses,
   canChangeStatus,
+  canOverrideQuestionnaireDrivenStatus,
   orgRoleToWorkflowRole,
   STATUS_LABELS,
   STATUS_ORDER,
@@ -89,6 +90,7 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const router = useRouter();
   const wf = orgRoleToWorkflowRole(orgRole);
+  const canOverrideQ = canOverrideQuestionnaireDrivenStatus(orgRole);
   const [query, setQuery] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -149,6 +151,14 @@ export function KanbanBoard({
     if (!over) return;
     const item = items.find((i) => i.id === active.id);
     if (!item) return;
+    const qLocked =
+      (item.itemQuestionnaires?.length ?? 0) > 0 && !canOverrideQ;
+    if (qLocked) {
+      toast.error(
+        "This item follows the questionnaire workflow; only workspace owners and admins can move it on the board."
+      );
+      return;
+    }
     const next = resolveDropTarget(over.id);
     if (!next || next === item.status) return;
     if (!canChangeStatus(wf, item.status, next)) {
@@ -166,6 +176,14 @@ export function KanbanBoard({
 
   function handleSelectStatus(item: ItemWithUsers, next: ItemStatus) {
     if (next === item.status) return;
+    const qLocked =
+      (item.itemQuestionnaires?.length ?? 0) > 0 && !canOverrideQ;
+    if (qLocked) {
+      toast.error(
+        "Status is driven by questionnaires until they complete (owners/admins can override)."
+      );
+      return;
+    }
     if (!canChangeStatus(wf, item.status, next)) {
       toast.error("You cannot move this item to that stage");
       return;
@@ -256,15 +274,21 @@ export function KanbanBoard({
               )}
               {grouped[status].map((item) => {
                 const options = allowedNextStatuses(wf, item.status);
+                const qLocked =
+                  (item.itemQuestionnaires?.length ?? 0) > 0 && !canOverrideQ;
                 return (
                   <div key={item.id} className="space-y-2">
-                    <ItemCard item={item} orgSlug={orgSlug} />
+                    <ItemCard
+                      item={item}
+                      orgSlug={orgSlug}
+                      dragDisabled={qLocked}
+                    />
                     <Select
                       value={item.status}
                       onValueChange={(v) => {
                         if (v) handleSelectStatus(item, v as ItemStatus);
                       }}
-                      disabled={isPending}
+                      disabled={isPending || qLocked}
                     >
                       <SelectTrigger
                         size="sm"

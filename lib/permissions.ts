@@ -1,4 +1,4 @@
-import type { ItemStatus, OrgRole, UserRole } from "@/types";
+import type { ItemQuestionnaireStatus, ItemStatus, OrgRole, UserRole } from "@/types";
 
 /** Ordered workflow columns for UI and validation */
 export const STATUS_ORDER: ItemStatus[] = [
@@ -114,3 +114,34 @@ export function canInvite(orgRole: OrgRole): boolean {
 export function canDeleteCase(orgRole: OrgRole): boolean {
   return orgRole === "org_owner" || orgRole === "org_admin";
 }
+
+/** Workflow "admin" only — can override Kanban when questionnaires drive status (migration 031). */
+export function canOverrideQuestionnaireDrivenStatus(orgRole: OrgRole): boolean {
+  return orgRole === "org_owner" || orgRole === "org_admin";
+}
+
+/** Delete questionnaires and run manager review (RPC allows admin + manager). */
+export function canManageItemQuestionnaires(orgRole: OrgRole): boolean {
+  return (
+    orgRole === "org_owner" ||
+    orgRole === "org_admin" ||
+    orgRole === "org_manager"
+  );
+}
+
+export function canCreateItemQuestionnaire(
+  orgRole: OrgRole,
+  item: { created_by: string | null; assigned_to: string | null },
+  userId: string
+): boolean {
+  if (canManageItemQuestionnaires(orgRole)) return true;
+  return item.created_by === userId || item.assigned_to === userId;
+}
+
+export const ITEM_QUESTIONNAIRE_STATUS_LABELS: Record<ItemQuestionnaireStatus, string> =
+  {
+    pending_accept: "Needs accept",
+    in_progress: "In progress",
+    under_review: "Under review",
+    completed: "Completed",
+  };

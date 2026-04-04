@@ -111,46 +111,48 @@ export function FormFillView({ organizationId, orgSlug, form, caseId }: Props) {
                   />
                 )}
                 {field.type === "mcq_single" && (
-                  <div className="space-y-2">
-                    {(field.options ?? []).map((opt) => (
+                  <fieldset className="m-0 space-y-2 border-0 p-0">
+                    <legend className="sr-only">{field.label || "Choose one"}</legend>
+                    {(field.options ?? []).map((opt, i) => (
                       <label
-                        key={opt}
-                        className="flex cursor-pointer items-center gap-2 text-sm touch-manipulation"
+                        key={`${field.id}-mcq-${i}`}
+                        className="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent px-2 py-2 text-sm leading-snug touch-manipulation hover:bg-muted/40 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-1 has-[:focus-visible]:ring-ring"
                       >
                         <input
                           type="radio"
                           name={field.id}
-                          className="size-4"
+                          className="mt-0.5 size-4 shrink-0 accent-primary"
                           checked={answers[field.id] === opt}
                           onChange={() => setAnswer(field.id, opt)}
                         />
-                        {opt}
+                        <span className="min-w-0 flex-1">{opt}</span>
                       </label>
                     ))}
-                  </div>
+                  </fieldset>
                 )}
                 {field.type === "mcq_multi" && (
-                  <div className="space-y-2">
-                    {(field.options ?? []).map((opt) => {
+                  <fieldset className="m-0 space-y-2 border-0 p-0">
+                    <legend className="sr-only">{field.label || "Choose any"}</legend>
+                    {(field.options ?? []).map((opt, i) => {
                       const selected = Array.isArray(answers[field.id])
                         ? (answers[field.id] as string[]).includes(opt)
                         : false;
                       return (
                         <label
-                          key={opt}
-                          className="flex cursor-pointer items-center gap-2 text-sm touch-manipulation"
+                          key={`${field.id}-multi-${i}`}
+                          className="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent px-2 py-2 text-sm leading-snug touch-manipulation hover:bg-muted/40 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-1 has-[:focus-visible]:ring-ring"
                         >
                           <input
                             type="checkbox"
-                            className="size-4 rounded border-input"
+                            className="mt-0.5 size-4 shrink-0 rounded border-input accent-primary"
                             checked={selected}
                             onChange={(e) => toggleMulti(field.id, opt, e.target.checked)}
                           />
-                          {opt}
+                          <span className="min-w-0 flex-1">{opt}</span>
                         </label>
                       );
                     })}
-                  </div>
+                  </fieldset>
                 )}
               </CardContent>
             </Card>

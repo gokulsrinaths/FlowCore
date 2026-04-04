@@ -189,6 +189,47 @@ export type CaseParticipant = {
   invite_token?: string | null;
 };
 
+/** Per-item questionnaire assigned to a workspace member (migration 031). */
+export type ItemQuestionnaireStatus =
+  | "pending_accept"
+  | "in_progress"
+  | "under_review"
+  | "completed";
+
+export type ItemQuestionnairePreview = {
+  id: string;
+  item_id: string;
+  question_text: string;
+  status: ItemQuestionnaireStatus;
+};
+
+export type ItemQuestionnaireRow = ItemQuestionnairePreview & {
+  description: string | null;
+  assigned_to_user_id: string;
+  sort_order: number;
+  answer_text: string | null;
+  accepted_at: string | null;
+  submitted_at: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MyItemQuestionnaireRow = {
+  id: string;
+  item_id: string;
+  item_title: string;
+  case_id: string | null;
+  question_text: string;
+  description: string | null;
+  status: ItemQuestionnaireStatus;
+  answer_text: string | null;
+  accepted_at: string | null;
+  submitted_at: string | null;
+  updated_at: string;
+};
+
 /** Item with joined assignee/creator names for UI */
 export type ItemWithUsers = ItemRow & {
   assignee?: Pick<UserRow, "id" | "name" | "email"> | null;
@@ -199,6 +240,8 @@ export type ItemWithUsers = ItemRow & {
     email: string | null;
   } | null;
   creator?: Pick<UserRow, "id" | "name" | "email"> | null;
+  /** Questionnaires on this item (batch-loaded for board + detail). */
+  itemQuestionnaires?: ItemQuestionnairePreview[];
 };
 
 export type ActivityLogRow = {
