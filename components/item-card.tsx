@@ -40,7 +40,7 @@ export function ItemCard({ item, orgSlug, dragDisabled = false }: ItemCardProps)
     "Unassigned";
 
   const q = item.itemQuestionnaires ?? [];
-  const showQPreview = q.length > 0 && item.status === "created";
+  const showQPreview = q.length > 0 && item.status !== "completed";
 
   return (
     <div ref={setNodeRef} style={style} className={cn(isDragging && "z-10")}>

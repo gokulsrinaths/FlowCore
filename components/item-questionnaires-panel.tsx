@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   createItemQuestionnaireAction,
@@ -53,7 +53,18 @@ export function ItemQuestionnairesPanel({
   const [pending, start] = useTransition();
   const [questionText, setQuestionText] = useState("");
   const [description, setDescription] = useState("");
-  const [assignTo, setAssignTo] = useState(users[0]?.id ?? "");
+  const teammates = useMemo(
+    () => users.filter((u) => u.id !== currentUserId),
+    [users, currentUserId]
+  );
+  const [assignTo, setAssignTo] = useState("");
+
+  useEffect(() => {
+    setAssignTo((prev) => {
+      if (prev && teammates.some((t) => t.id === prev)) return prev;
+      return teammates[0]?.id ?? "";
+    });
+  }, [teammates]);
 
   const canCreate = canCreateItemQuestionnaire(
     orgRole,
@@ -65,12 +76,20 @@ export function ItemQuestionnairesPanel({
 
   return (
     <div className="space-y-6">
-      {canCreate && users.length > 0 ? (
+      {canCreate && teammates.length === 0 ? (
+        <p className="text-sm text-muted-foreground rounded-lg border border-dashed border-border/80 p-4">
+          Add other people to this workspace under Team settings so you can assign questionnaires
+          to them. You cannot assign a questionnaire to yourself.
+        </p>
+      ) : null}
+
+      {canCreate && teammates.length > 0 ? (
         <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4">
           <h3 className="text-sm font-medium">Add questionnaire</h3>
           <p className="text-xs text-muted-foreground">
-            Assign a question to a teammate. They accept it, answer, and a manager or admin
-            reviews before the item can complete.
+            Pick someone on your team (not yourself). They will get a notification and see it under
+            Questionnaires. The item moves to <strong className="text-foreground">In progress</strong>{" "}
+            until all questionnaires are done and reviewed.
           </p>
           <div className="space-y-2">
             <Label htmlFor="nq-text">Question</Label>
@@ -106,7 +125,7 @@ export function ItemQuestionnairesPanel({
                 <SelectValue placeholder="Member" />
               </SelectTrigger>
               <SelectContent>
-                {users.map((u) => (
+                {teammates.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
                     {u.name ?? u.email ?? u.id}
                   </SelectItem>
