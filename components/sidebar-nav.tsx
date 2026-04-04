@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   Mail,
   ScrollText,
-  Search,
   Settings,
   Users,
 } from "lucide-react";
@@ -19,7 +18,6 @@ import { cn } from "@/lib/utils";
 
 const ICONS = {
   dashboard: LayoutDashboard,
-  search: Search,
   forms: ClipboardList,
   cases: Briefcase,
   items: Kanban,
@@ -49,8 +47,6 @@ export function SidebarNav({
         let active = false;
         if (label === "Invitations") {
           active = pathname === "/invitations" || pathname.startsWith("/invitations/");
-        } else if (label === "Search") {
-          active = pathname.startsWith(`${base}/search`);
         } else if (label === "Forms") {
           active = pathname.startsWith(`${base}/forms`);
         } else if (label === "Questionnaires") {

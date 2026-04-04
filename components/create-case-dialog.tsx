@@ -117,8 +117,10 @@ export function CreateCaseDialog({ organizationId, orgSlug, orgUsers }: CreateCa
           <DialogHeader>
             <DialogTitle>Enter case details</DialogTitle>
             <DialogDescription>
-              Add a new case file. Optionally add workspace members to the case roster now; you can
-              change details anytime if you created the case or are on the roster.
+              Create the case file, then choose which workspace members get access to this case’s
+              information. You can change case details and add more people later from{" "}
+              <strong className="text-foreground">Edit case</strong> on the case page if you have
+              permission.
             </DialogDescription>
           </DialogHeader>
           <form action={onSubmit} className="space-y-4">
@@ -162,10 +164,11 @@ export function CreateCaseDialog({ organizationId, orgSlug, orgUsers }: CreateCa
             />
             {orgUsers.length > 0 ? (
               <div className="space-y-2 rounded-lg border border-border/70 bg-muted/20 p-3">
-                <Label className="text-sm font-medium">Case members (optional)</Label>
+                <Label className="text-sm font-medium">Who can access this case</Label>
                 <p className="text-xs text-muted-foreground">
-                  Select teammates to add to this case roster. You can add more later on the case
-                  page.
+                  Add workspace members who should be on this case roster (tasks, assignments, and
+                  case workflows). You can add more people anytime from <strong>Edit case</strong> or
+                  the Case participants section on the case page.
                 </p>
                 <ul className="max-h-40 space-y-2 overflow-y-auto pr-1">
                   {orgUsers.map((u) => (

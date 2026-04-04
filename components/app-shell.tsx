@@ -1,8 +1,7 @@
-import { LogOut, Search } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { AppChrome } from "@/components/app-chrome";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { NotificationBell } from "@/components/notification-bell";
 import { signOutAction } from "@/app/actions/auth";
 import { getActionableQuestionnaireCountForNav } from "@/app/actions/item-questionnaires";
@@ -39,7 +38,6 @@ export async function AppShell({
       badge: questionnaireBadge > 0 ? questionnaireBadge : undefined,
     },
     { href: `${base}/dashboard`, label: "Dashboard", icon: "dashboard" as const },
-    { href: `${base}/search`, label: "Search", icon: "search" as const },
     { href: `${base}/cases`, label: "Cases", icon: "cases" as const },
     { href: `${base}/forms`, label: "Forms", icon: "forms" as const },
     { href: `${base}/items`, label: "Items", icon: "items" as const },
@@ -57,25 +55,8 @@ export async function AppShell({
       base={base}
     >
       <header className="sticky top-12 z-40 border-b border-border/80 bg-card/30 backdrop-blur-sm md:top-0">
-        <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-3">
-          <form
-            action={`${base}/search`}
-            method="get"
-            className="min-w-0 flex-1 basis-full sm:basis-auto sm:max-w-md"
-          >
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                name="q"
-                placeholder="Search…"
-                className="bg-background/80 pl-9"
-                type="search"
-                autoComplete="off"
-                enterKeyHint="search"
-              />
-            </div>
-          </form>
-          <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Link
               href="/help"
               className="inline-flex min-h-9 shrink-0 items-center rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"

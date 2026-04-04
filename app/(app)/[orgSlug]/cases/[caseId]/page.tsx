@@ -108,7 +108,13 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
             defaultCaseId={caseId}
           />
           {canEditCase ? (
-            <EditCaseDialog organizationId={orgId} orgSlug={orgSlug} caseRow={caseRow} />
+            <EditCaseDialog
+              organizationId={orgId}
+              orgSlug={orgSlug}
+              caseRow={caseRow}
+              orgUsers={users}
+              participants={participants}
+            />
           ) : null}
           {showDelete && (
             <DeleteCaseButton

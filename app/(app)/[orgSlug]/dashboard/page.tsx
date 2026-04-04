@@ -82,15 +82,6 @@ async function Stats({
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Link
-            href={`${base}/search`}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "w-full justify-center sm:w-auto"
-            )}
-          >
-            Search
-          </Link>
-          <Link
             href={`${base}/cases`}
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
