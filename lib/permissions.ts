@@ -114,6 +114,24 @@ export function canAdministerWorkspaceRecords(orgRole: OrgRole): boolean {
   return orgRole === "org_owner" || orgRole === "org_admin";
 }
 
+/**
+ * Edit case metadata (matches migration 034 flowcore_update_case).
+ */
+export function canEditCaseDetails(
+  orgRole: OrgRole,
+  caseRow: { created_by: string | null },
+  userId: string,
+  isInternalCaseParticipant: boolean
+): boolean {
+  if (orgRole === "org_owner" || orgRole === "org_admin" || orgRole === "org_manager") {
+    return true;
+  }
+  if (caseRow.created_by != null && caseRow.created_by === userId) {
+    return true;
+  }
+  return isInternalCaseParticipant;
+}
+
 export function canInvite(orgRole: OrgRole): boolean {
   return orgRole === "org_owner" || orgRole === "org_admin";
 }

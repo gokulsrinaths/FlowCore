@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { fetchCasesForOrg } from "@/lib/cases";
+import { fetchUsersForOrg } from "@/lib/db";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -29,7 +30,10 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
   if (!membership) notFound();
 
   const orgId = membership.organization.id;
-  const cases = await fetchCasesForOrg(orgId);
+  const [cases, orgUsers] = await Promise.all([
+    fetchCasesForOrg(orgId),
+    fetchUsersForOrg(orgId),
+  ]);
 
   return (
     <>
@@ -41,7 +45,7 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
             Domain cases — tasks stay generic and link here when needed.
           </p>
         </div>
-        <CreateCaseDialog organizationId={orgId} orgSlug={orgSlug} />
+        <CreateCaseDialog organizationId={orgId} orgSlug={orgSlug} orgUsers={orgUsers} />
       </div>
 
       {cases.length === 0 ? (

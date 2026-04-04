@@ -21,7 +21,7 @@ import { PageBackLink } from "@/components/page-back-link";
 import { fetchCaseById, fetchCasesForOrg } from "@/lib/cases";
 import { fetchCaseQuestions } from "@/lib/case-questions";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
-import { canAdministerWorkspaceRecords, canDeleteCase } from "@/lib/permissions";
+import { canDeleteCase, canEditCaseDetails } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -68,7 +68,10 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
 
   const caseOptions = allCases.map((c) => ({ id: c.id, title: c.title }));
   const showDelete = canDeleteCase(orgRole);
-  const canEditCase = canAdministerWorkspaceRecords(orgRole);
+  const isInternalCaseParticipant = participants.some(
+    (p) => p.type === "internal" && p.user_id === profile.id
+  );
+  const canEditCase = canEditCaseDetails(orgRole, caseRow, profile.id, isInternalCaseParticipant);
 
   return (
     <div className="space-y-10 max-w-6xl">

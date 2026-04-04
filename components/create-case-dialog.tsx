@@ -1,9 +1,11 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createCaseAction } from "@/app/actions/cases";
+import { addCaseParticipantAction } from "@/app/actions/participants";
 import { AccusedDetailsFields } from "@/components/accused-details-fields";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +27,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CASE_STATUS_LABELS } from "@/lib/case-labels";
-import type { CaseStatus } from "@/types";
+import type { CaseStatus, UserRow } from "@/types";
+import { cn } from "@/lib/utils";
 
 const STATUSES: CaseStatus[] = [
   "open",
@@ -37,22 +40,59 @@ const STATUSES: CaseStatus[] = [
 type CreateCaseDialogProps = {
   organizationId: string;
   orgSlug: string;
+  orgUsers: UserRow[];
 };
 
-export function CreateCaseDialog({ organizationId, orgSlug }: CreateCaseDialogProps) {
+export function CreateCaseDialog({ organizationId, orgSlug, orgUsers }: CreateCaseDialogProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<CaseStatus>("open");
+  const [memberIds, setMemberIds] = useState<Set<string>>(new Set());
+  const [submitting, setSubmitting] = useState(false);
+
+  function toggleMember(userId: string) {
+    setMemberIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  }
 
   async function onSubmit(formData: FormData) {
     formData.set("organization_id", organizationId);
     formData.set("org_slug", orgSlug);
     formData.set("status", status);
-    const res = await createCaseAction(formData);
-    if (res.ok) {
-      toast.success("Case created");
+    setSubmitting(true);
+    try {
+      const res = await createCaseAction(formData);
+      if (!res.ok || !res.id) {
+        toast.error(
+          res.ok ? "Case created but no id returned" : (res.error ?? "Could not create case")
+        );
+        return;
+      }
+      const caseId = res.id;
+      for (const uid of memberIds) {
+        const add = await addCaseParticipantAction(organizationId, orgSlug, caseId, {
+          userId: uid,
+        });
+        if (!add.ok) {
+          toast.error(add.error ?? "Could not add a case member");
+          router.push(`/${orgSlug}/cases/${caseId}`);
+          router.refresh();
+          setOpen(false);
+          setMemberIds(new Set());
+          return;
+        }
+      }
+      toast.success(memberIds.size > 0 ? "Case created with members" : "Case created");
+      router.push(`/${orgSlug}/cases/${caseId}`);
+      router.refresh();
       setOpen(false);
-    } else {
-      toast.error(res.error ?? "Could not create case");
+      setMemberIds(new Set());
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -66,12 +106,19 @@ export function CreateCaseDialog({ organizationId, orgSlug }: CreateCaseDialogPr
         <Plus className="size-4" />
         New case
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (!v) setMemberIds(new Set());
+        }}
+      >
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Enter case details</DialogTitle>
             <DialogDescription>
-              Add a new case file. Tasks can be linked after the case is created.
+              Add a new case file. Optionally add workspace members to the case roster now; you can
+              change details anytime if you created the case or are on the roster.
             </DialogDescription>
           </DialogHeader>
           <form action={onSubmit} className="space-y-4">
@@ -113,6 +160,35 @@ export function CreateCaseDialog({ organizationId, orgSlug }: CreateCaseDialogPr
               key={open ? "case-form-open" : "case-form-closed"}
               initialEntries={[""]}
             />
+            {orgUsers.length > 0 ? (
+              <div className="space-y-2 rounded-lg border border-border/70 bg-muted/20 p-3">
+                <Label className="text-sm font-medium">Case members (optional)</Label>
+                <p className="text-xs text-muted-foreground">
+                  Select teammates to add to this case roster. You can add more later on the case
+                  page.
+                </p>
+                <ul className="max-h-40 space-y-2 overflow-y-auto pr-1">
+                  {orgUsers.map((u) => (
+                    <li key={u.id}>
+                      <label
+                        className={cn(
+                          "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted/80"
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={memberIds.has(u.id)}
+                          onChange={() => toggleMember(u.id)}
+                          className="size-4 shrink-0 rounded border-input"
+                        />
+                        <span>{u.name ?? u.email ?? u.id}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="financial_impact">Defrauded amount</Label>
@@ -144,7 +220,9 @@ export function CreateCaseDialog({ organizationId, orgSlug }: CreateCaseDialogPr
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit">Create case</Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "Creating…" : "Create case"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
