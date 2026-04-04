@@ -1,7 +1,8 @@
 import { FormBuilderEditor } from "@/components/form-builder-editor";
 import { PageBackLink } from "@/components/page-back-link";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
-import { notFound } from "next/navigation";
+import { canAdministerWorkspaceRecords } from "@/lib/permissions";
+import { notFound, redirect } from "next/navigation";
 
 type PageProps = { params: Promise<{ orgSlug: string }> };
 
@@ -9,6 +10,10 @@ export default async function NewFormPage({ params }: PageProps) {
   const { orgSlug } = await params;
   const membership = await getOrgMembershipBySlug(orgSlug);
   if (!membership) notFound();
+
+  if (!canAdministerWorkspaceRecords(membership.organization.role)) {
+    redirect(`/${orgSlug}/forms`);
+  }
 
   const orgId = membership.organization.id;
 

@@ -18,10 +18,11 @@ import {
 import { fetchFormSubmissions, fetchFormTemplateById } from "@/lib/forms";
 import { sortedFormFields } from "@/lib/form-template-logic";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
+import { canAdministerWorkspaceRecords } from "@/lib/permissions";
 import { buttonVariants } from "@/lib/button-variants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 type PageProps = { params: Promise<{ orgSlug: string; formId: string }> };
 
@@ -29,6 +30,10 @@ export default async function FormDetailPage({ params }: PageProps) {
   const { orgSlug, formId } = await params;
   const membership = await getOrgMembershipBySlug(orgSlug);
   if (!membership) notFound();
+
+  if (!canAdministerWorkspaceRecords(membership.organization.role)) {
+    redirect(`/${orgSlug}/forms/${formId}/fill`);
+  }
 
   const orgId = membership.organization.id;
   const [form, submissions] = await Promise.all([

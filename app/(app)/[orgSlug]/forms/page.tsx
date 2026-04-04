@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { fetchFormTemplates } from "@/lib/forms";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
+import { canAdministerWorkspaceRecords } from "@/lib/permissions";
 import { buttonVariants } from "@/lib/button-variants";
 import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
@@ -30,6 +31,7 @@ export default async function FormsListPage({ params }: PageProps) {
 
   const forms = await fetchFormTemplates(membership.organization.id);
   const base = `/${orgSlug}/forms`;
+  const canEditForms = canAdministerWorkspaceRecords(membership.organization.role);
 
   return (
     <div className="space-y-8">
@@ -40,14 +42,22 @@ export default async function FormsListPage({ params }: PageProps) {
           <p className="text-muted-foreground text-sm mt-1 text-pretty max-w-xl">
             Build forms with short answers, paragraphs, multiple choice, and conditional follow-up
             questions—similar to Google Forms. Responses are stored per workspace.
+            {!canEditForms ? (
+              <span className="block mt-2 text-amber-700 dark:text-amber-500/90">
+                Only workspace owners and admins can create or edit form structure; everyone can
+                fill out forms.
+              </span>
+            ) : null}
           </p>
         </div>
-        <Link
-          href={`${base}/new`}
-          className={cn(buttonVariants(), "w-full justify-center sm:w-auto touch-manipulation")}
-        >
-          New form
-        </Link>
+        {canEditForms ? (
+          <Link
+            href={`${base}/new`}
+            className={cn(buttonVariants(), "w-full justify-center sm:w-auto touch-manipulation")}
+          >
+            New form
+          </Link>
+        ) : null}
       </div>
 
       {forms.length === 0 ? (
@@ -59,13 +69,19 @@ export default async function FormsListPage({ params }: PageProps) {
               answers.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Link
-              href={`${base}/new`}
-              className={cn(buttonVariants(), "inline-flex touch-manipulation")}
-            >
-              Create your first form
-            </Link>
+            <CardContent>
+            {canEditForms ? (
+              <Link
+                href={`${base}/new`}
+                className={cn(buttonVariants(), "inline-flex touch-manipulation")}
+              >
+                Create your first form
+              </Link>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Ask a workspace owner or admin to create a form you can fill out.
+              </p>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -82,12 +98,22 @@ export default async function FormsListPage({ params }: PageProps) {
               {forms.map((f) => (
                 <TableRow key={f.id}>
                   <TableCell className="font-medium">
-                    <Link
-                      href={`${base}/${f.id}`}
-                      className="text-primary underline-offset-4 hover:underline"
-                    >
-                      {f.title}
-                    </Link>
+                    <div className="flex flex-col gap-1 items-start">
+                      <Link
+                        href={`${base}/${f.id}/fill`}
+                        className="text-primary underline-offset-4 hover:underline"
+                      >
+                        {f.title}
+                      </Link>
+                      {canEditForms ? (
+                        <Link
+                          href={`${base}/${f.id}`}
+                          className="text-xs text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
+                        >
+                          Edit structure
+                        </Link>
+                      ) : null}
+                    </div>
                     {f.description ? (
                       <p className="text-xs text-muted-foreground font-normal mt-1 line-clamp-2">
                         {f.description}

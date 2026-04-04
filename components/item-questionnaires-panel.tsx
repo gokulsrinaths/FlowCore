@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  canAdministerWorkspaceRecords,
   canCreateItemQuestionnaire,
   canManageItemQuestionnaires,
   ITEM_QUESTIONNAIRE_STATUS_LABELS,
@@ -53,18 +54,20 @@ export function ItemQuestionnairesPanel({
   const [pending, start] = useTransition();
   const [questionText, setQuestionText] = useState("");
   const [description, setDescription] = useState("");
+  const isWorkspaceAdmin = canAdministerWorkspaceRecords(orgRole);
   const teammates = useMemo(
     () => users.filter((u) => u.id !== currentUserId),
     [users, currentUserId]
   );
+  const assignOptions = isWorkspaceAdmin ? users : teammates;
   const [assignTo, setAssignTo] = useState("");
 
   useEffect(() => {
     setAssignTo((prev) => {
-      if (prev && teammates.some((t) => t.id === prev)) return prev;
-      return teammates[0]?.id ?? "";
+      if (prev && assignOptions.some((t) => t.id === prev)) return prev;
+      return assignOptions[0]?.id ?? "";
     });
-  }, [teammates]);
+  }, [assignOptions]);
 
   const canCreate = canCreateItemQuestionnaire(
     orgRole,
@@ -76,20 +79,25 @@ export function ItemQuestionnairesPanel({
 
   return (
     <div className="space-y-6">
-      {canCreate && teammates.length === 0 ? (
+      {canCreate && assignOptions.length === 0 ? (
         <p className="text-sm text-muted-foreground rounded-lg border border-dashed border-border/80 p-4">
-          Add other people to this workspace under Team settings so you can assign questionnaires
-          to them. You cannot assign a questionnaire to yourself.
+          {isWorkspaceAdmin
+            ? "Add people to this workspace under Team settings before assigning questionnaires."
+            : "Add other people to this workspace under Team settings so you can assign questionnaires to them. You cannot assign a questionnaire to yourself."}
         </p>
       ) : null}
 
-      {canCreate && teammates.length > 0 ? (
+      {canCreate && assignOptions.length > 0 ? (
         <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4">
           <h3 className="text-sm font-medium">Add questionnaire</h3>
           <p className="text-xs text-muted-foreground">
-            Pick someone on your team (not yourself). They will get a notification and see it under
-            Questionnaires. The item moves to <strong className="text-foreground">In progress</strong>{" "}
-            until all questionnaires are done and reviewed.
+            {isWorkspaceAdmin
+              ? "Assign to anyone on the team, including yourself if needed. Assignees get a notification (except when you assign to yourself). The item stays in "
+              : "Pick someone on your team (not yourself). They get a notification and see it under Questionnaires. The item moves to "}
+            <strong className="text-foreground">In progress</strong>
+            {isWorkspaceAdmin
+              ? " while questionnaires are open."
+              : " until all questionnaires are done and reviewed."}
           </p>
           <div className="space-y-2">
             <Label htmlFor="nq-text">Question</Label>
@@ -125,9 +133,9 @@ export function ItemQuestionnairesPanel({
                 <SelectValue placeholder="Member" />
               </SelectTrigger>
               <SelectContent>
-                {teammates.map((u) => (
+                {assignOptions.map((u) => (
                   <SelectItem key={u.id} value={u.id}>
-                    {u.name ?? u.email ?? u.id}
+                    {u.id === currentUserId ? `${u.name ?? u.email ?? u.id} (you)` : u.name ?? u.email ?? u.id}
                   </SelectItem>
                 ))}
               </SelectContent>

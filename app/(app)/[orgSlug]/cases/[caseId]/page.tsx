@@ -21,7 +21,7 @@ import { PageBackLink } from "@/components/page-back-link";
 import { fetchCaseById, fetchCasesForOrg } from "@/lib/cases";
 import { fetchCaseQuestions } from "@/lib/case-questions";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
-import { canDeleteCase } from "@/lib/permissions";
+import { canAdministerWorkspaceRecords, canDeleteCase } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -68,6 +68,7 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
 
   const caseOptions = allCases.map((c) => ({ id: c.id, title: c.title }));
   const showDelete = canDeleteCase(orgRole);
+  const canEditCase = canAdministerWorkspaceRecords(orgRole);
 
   return (
     <div className="space-y-10 max-w-6xl">
@@ -103,7 +104,9 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
             cases={caseOptions}
             defaultCaseId={caseId}
           />
-          <EditCaseDialog organizationId={orgId} orgSlug={orgSlug} caseRow={caseRow} />
+          {canEditCase ? (
+            <EditCaseDialog organizationId={orgId} orgSlug={orgSlug} caseRow={caseRow} />
+          ) : null}
           {showDelete && (
             <DeleteCaseButton
               organizationId={orgId}

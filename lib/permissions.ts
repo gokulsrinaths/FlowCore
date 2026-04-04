@@ -106,6 +106,14 @@ export function canManageTeam(orgRole: OrgRole): boolean {
   return orgRole === "org_owner" || orgRole === "org_admin";
 }
 
+/**
+ * Workspace owners and org admins — edit form templates, case records, and assign
+ * questionnaires to any member including themselves (matches migration 033 RPC checks).
+ */
+export function canAdministerWorkspaceRecords(orgRole: OrgRole): boolean {
+  return orgRole === "org_owner" || orgRole === "org_admin";
+}
+
 export function canInvite(orgRole: OrgRole): boolean {
   return orgRole === "org_owner" || orgRole === "org_admin";
 }
