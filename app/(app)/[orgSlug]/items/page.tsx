@@ -1,5 +1,6 @@
 import { CreateItemDialog } from "@/components/create-item-dialog";
 import { KanbanBoard } from "@/components/kanban-board";
+import { PageBackLink } from "@/components/page-back-link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCurrentUserProfile } from "@/lib/auth";
 import { fetchCasesForOrg } from "@/lib/cases";
@@ -75,6 +76,7 @@ export default async function ItemsPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8">
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
       <Suspense fallback={<ItemsLoading />}>
         <ItemsContent orgSlug={orgSlug} />
       </Suspense>

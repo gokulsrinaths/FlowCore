@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SettingsSubnav } from "@/components/settings-subnav";
 import { TeamMembersTable } from "@/components/team-members-table";
 import { InviteForm } from "@/components/invite-form";
 import {
@@ -31,11 +32,20 @@ export default async function TeamSettingsPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8 w-full max-w-3xl">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Team</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Members, roles, and invitations.
-        </p>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Workspace name, team, and billing.
+          </p>
+        </div>
+        <SettingsSubnav orgSlug={orgSlug} current="team" />
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Team</h2>
+          <p className="text-muted-foreground text-sm mt-1">
+            Members, roles, and invitations.
+          </p>
+        </div>
       </div>
 
       {showInvite && (

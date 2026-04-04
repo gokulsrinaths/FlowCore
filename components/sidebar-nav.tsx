@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Mail,
   ScrollText,
+  Search,
   Settings,
   Users,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 const ICONS = {
   dashboard: LayoutDashboard,
+  search: Search,
   cases: Briefcase,
   items: Kanban,
   activity: ScrollText,
@@ -43,6 +45,8 @@ export function SidebarNav({
         let active = false;
         if (label === "Invitations") {
           active = pathname === "/invitations" || pathname.startsWith("/invitations/");
+        } else if (label === "Search") {
+          active = pathname.startsWith(`${base}/search`);
         } else if (label === "Team") {
           active = pathname.startsWith(`${base}/settings/team`);
         } else if (label === "Cases") {

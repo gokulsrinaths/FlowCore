@@ -17,6 +17,7 @@ import {
 } from "@/lib/db";
 import { CaseParticipantsPanel } from "@/components/case-participants-panel";
 import { CaseQuestionsPanel } from "@/components/case-questions-panel";
+import { PageBackLink } from "@/components/page-back-link";
 import { fetchCaseById, fetchCasesForOrg } from "@/lib/cases";
 import { fetchCaseQuestions } from "@/lib/case-questions";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
@@ -70,6 +71,7 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
 
   return (
     <div className="space-y-10 max-w-6xl">
+      <PageBackLink href={`/${orgSlug}/cases`} label="Back to cases" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">

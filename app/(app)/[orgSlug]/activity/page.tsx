@@ -1,4 +1,5 @@
 import { ActivityLog } from "@/components/activity-log";
+import { PageBackLink } from "@/components/page-back-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { fetchActivityForOrg, fetchOrgSystemAuditLogs } from "@/lib/db";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
@@ -19,6 +20,7 @@ export default async function ActivityPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8">
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
         <p className="text-muted-foreground text-sm mt-1">

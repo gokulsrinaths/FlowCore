@@ -1,4 +1,5 @@
 import { LogOut, Search } from "lucide-react";
+import Link from "next/link";
 import { AppChrome } from "@/components/app-chrome";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ export async function AppShell({
       badge: invitationBadge > 0 ? invitationBadge : undefined,
     },
     { href: `${base}/dashboard`, label: "Dashboard", icon: "dashboard" as const },
+    { href: `${base}/search`, label: "Search", icon: "search" as const },
     { href: `${base}/cases`, label: "Cases", icon: "cases" as const },
     { href: `${base}/items`, label: "Items", icon: "items" as const },
     { href: `${base}/activity`, label: "Activity", icon: "activity" as const },
@@ -65,6 +67,12 @@ export async function AppShell({
             </div>
           </form>
           <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+            <Link
+              href="/help"
+              className="inline-flex min-h-9 shrink-0 items-center rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              Help
+            </Link>
             <NotificationBell orgSlug={organization.slug} />
             <form action={signOutAction} className="hidden sm:block">
               <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground">

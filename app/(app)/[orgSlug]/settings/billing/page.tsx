@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SettingsSubnav } from "@/components/settings-subnav";
 import { buttonVariants } from "@/lib/button-variants";
 import { cn } from "@/lib/utils";
 import { PLANS, planDisplayName } from "@/lib/billing";
@@ -18,11 +19,20 @@ export default async function BillingSettingsPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Billing</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Plan and usage — Stripe checkout will plug in here.
-        </p>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Workspace name, team, and billing.
+          </p>
+        </div>
+        <SettingsSubnav orgSlug={orgSlug} current="billing" />
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Billing</h2>
+          <p className="text-muted-foreground text-sm mt-1">
+            Plan and usage — Stripe checkout will plug in here.
+          </p>
+        </div>
       </div>
 
       <Card>

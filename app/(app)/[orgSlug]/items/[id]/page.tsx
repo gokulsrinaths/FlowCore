@@ -3,6 +3,7 @@ import { CommentSection } from "@/components/comment-section";
 import { ItemCaseLink } from "@/components/item-case-link";
 import { ItemDetailActions } from "@/components/item-detail-actions";
 import { ItemDetailControls } from "@/components/item-detail-controls";
+import { PageBackLink } from "@/components/page-back-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getCurrentUserProfile } from "@/lib/auth";
@@ -56,6 +57,7 @@ export default async function ItemDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8 max-w-3xl">
+      <PageBackLink href={`/${orgSlug}/items`} label="Back to items" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">

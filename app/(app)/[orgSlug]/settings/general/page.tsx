@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SettingsSubnav } from "@/components/settings-subnav";
 import { GeneralSettingsForm } from "@/components/settings-general-form";
 import { buttonVariants } from "@/lib/button-variants";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
@@ -19,11 +20,18 @@ export default async function GeneralSettingsPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8 max-w-xl">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">General</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Workspace name and basics.
-        </p>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Workspace name, team, and billing.
+          </p>
+        </div>
+        <SettingsSubnav orgSlug={orgSlug} current="general" />
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">General</h2>
+          <p className="text-muted-foreground text-sm mt-1">Name and basics.</p>
+        </div>
       </div>
       <Card>
         <CardHeader>

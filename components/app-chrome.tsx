@@ -118,8 +118,15 @@ export function AppChrome({
         <nav className="flex-1 space-y-1 p-3">
           <SidebarNav items={nav} base={base} />
         </nav>
-        <div className="border-t border-border/60 p-3 text-xs text-muted-foreground">
-          <p className="truncate">{profile.name ?? profile.email ?? "Signed in"}</p>
+        <div className="border-t border-border/60 p-3 space-y-2">
+          <p className="truncate text-xs text-muted-foreground">
+            {profile.name ?? profile.email ?? "Signed in"}
+          </p>
+          <form action={signOutAction}>
+            <Button type="submit" variant="outline" size="sm" className="w-full touch-manipulation">
+              Sign out
+            </Button>
+          </form>
         </div>
       </aside>
 

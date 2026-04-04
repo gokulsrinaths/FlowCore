@@ -105,6 +105,17 @@ async function Stats({
           >
             Open items board
           </Link>
+          {myCaseQuestions.length > 0 ? (
+            <Link
+              href="#dashboard-your-questions"
+              className={cn(
+                buttonVariants({ variant: "default", size: "sm" }),
+                "w-full justify-center sm:w-auto"
+              )}
+            >
+              Your questions ({myCaseQuestions.length})
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -164,6 +175,26 @@ async function Stats({
         ))}
       </div>
 
+      {caseCounts.total === 0 && (
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="text-base">No cases yet</CardTitle>
+            <CardDescription>
+              Case files group tasks, participants, and structured questions. Create one to start an
+              investigation.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={`${base}/cases`}
+              className={cn(buttonVariants(), "inline-flex w-full justify-center sm:w-auto")}
+            >
+              Go to cases
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       {recentCases.length > 0 && (
         <Card>
           <CardHeader className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -222,12 +253,12 @@ async function Stats({
       )}
 
       {myCaseQuestions.length > 0 ? (
-        <Card className="border-primary/20">
+        <Card id="dashboard-your-questions" className="scroll-mt-24 border-primary/20">
           <CardHeader>
             <CardTitle className="text-base">Your questions</CardTitle>
             <CardDescription>
-              Case questions assigned to you with dependencies satisfied — answer on the case
-              Questions tab.
+              Assigned to you and unlocked (all dependencies answered). Open each case and use the
+              Questions tab to respond.
             </CardDescription>
           </CardHeader>
           <CardContent>
