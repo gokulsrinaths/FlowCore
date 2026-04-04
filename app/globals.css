@@ -126,5 +126,13 @@
   }
   html {
     @apply font-sans;
+    /* Base for rem scale; TextZoomToolbar adjusts this percentage (90–200%). */
+    font-size: 100%;
+  }
+}
+
+@media print {
+  .text-zoom-toolbar-root {
+    display: none !important;
   }
 }
