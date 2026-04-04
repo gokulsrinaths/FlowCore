@@ -12,13 +12,13 @@ import {
   fetchActivityForOrg,
   fetchCaseParticipants,
   fetchCommentsForCase,
-  fetchItemsWithUsers,
-  fetchUsersForOrg,
 } from "@/lib/db";
+import { fetchItemsBoardBundle } from "@/lib/items-board-bundle";
+import { withLatencyGuard } from "@/lib/latency-dev";
 import { CaseParticipantsPanel } from "@/components/case-participants-panel";
 import { CaseQuestionsPanel } from "@/components/case-questions-panel";
 import { PageBackLink } from "@/components/page-back-link";
-import { fetchCaseById, fetchCasesForOrg } from "@/lib/cases";
+import { fetchCaseById } from "@/lib/cases";
 import { fetchCaseQuestions } from "@/lib/case-questions";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
 import { canDeleteCase, canEditCaseDetails } from "@/lib/permissions";
@@ -55,18 +55,20 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
   const caseRow = await fetchCaseById(orgId, caseId);
   if (!caseRow) notFound();
 
-  const [items, users, logs, comments, allCases, participants, caseQuestions] =
-    await Promise.all([
-      fetchItemsWithUsers(orgId, { caseId }),
-      fetchUsersForOrg(orgId),
-      fetchActivityForOrg(orgId, { limit: 200, filters: { caseId } }),
-      fetchCommentsForCase(orgId, caseId),
-      fetchCasesForOrg(orgId),
-      fetchCaseParticipants(orgId, caseId),
-      activeTab === "questions" ? fetchCaseQuestions(orgId, caseId) : Promise.resolve([]),
-    ]);
+  // Some parallel branches still chain extra queries internally (next P1: case-detail RPC).
+  const [board, logs, comments, participants, caseQuestions] = await withLatencyGuard(
+    "case-detail-fetch",
+    () =>
+      Promise.all([
+        fetchItemsBoardBundle(orgId, caseId),
+        fetchActivityForOrg(orgId, { limit: 200, filters: { caseId } }),
+        fetchCommentsForCase(orgId, caseId),
+        fetchCaseParticipants(orgId, caseId),
+        activeTab === "questions" ? fetchCaseQuestions(orgId, caseId) : Promise.resolve([]),
+      ])
+  );
 
-  const caseOptions = allCases.map((c) => ({ id: c.id, title: c.title }));
+  const { items, users, cases: caseOptions } = board;
   const showDelete = canDeleteCase(orgRole);
   const isInternalCaseParticipant = participants.some(
     (p) => p.type === "internal" && p.user_id === profile.id

@@ -11,6 +11,29 @@ function parseDependsOn(raw: unknown): string[] {
   return [];
 }
 
+/** Shared by RPC payloads (dashboard snapshot, list-my-unlocked). */
+export function parseMyUnlockedCaseQuestionRows(arr: unknown[]): MyCaseQuestionRow[] {
+  return arr.map((x) => {
+    const r = x as Record<string, unknown>;
+    return {
+      id: String(r.id),
+      case_id: String(r.case_id),
+      case_title: String(r.case_title ?? ""),
+      org_slug: String(r.org_slug ?? ""),
+      question_text: String(r.question_text ?? ""),
+      description: r.description != null ? String(r.description) : null,
+      status: r.status as MyCaseQuestionRow["status"],
+      depends_on: parseDependsOn(r.depends_on),
+      order_index: Number(r.order_index ?? 0),
+      assigned_to_participant_id:
+        r.assigned_to_participant_id != null
+          ? String(r.assigned_to_participant_id)
+          : null,
+      deps_unlocked: Boolean(r.deps_unlocked),
+    };
+  });
+}
+
 function parseLatestAnswer(raw: unknown): CaseQuestionRow["latest_answer"] {
   if (raw == null || typeof raw !== "object") return null;
   const o = raw as Record<string, unknown>;
@@ -74,24 +97,6 @@ export const fetchMyUnlockedCaseQuestions = cache(
     if (o.ok === false) return [];
     const arr = o.questions;
     if (!Array.isArray(arr)) return [];
-    return arr.map((x) => {
-      const r = x as Record<string, unknown>;
-      return {
-        id: String(r.id),
-        case_id: String(r.case_id),
-        case_title: String(r.case_title ?? ""),
-        org_slug: String(r.org_slug ?? ""),
-        question_text: String(r.question_text ?? ""),
-        description: r.description != null ? String(r.description) : null,
-        status: r.status as MyCaseQuestionRow["status"],
-        depends_on: parseDependsOn(r.depends_on),
-        order_index: Number(r.order_index ?? 0),
-        assigned_to_participant_id:
-          r.assigned_to_participant_id != null
-            ? String(r.assigned_to_participant_id)
-            : null,
-        deps_unlocked: Boolean(r.deps_unlocked),
-      };
-    });
+    return parseMyUnlockedCaseQuestionRows(arr);
   }
 );

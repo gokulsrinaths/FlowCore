@@ -11,16 +11,10 @@ import { buttonVariants } from "@/lib/button-variants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Suspense } from "react";
-import {
-  countAssignedToUser,
-  countItemsByAssignee,
-  countItemsByStatus,
-  fetchActivityForOrg,
-} from "@/lib/db";
-import { fetchMyUnlockedCaseQuestions } from "@/lib/case-questions";
-import { countCasesForOrg, fetchRecentCasesForOrg } from "@/lib/cases";
 import { getCurrentUserProfile } from "@/lib/auth";
-import { fetchSubscription, getOrgMembershipBySlug } from "@/lib/organizations";
+import { fetchDashboardSnapshot } from "@/lib/dashboard-snapshot";
+import { withLatencyGuard } from "@/lib/latency-dev";
+import { getOrgMembershipBySlug } from "@/lib/organizations";
 import { planDisplayName } from "@/lib/billing";
 import { STATUS_LABELS, STATUS_ORDER } from "@/lib/permissions";
 import type { ItemStatus } from "@/types";
@@ -33,23 +27,24 @@ type PageProps = { params: Promise<{ orgSlug: string }> };
 async function Stats({
   orgSlug,
   organizationId,
-  userId,
 }: {
   orgSlug: string;
   organizationId: string;
-  userId: string;
 }) {
-  const [counts, assigned, workload, recent, sub, caseCounts, recentCases, myCaseQuestions] =
-    await Promise.all([
-      countItemsByStatus(organizationId),
-      countAssignedToUser(organizationId, userId),
-      countItemsByAssignee(organizationId),
-      fetchActivityForOrg(organizationId, { limit: 8 }),
-      fetchSubscription(organizationId),
-      countCasesForOrg(organizationId),
-      fetchRecentCasesForOrg(organizationId, 5),
-      fetchMyUnlockedCaseQuestions(organizationId),
-    ]);
+  const snap = await withLatencyGuard(
+    "dashboard-fetch",
+    () => fetchDashboardSnapshot(organizationId),
+    { backendRoundTrips: 1 }
+  );
+
+  const counts = snap.countsByStatus;
+  const assigned = snap.assignedToMe;
+  const workload = snap.workload;
+  const recent = snap.recentActivity;
+  const sub = snap.subscription;
+  const caseCounts = snap.caseCounts;
+  const recentCases = snap.recentCases;
+  const myCaseQuestions = snap.myCaseQuestions;
 
   const total = STATUS_ORDER.reduce((acc, s) => acc + counts[s], 0);
   const base = `/${orgSlug}`;
@@ -353,11 +348,7 @@ export default async function DashboardPage({ params }: PageProps) {
         </p>
       </div>
       <Suspense fallback={<StatsLoading />}>
-        <Stats
-          orgSlug={orgSlug}
-          organizationId={membership.organization.id}
-          userId={profile.id}
-        />
+        <Stats orgSlug={orgSlug} organizationId={membership.organization.id} />
       </Suspense>
     </div>
   );

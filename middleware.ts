@@ -6,6 +6,15 @@ import { createServerClient } from "@supabase/ssr";
  * Authenticated: onboarding, invite, /[orgSlug]/...
  */
 export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // Avoid a Supabase round-trip on static marketing — major win for TTFB / cold regions (e.g. India → EU/US API).
+  const isPublicMarketing =
+    path === "/" || path === "/pricing" || path === "/help";
+  if (isPublicMarketing) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -33,13 +42,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-
-  const isLogin = path === "/login";
-  const isPublicMarketing =
-    path === "/" ||
-    path === "/pricing" ||
-    path === "/help";
+  const isLogin = path === "/login" || path.startsWith("/login/");
 
   if (!user && !isLogin && !isPublicMarketing) {
     const url = request.nextUrl.clone();

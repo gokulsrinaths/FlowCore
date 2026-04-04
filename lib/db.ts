@@ -380,20 +380,6 @@ export async function countAssignedToUser(
   return count ?? 0;
 }
 
-/** Team workload: count per assignee in org */
-export async function countItemsByAssignee(
-  organizationId: string
-): Promise<{ userId: string; count: number }[]> {
-  const items = await fetchItemsWithUsers(organizationId);
-  const map = new Map<string, number>();
-  for (const it of items) {
-    const aid = it.assigned_to;
-    if (!aid) continue;
-    map.set(aid, (map.get(aid) ?? 0) + 1);
-  }
-  return [...map.entries()].map(([userId, count]) => ({ userId, count }));
-}
-
 export type ActivityFeedFilters = {
   userId?: string;
   action?: string;

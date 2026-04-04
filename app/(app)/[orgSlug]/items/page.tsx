@@ -3,8 +3,8 @@ import { KanbanBoard } from "@/components/kanban-board";
 import { PageBackLink } from "@/components/page-back-link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCurrentUserProfile } from "@/lib/auth";
-import { fetchCasesForOrg } from "@/lib/cases";
-import { fetchItemsWithUsers, fetchUsersForOrg } from "@/lib/db";
+import { fetchItemsBoardBundle } from "@/lib/items-board-bundle";
+import { withLatencyGuard } from "@/lib/latency-dev";
 import { getOrgMembershipBySlug } from "@/lib/organizations";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -17,12 +17,12 @@ async function ItemsContent({ orgSlug }: { orgSlug: string }) {
   if (!membership || !profile) return null;
 
   const orgId = membership.organization.id;
-  const [items, users, cases] = await Promise.all([
-    fetchItemsWithUsers(orgId),
-    fetchUsersForOrg(orgId),
-    fetchCasesForOrg(orgId),
-  ]);
-  const caseOptions = cases.map((c) => ({ id: c.id, title: c.title }));
+  const { items, users, cases } = await withLatencyGuard(
+    "items-board-fetch",
+    () => fetchItemsBoardBundle(orgId),
+    { backendRoundTrips: 1 }
+  );
+  const caseOptions = cases;
 
   return (
     <>
