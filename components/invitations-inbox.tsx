@@ -34,13 +34,13 @@ function formatInvitedOn(iso: string): string {
 function statusLabel(s: InvitationInboxItem["status"]): string {
   switch (s) {
     case "invited":
-      return "Invited";
+      return "Invite sent";
     case "registered":
-      return "Registered";
+      return "Ready for you to accept";
     case "accepted":
-      return "Accepted";
+      return "Joined";
     case "rejected":
-      return "Rejected";
+      return "Declined";
     default:
       return s;
   }
@@ -68,7 +68,7 @@ function InboxCard({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{inv.org_name}</CardTitle>
-        <CardDescription>Case: {caseLine}</CardDescription>
+        <CardDescription>About: {caseLine}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <dl className="grid gap-2 text-sm">
@@ -77,7 +77,7 @@ function InboxCard({
             <dd className="font-medium">{statusLabel(inv.status)}</dd>
           </div>
           <div className="flex flex-wrap justify-between gap-2">
-            <dt className="text-muted-foreground">Invited on</dt>
+            <dt className="text-muted-foreground">Sent on</dt>
             <dd>{formatInvitedOn(inv.created_at)}</dd>
           </div>
         </dl>
@@ -118,7 +118,7 @@ function InboxCard({
                 disabled={busy}
                 onClick={() => onCopy(inv.token!)}
               >
-                Copy invite link
+                Copy link
               </Button>
             ) : null}
           </div>
@@ -126,7 +126,7 @@ function InboxCard({
 
         {section === "accepted" ? (
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <p className="text-sm font-medium text-muted-foreground">Joined</p>
+            <p className="text-sm font-medium text-muted-foreground">You’re in</p>
             {inv.org_slug ? (
               <a
                 href={`/${inv.org_slug}/dashboard`}
@@ -142,7 +142,7 @@ function InboxCard({
         ) : null}
 
         {section === "rejected" ? (
-          <p className="text-sm font-medium text-muted-foreground">Rejected</p>
+          <p className="text-sm font-medium text-muted-foreground">You declined</p>
         ) : null}
       </CardContent>
     </Card>
@@ -156,14 +156,14 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
 
   function copyToken(token: string) {
     void navigator.clipboard.writeText(publicInviteUrl(token));
-    toast.success("Invite link copied");
+    toast.success("Link copied");
   }
 
   function accept(id: string) {
     start(async () => {
       const res = await acceptInvitationAction(id);
       if (res.ok) {
-        toast.success("Invitation accepted");
+        toast.success("Welcome — you’re in");
         const path = res.slug ? `/${res.slug}/dashboard` : "/invitations";
         if (res.slug) {
           window.location.assign(path);
@@ -180,7 +180,7 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
     start(async () => {
       const res = await rejectInvitationAction(id);
       if (res.ok) {
-        toast.success("Invitation rejected");
+        toast.success("Invite declined");
         setGroups((g) => {
           const row = g.pending.find((x) => x.id === id);
           return {
@@ -221,11 +221,11 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
     <div className="space-y-10">
       <section className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Pending invitations</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Needs your response</h2>
           <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Invited</span> — not yet linked to your
-            account. <span className="font-medium text-foreground">Registered</span> — you can
-            accept or reject.
+            <span className="font-medium text-foreground">Invite sent</span> — finish signing up
+            with that email first. <span className="font-medium text-foreground">Ready to accept</span>{" "}
+            — you can join or decline below.
           </p>
         </div>
         {groups.pending.length === 0 ? (
@@ -269,7 +269,7 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight">Rejected invitations</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Declined</h2>
         {groups.rejected.length === 0 ? (
           <p className="text-sm text-muted-foreground">None.</p>
         ) : (

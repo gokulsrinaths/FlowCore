@@ -26,7 +26,7 @@ export default async function SearchPage({ params, searchParams }: PageProps) {
 
   return (
     <div className="space-y-8">
-      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to home" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Search</h1>
         <p className="text-muted-foreground text-sm mt-1">

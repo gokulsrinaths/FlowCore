@@ -38,7 +38,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { CaseParticipant, CaseQuestionRow } from "@/types";
+import type { CaseParticipant, CaseQuestionRow, CaseQuestionStatus } from "@/types";
+
+const CASE_Q_STATUS_LABELS: Record<CaseQuestionStatus, string> = {
+  pending: "Not started",
+  in_progress: "In progress",
+  answered: "Answered",
+};
 import { ArrowDown, ArrowUp, ChevronDown, Plus, Trash2 } from "lucide-react";
 
 function participantLabel(p: CaseParticipant): string {
@@ -105,7 +111,7 @@ export function CaseQuestionsPanel({
     start(async () => {
       const res = await deleteCaseQuestionAction(organizationId, orgSlug, caseId, id);
       if (res.ok) {
-        toast.success("Question removed");
+        toast.success("Question removed from case");
         refresh();
       } else toast.error(res.error);
     });
@@ -129,7 +135,7 @@ export function CaseQuestionsPanel({
           }}
         >
           <Plus className="size-4" />
-          New question
+          Add question
         </Button>
       </div>
 
@@ -162,7 +168,7 @@ export function CaseQuestionsPanel({
         <Dialog open onOpenChange={(o) => !o && setEditId(null)}>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Edit question</DialogTitle>
+              <DialogTitle>Edit case question</DialogTitle>
             </DialogHeader>
             {(() => {
               const q = sorted.find((x) => x.id === editId);
@@ -193,7 +199,9 @@ export function CaseQuestionsPanel({
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="text-base">No questions yet</CardTitle>
-            <CardDescription>Create questions to coordinate distributed answers on this case.</CardDescription>
+            <CardDescription>
+              Add questions when you need specific answers from people on this case.
+            </CardDescription>
           </CardHeader>
         </Card>
       ) : (
@@ -215,8 +223,8 @@ export function CaseQuestionsPanel({
                                 : "outline"
                           }
                         >
-                          {q.status}
-                          {!q.deps_unlocked && q.status !== "answered" ? " · locked" : ""}
+                          {CASE_Q_STATUS_LABELS[q.status]}
+                          {!q.deps_unlocked && q.status !== "answered" ? " · waiting on earlier answers" : ""}
                         </Badge>
                       </div>
                       <CardTitle className="text-base leading-snug">{q.question_text}</CardTitle>
@@ -351,10 +359,10 @@ function AssignRow({
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
       <div className="min-w-0 flex-1 space-y-1">
-        <Label className="text-xs">Assign to participant</Label>
+        <Label className="text-xs">Assign to</Label>
         <Select value={pid || undefined} onValueChange={(v) => setPid(v ?? "")}>
           <SelectTrigger className="w-full md:max-w-xs">
-            <SelectValue placeholder="Choose participant…" />
+            <SelectValue placeholder="Choose someone…" />
           </SelectTrigger>
           <SelectContent>
             {participants.map((p) => (
@@ -379,7 +387,7 @@ function AssignRow({
               pid
             );
             if (res.ok) {
-              toast.success("Assigned");
+              toast.success("Assignment saved");
               setPid("");
               onDone();
             } else toast.error(res.error);
@@ -435,7 +443,7 @@ function AnswerBlock({
             fd
           );
           if (res.ok) {
-            toast.success("Answer submitted");
+            toast.success("Answer sent");
             onDone();
           } else toast.error(res.error);
         });
@@ -443,12 +451,12 @@ function AnswerBlock({
     >
       <p className="font-medium text-sm">Your answer</p>
       <div className="space-y-2">
-        <Label htmlFor={`ans-${q.id}`}>Answer</Label>
-        <Textarea id={`ans-${q.id}`} name="answer_text" required rows={3} placeholder="Answer" />
+        <Label htmlFor={`ans-${q.id}`}>Your answer</Label>
+        <Textarea id={`ans-${q.id}`} name="answer_text" required rows={3} placeholder="Type your answer" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor={`reas-${q.id}`}>Reasoning (optional)</Label>
-        <Textarea id={`reas-${q.id}`} name="reasoning" rows={2} placeholder="Reasoning" />
+        <Label htmlFor={`reas-${q.id}`}>Context (optional)</Label>
+        <Textarea id={`reas-${q.id}`} name="reasoning" rows={2} placeholder="Any extra context for your team" />
       </div>
       <Button type="submit" size="sm" disabled={pending}>
         Submit answer
@@ -509,7 +517,7 @@ function QuestionForm({
           if (mode === "create") {
             const res = await createCaseQuestionAction(organizationId, orgSlug, caseId, fd);
             if (res.ok) {
-              toast.success("Question created");
+              toast.success("Question added");
               onDone();
             } else toast.error(res.error);
           } else if (initial) {
@@ -522,7 +530,7 @@ function QuestionForm({
               fd
             );
             if (res.ok) {
-              toast.success("Question updated");
+              toast.success("Question saved");
               onDone();
             } else toast.error(res.error);
           }
@@ -530,18 +538,18 @@ function QuestionForm({
       }}
     >
       <div className="space-y-2">
-        <Label htmlFor="cq-text">Question</Label>
+        <Label htmlFor="cq-text">Question text</Label>
         <Textarea
           id="cq-text"
           name="question_text"
           required
           rows={2}
           defaultValue={initial?.question_text}
-          placeholder="Question text"
+          placeholder="What do you need to know?"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="cq-desc">Description (optional)</Label>
+        <Label htmlFor="cq-desc">More detail (optional)</Label>
         <Textarea
           id="cq-desc"
           name="description"
@@ -551,7 +559,7 @@ function QuestionForm({
       </div>
       {mode === "create" ? (
         <div className="space-y-2">
-          <Label>Assign on create (optional)</Label>
+          <Label>Assign now (optional)</Label>
           <Select value={assign || undefined} onValueChange={(v) => setAssign(v ?? "")}>
             <SelectTrigger>
               <SelectValue placeholder="Unassigned" />
@@ -568,7 +576,7 @@ function QuestionForm({
       ) : null}
       {depChoices.length > 0 ? (
         <div className="space-y-2">
-          <Label>Depends on</Label>
+          <Label>Unlock only after these are answered</Label>
           <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-border/80 p-2">
             {depChoices.map((q) => (
               <label
@@ -583,7 +591,10 @@ function QuestionForm({
                 />
                 <span className="min-w-0">
                   <span className="line-clamp-2 font-medium">{q.question_text}</span>
-                  <span className="text-muted-foreground text-xs"> ({q.status})</span>
+                  <span className="text-muted-foreground text-xs">
+                    {" "}
+                    ({CASE_Q_STATUS_LABELS[q.status]})
+                  </span>
                 </span>
               </label>
             ))}
@@ -592,7 +603,7 @@ function QuestionForm({
       ) : null}
       <DialogFooter className="gap-2 sm:gap-0">
         <Button type="submit" disabled={pending}>
-          {mode === "create" ? "Create" : "Save"}
+          {mode === "create" ? "Add question" : "Save"}
         </Button>
       </DialogFooter>
     </form>

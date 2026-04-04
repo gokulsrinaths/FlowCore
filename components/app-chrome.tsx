@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CircleUser, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/app/actions/auth";
 import { OrgSwitcher } from "@/components/org-switcher";
@@ -14,13 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { ComponentProps } from "react";
 import type { OrganizationWithRole, UserRow } from "@/types";
 
@@ -34,6 +27,26 @@ type AppChromeProps = {
   base: string;
   children: React.ReactNode;
 };
+
+function AccountFooter({ profile }: { profile: UserRow }) {
+  return (
+    <div className="border-t border-border/60 p-3">
+      <p className="mb-2 truncate text-xs font-medium text-foreground">
+        {profile.name ?? profile.email ?? "Signed in"}
+      </p>
+      <form action={signOutAction}>
+        <Button
+          type="submit"
+          variant="outline"
+          size="sm"
+          className="w-full touch-manipulation"
+        >
+          Sign out
+        </Button>
+      </form>
+    </div>
+  );
+}
 
 export function AppChrome({
   organization,
@@ -58,12 +71,13 @@ export function AppChrome({
         <Button
           type="button"
           variant="outline"
-          size="icon"
-          className="size-9 shrink-0 touch-manipulation"
+          size="sm"
+          className="h-9 shrink-0 touch-manipulation gap-2 px-2.5"
           aria-label="Open menu"
           onClick={() => setMenuOpen(true)}
         >
-          <Menu className="size-4" />
+          <Menu className="size-4 shrink-0" aria-hidden />
+          <span className="text-xs font-medium">Menu</span>
         </Button>
         <Link
           href={`${base}/dashboard`}
@@ -86,8 +100,8 @@ export function AppChrome({
           showCloseButton
           className="top-0 left-0 flex h-[100dvh] max-h-[100dvh] w-[min(20rem,calc(100vw-2rem))] max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-r border-y-0 border-l-0 p-0 sm:max-w-none"
         >
-          <DialogHeader className="sr-only">
-            <DialogTitle>Workspace menu</DialogTitle>
+          <DialogHeader className="border-b border-border/60 px-4 py-3 text-left">
+            <DialogTitle className="text-base">Menu</DialogTitle>
           </DialogHeader>
           <nav
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3"
@@ -99,37 +113,23 @@ export function AppChrome({
               onNavigate={() => setMenuOpen(false)}
             />
           </nav>
-          <div className="border-t border-border/60 p-3">
-            <p className="mb-2 truncate text-xs text-muted-foreground">
-              {profile.name ?? profile.email ?? "Signed in"}
-            </p>
-            <form action={signOutAction}>
-              <Button
-                type="submit"
-                variant="outline"
-                size="sm"
-                className="w-full touch-manipulation"
-              >
-                Sign out
-              </Button>
-            </form>
-          </div>
+          <AccountFooter profile={profile} />
         </DialogContent>
       </Dialog>
 
-      {/* Desktop sidebar: fixed narrow rail; each nav icon opens its own hover flyout */}
+      {/* Desktop: labeled sidebar — no hover-only navigation */}
       <aside
         className={cn(
-          "relative z-30 hidden w-14 shrink-0 flex-col overflow-x-visible border-border/80 bg-card/40 md:flex",
+          "relative z-30 hidden w-52 shrink-0 flex-col border-border/80 bg-card/40 md:flex",
           "md:min-h-screen md:border-r"
         )}
       >
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="flex shrink-0 items-center justify-center border-b border-border/60 px-2 py-3">
+          <div className="flex shrink-0 items-center gap-2 border-b border-border/60 px-3 py-3">
             <Link
               href={`${base}/dashboard`}
-              className="flex size-10 items-center justify-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              aria-label="FlowCore — Dashboard"
+              className="flex min-w-0 flex-1 items-center gap-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              aria-label="FlowCore — home"
             >
               <span
                 className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground"
@@ -137,52 +137,18 @@ export function AppChrome({
               >
                 FC
               </span>
+              <span className="truncate text-sm font-semibold tracking-tight">FlowCore</span>
             </Link>
           </div>
 
           <nav
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-visible overscroll-contain py-2"
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-2 py-3"
             aria-label="Workspace navigation"
           >
-            <SidebarNav items={nav} base={base} variant="iconsOnly" />
+            <SidebarNav items={nav} base={base} />
           </nav>
 
-          <div className="flex shrink-0 justify-center border-t border-border/60 py-2">
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger
-                openOnHover
-                delay={90}
-                closeDelay={180}
-                className="flex size-10 items-center justify-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                aria-label="Account and sign out"
-              >
-                <CircleUser className="size-5 shrink-0" aria-hidden />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="right"
-                align="end"
-                sideOffset={10}
-                className="min-w-[12rem] p-1"
-              >
-                <DropdownMenuLabel className="max-w-[14rem] truncate font-normal">
-                  {profile.name ?? profile.email ?? "Signed in"}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <div className="p-1">
-                  <form action={signOutAction}>
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      size="sm"
-                      className="w-full touch-manipulation"
-                    >
-                      Sign out
-                    </Button>
-                  </form>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <AccountFooter profile={profile} />
         </div>
       </aside>
 

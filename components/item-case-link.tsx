@@ -42,10 +42,10 @@ export function ItemCaseLink({
     startTransition(async () => {
       const res = await assignItemToCaseAction(organizationId, orgSlug, itemId, caseId);
       if (res.ok) {
-        toast.success(caseId ? "Linked to case" : "Unlinked from case");
+        toast.success(caseId ? "Linked to this case" : "Unlinked from case");
         router.refresh();
       } else {
-        toast.error(res.error ?? "Could not update case link");
+        toast.error(res.error ?? "Couldn’t update the link");
       }
     });
   }

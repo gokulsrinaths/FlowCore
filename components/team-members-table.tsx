@@ -57,10 +57,10 @@ export function TeamMembersTable({
     startTransition(async () => {
       const res = await updateMemberRole(organizationId, orgSlug, userId, role);
       if (res.ok) {
-        toast.success("Role updated");
+        toast.success("Role saved");
         router.refresh();
       } else {
-        toast.error(res.error ?? "Could not update role");
+        toast.error(res.error ?? "Couldn’t update role");
       }
     });
   }
@@ -69,10 +69,10 @@ export function TeamMembersTable({
     startTransition(async () => {
       const res = await removeMember(organizationId, orgSlug, userId);
       if (res.ok) {
-        toast.success("Member removed");
+        toast.success("Removed from workspace");
         router.refresh();
       } else {
-        toast.error(res.error ?? "Could not remove");
+        toast.error(res.error ?? "Couldn’t remove");
       }
     });
   }
@@ -81,11 +81,11 @@ export function TeamMembersTable({
     startTransition(async () => {
       const res = await leaveOrganization(organizationId, orgSlug);
       if (res.ok) {
-        toast.success("Left workspace");
+        toast.success("You’ve left this workspace");
         router.push("/onboarding");
         router.refresh();
       } else {
-        toast.error(res.error ?? "Could not leave");
+        toast.error(res.error ?? "Couldn’t leave");
       }
     });
   }

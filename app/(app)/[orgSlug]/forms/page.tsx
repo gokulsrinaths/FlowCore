@@ -35,17 +35,17 @@ export default async function FormsListPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8">
-      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to home" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Forms</h1>
           <p className="text-muted-foreground text-sm mt-1 text-pretty max-w-xl">
-            Build forms with short answers, paragraphs, multiple choice, and conditional follow-up
-            questions—similar to Google Forms. Responses are stored per workspace.
+            A <strong className="text-foreground font-medium">form</strong> collects answers from
+            your team (short text, paragraphs, choices, optional follow-ups). Fill one out or build
+            a new template — answers stay in this workspace.
             {!canEditForms ? (
               <span className="block mt-2 text-amber-700 dark:text-amber-500/90">
-                Only workspace owners and admins can create or edit form structure; everyone can
-                fill out forms.
+                Only owners and admins can change how a form is built; everyone can fill forms out.
               </span>
             ) : null}
           </p>
@@ -65,8 +65,7 @@ export default async function FormsListPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="text-base">No forms yet</CardTitle>
             <CardDescription>
-              Create a form to collect structured answers with optional branching based on earlier
-              answers.
+              Forms gather structured answers from your team. Create one to get started.
             </CardDescription>
           </CardHeader>
             <CardContent>
@@ -110,7 +109,7 @@ export default async function FormsListPage({ params }: PageProps) {
                           href={`${base}/${f.id}`}
                           className="text-xs text-muted-foreground underline-offset-4 hover:underline hover:text-foreground"
                         >
-                          Edit structure
+                          Edit form
                         </Link>
                       ) : null}
                     </div>

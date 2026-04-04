@@ -63,9 +63,9 @@ export function FormFillView({ organizationId, orgSlug, form, caseId }: Props) {
         caseId
       );
       if (res.ok) {
-        toast.success("Response submitted");
+        toast.success("Your answers were sent");
         router.push(`/${orgSlug}/forms/${form.id}`);
-      } else toast.error(res.error);
+      } else toast.error(res.error ?? "Couldn’t send your answers");
     });
   }
 
@@ -162,7 +162,7 @@ export function FormFillView({ organizationId, orgSlug, form, caseId }: Props) {
 
       <div className="flex flex-wrap gap-2">
         <Button type="button" onClick={submit} disabled={pending} className="touch-manipulation">
-          Submit
+          Send answers
         </Button>
         <Button
           type="button"
@@ -170,7 +170,7 @@ export function FormFillView({ organizationId, orgSlug, form, caseId }: Props) {
           className="touch-manipulation"
           onClick={() => router.push(`/${orgSlug}/forms/${form.id}`)}
         >
-          Cancel
+          Leave without sending
         </Button>
       </div>
     </div>

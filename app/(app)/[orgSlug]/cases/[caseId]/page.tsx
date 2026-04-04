@@ -77,14 +77,14 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
 
   return (
     <div className="space-y-10 max-w-6xl">
-      <PageBackLink href={`/${orgSlug}/cases`} label="Back to cases" />
+      <PageBackLink href={`/${orgSlug}/cases`} label="Back to all cases" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <CaseStatusBadge status={caseRow.status} />
             {caseRow.all_questions_answered ? (
               <Badge variant="secondary" className="text-xs">
-                All questions answered
+                All case questions answered
               </Badge>
             ) : null}
             <span className="text-xs text-muted-foreground">
@@ -92,9 +92,13 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
             </span>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">{caseRow.title}</h1>
+          <p className="text-muted-foreground text-sm mt-1 max-w-2xl">
+            Case questions, people, and tasks for this matter live here. Use the tabs to switch
+            between the overview and <strong className="text-foreground">Questions</strong>.
+          </p>
           {(caseRow.district || caseRow.crime_number) && (
-            <p className="text-sm text-muted-foreground">
-              District / crime number:{" "}
+            <p className="text-sm text-muted-foreground mt-2">
+              District / reference:{" "}
               {[caseRow.district, caseRow.crime_number].filter(Boolean).join(" · ")}
             </p>
           )}
@@ -168,12 +172,12 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
       {activeTab === "overview" ? (
         <>
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Case info</h2>
+        <h2 className="text-lg font-medium">Summary</h2>
         <Card>
           <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Complainant details
+                What we know so far
               </p>
               <p className="text-sm mt-1 whitespace-pre-wrap">
                 {caseRow.description?.trim() ? caseRow.description : "—"}
@@ -189,7 +193,7 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
             </div>
             <div className="sm:col-span-2">
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Defrauded amount
+                Amount involved
               </p>
               <p className="text-sm mt-1 tabular-nums">{formatFinancial(caseRow.financial_impact)}</p>
             </div>
@@ -229,7 +233,7 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
       <Separator />
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Comments & notes</h2>
+        <h2 className="text-lg font-medium">Discussion from tasks</h2>
         <Card>
           <CardHeader>
             <CardTitle className="text-base">From linked tasks</CardTitle>
@@ -240,7 +244,7 @@ export default async function CaseDetailPage({ params, searchParams }: PageProps
           <CardContent className="space-y-4">
             {comments.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No comments on tasks in this case yet. Open a task to add notes.
+                No comments on tasks in this case yet. Open a task to add an update.
               </p>
             ) : (
               <ul className="space-y-4">

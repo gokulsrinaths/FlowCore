@@ -48,9 +48,40 @@ async function Stats({
 
   const total = STATUS_ORDER.reduce((acc, s) => acc + counts[s], 0);
   const base = `/${orgSlug}`;
+  const emptyWorkspace = caseCounts.total === 0 && total === 0;
 
   return (
     <div className="space-y-3">
+      {emptyWorkspace ? (
+        <Card className="border-primary/20 bg-muted/25">
+          <CardHeader className="gap-1 pb-2">
+            <CardTitle className="text-base">Welcome — start here</CardTitle>
+            <CardDescription className="text-pretty">
+              FlowCore helps your team track <strong className="text-foreground">cases</strong>{" "}
+              (a folder of related work) and <strong className="text-foreground">tasks</strong> on a
+              simple board. Create a case first, or jump to tasks if you already know what to do.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2 pt-0 sm:flex-row sm:flex-wrap">
+            <Link
+              href={`${base}/cases`}
+              className={cn(buttonVariants({ size: "default" }), "w-full justify-center sm:w-auto")}
+            >
+              Create your first case
+            </Link>
+            <Link
+              href={`${base}/items`}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "default" }),
+                "w-full justify-center sm:w-auto"
+              )}
+            >
+              Open the task board
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs text-muted-foreground uppercase tracking-wide">
@@ -83,13 +114,13 @@ async function Stats({
               "w-full justify-center sm:w-auto"
             )}
           >
-            Cases
+            All cases
           </Link>
           <Link
             href={`${base}/items`}
             className={cn(buttonVariants({ size: "sm" }), "w-full justify-center sm:w-auto")}
           >
-            Open items board
+            Task board
           </Link>
           {myCaseQuestions.length > 0 ? (
             <Link
@@ -99,7 +130,7 @@ async function Stats({
                 "w-full justify-center sm:w-auto"
               )}
             >
-              Your questions ({myCaseQuestions.length})
+              Answer questions ({myCaseQuestions.length})
             </Link>
           ) : null}
         </div>
@@ -109,7 +140,7 @@ async function Stats({
         <Card size="sm" className="border-dashed">
           <CardHeader className="pb-1.5 pt-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Assigned to you
+              Your tasks
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -119,20 +150,20 @@ async function Stats({
         <Card size="sm">
           <CardHeader className="pb-1.5 pt-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total cases
+              Cases
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold tabular-nums">{caseCounts.total}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {caseCounts.active} active (not closed)
+              {caseCounts.active} not finished yet
             </p>
           </CardContent>
         </Card>
         <Card size="sm">
           <CardHeader className="pb-1.5 pt-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total items
+              All tasks
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -140,7 +171,7 @@ async function Stats({
             {total === 0 && (
               <div className="mt-2 space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Your workspace is empty — create demo items to explore the workflow.
+                  No tasks yet — add sample tasks to see how the board works.
                 </p>
                 <DemoDataButton organizationId={organizationId} orgSlug={orgSlug} />
               </div>
@@ -161,13 +192,13 @@ async function Stats({
         ))}
       </div>
 
-      {caseCounts.total === 0 && (
+      {caseCounts.total === 0 && !emptyWorkspace ? (
         <Card size="sm" className="border-dashed">
           <CardHeader className="gap-0.5 pb-2">
             <CardTitle className="text-base">No cases yet</CardTitle>
             <CardDescription>
-              Case files group tasks, participants, and structured questions. Create one to start an
-              investigation.
+              A case groups tasks, people, and follow-up questions. Add one when you are ready to
+              organize work around a topic.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -175,18 +206,18 @@ async function Stats({
               href={`${base}/cases`}
               className={cn(buttonVariants(), "inline-flex w-full justify-center sm:w-auto")}
             >
-              Go to cases
+              Create a case
             </Link>
           </CardContent>
         </Card>
-      )}
+      ) : null}
 
       {recentCases.length > 0 && (
         <Card size="sm">
           <CardHeader className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3 pb-2">
             <div>
               <CardTitle className="text-base">Recent cases</CardTitle>
-              <CardDescription>Latest case files in this workspace</CardDescription>
+              <CardDescription>Cases updated lately in this workspace</CardDescription>
             </div>
             <Link
               href={`${base}/cases`}
@@ -222,8 +253,8 @@ async function Stats({
       {workload.length > 0 && (
         <Card size="sm">
           <CardHeader className="gap-0.5 pb-2">
-            <CardTitle className="text-base">Team workload</CardTitle>
-            <CardDescription>Open assignments by teammate</CardDescription>
+            <CardTitle className="text-base">Who has what</CardTitle>
+            <CardDescription>Open tasks per person</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-1.5 pt-0">
             {workload.slice(0, 8).map((w) => (
@@ -231,7 +262,7 @@ async function Stats({
                 key={w.userId}
                 className="rounded-full border border-border/80 px-2.5 py-0.5 text-sm bg-muted/30"
               >
-                {w.count} open
+                {w.count} open task{w.count === 1 ? "" : "s"}
               </span>
             ))}
           </CardContent>
@@ -245,10 +276,9 @@ async function Stats({
           className="scroll-mt-16 border-primary/20"
         >
           <CardHeader className="gap-0.5 pb-2">
-            <CardTitle className="text-base">Your questions</CardTitle>
+            <CardTitle className="text-base">Questions for you</CardTitle>
             <CardDescription>
-              Assigned to you and unlocked (all dependencies answered). Open each case and use the
-              Questions tab to respond.
+              These are ready for you to answer. Open the case and use the Questions tab.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
@@ -276,7 +306,7 @@ async function Stats({
         <CardHeader className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3 pb-2">
           <div>
             <CardTitle className="text-base">Recent activity</CardTitle>
-            <CardDescription>Latest changes in this workspace</CardDescription>
+            <CardDescription>What changed lately</CardDescription>
           </div>
           <Link
             href={`${base}/activity`}
@@ -290,7 +320,9 @@ async function Stats({
         </CardHeader>
         <CardContent className="space-y-2 pt-0">
           {recent.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No activity yet.</p>
+            <p className="text-sm text-muted-foreground">
+              Nothing here yet — activity will show up as your team works.
+            </p>
           ) : (
             <ul className="space-y-1.5 text-sm">
               {recent.map((a) => (
@@ -311,11 +343,13 @@ async function Stats({
 
       <Card size="sm" className="border-primary/15 bg-muted/30">
         <CardHeader className="gap-0.5 pb-2">
-          <CardTitle className="text-base">Where your workflow lives</CardTitle>
+          <CardTitle className="text-base">How tasks move</CardTitle>
           <CardDescription className="text-pretty">
-            Items move through <strong>Created</strong> → <strong>In progress</strong> →{" "}
-            <strong>Under review</strong> → <strong>Completed</strong>. Use the board to
-            drag cards or change status from each card.
+            Tasks flow{" "}
+            <strong>{STATUS_LABELS.created}</strong> → <strong>{STATUS_LABELS.in_progress}</strong>{" "}
+            → <strong>{STATUS_LABELS.under_review}</strong> →{" "}
+            <strong>{STATUS_LABELS.completed}</strong>. Drag cards on the board or change status on
+            each card.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -348,7 +382,7 @@ export default async function DashboardPage({ params }: PageProps) {
           {membership.organization.name}
         </h1>
         <p className="text-muted-foreground text-sm mt-0.5">
-          Dashboard · snapshot of work in this workspace.
+          See cases, tasks, and what needs attention — all in one place.
         </p>
       </div>
       <Suspense fallback={<StatsLoading />}>

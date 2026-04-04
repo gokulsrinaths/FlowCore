@@ -22,24 +22,24 @@ export async function AppShell({
   ]);
   const base = `/${organization.slug}`;
   const nav = [
-    {
-      href: "/invitations",
-      label: "Invitations",
-      icon: "invitations" as const,
-      badge: invitationBadge > 0 ? invitationBadge : undefined,
-    },
+    { href: `${base}/dashboard`, label: "Home", icon: "dashboard" as const },
+    { href: `${base}/cases`, label: "Cases", icon: "cases" as const },
+    { href: `${base}/items`, label: "Tasks", icon: "items" as const },
+    { href: `${base}/forms`, label: "Forms", icon: "forms" as const },
     {
       href: `${base}/questionnaires`,
-      label: "Questionnaires",
+      label: "Task questions",
       icon: "questionnaires" as const,
       badge: questionnaireBadge > 0 ? questionnaireBadge : undefined,
     },
-    { href: `${base}/dashboard`, label: "Dashboard", icon: "dashboard" as const },
-    { href: `${base}/cases`, label: "Cases", icon: "cases" as const },
-    { href: `${base}/forms`, label: "Forms", icon: "forms" as const },
-    { href: `${base}/items`, label: "Items", icon: "items" as const },
     { href: `${base}/activity`, label: "Activity", icon: "activity" as const },
-    { href: `${base}/settings/team`, label: "Team", icon: "team" as const },
+    {
+      href: "/invitations",
+      label: "Invites",
+      icon: "invitations" as const,
+      badge: invitationBadge > 0 ? invitationBadge : undefined,
+    },
+    { href: `${base}/settings/team`, label: "People", icon: "team" as const },
     { href: `${base}/settings/general`, label: "Settings", icon: "settings" as const },
   ];
 

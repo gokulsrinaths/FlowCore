@@ -47,10 +47,10 @@ export default async function InvitationsPage() {
             <ArrowLeft className="size-4" />
             Back
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">Invitations</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Your invites</h1>
           <p className="text-muted-foreground text-sm text-pretty">
-            Everything here is tied to your signed-in email. Accepting joins the workspace (and case,
-            if any). Nothing is applied until you click Accept.
+            These use the email you’re signed in with. Accepting adds you to the workspace — and to
+            the case, if one was included. Nothing changes until you tap Accept.
           </p>
         </div>
         <InvitationsInbox initial={res.invitations} />

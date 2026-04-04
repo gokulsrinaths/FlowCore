@@ -155,22 +155,22 @@ export function KanbanBoard({
       (item.itemQuestionnaires?.length ?? 0) > 0 && !canOverrideQ;
     if (qLocked) {
       toast.error(
-        "This item follows the questionnaire workflow; only workspace owners and admins can move it on the board."
+        "This task is waiting on questions. Only workspace owners or admins can move it on the board."
       );
       return;
     }
     const next = resolveDropTarget(over.id);
     if (!next || next === item.status) return;
     if (!canChangeStatus(wf, item.status, next)) {
-      toast.error("You cannot move this item to that stage");
+      toast.error("That move isn’t allowed for your role. Ask a manager if you need help.");
       return;
     }
     startTransition(async () => {
       const res = await updateItemStatus(organizationId, orgSlug, item.id, next);
       if (res.ok) {
-        toast.success("Status updated");
+        toast.success("Task updated");
         router.refresh();
-      } else toast.error(res.error ?? "Update failed");
+      } else toast.error(res.error ?? "Couldn’t update the task");
     });
   }
 
@@ -180,20 +180,20 @@ export function KanbanBoard({
       (item.itemQuestionnaires?.length ?? 0) > 0 && !canOverrideQ;
     if (qLocked) {
       toast.error(
-        "Status is driven by questionnaires until they complete (owners/admins can override)."
+        "Status is set by task questions until they’re done. Owners or admins can override."
       );
       return;
     }
     if (!canChangeStatus(wf, item.status, next)) {
-      toast.error("You cannot move this item to that stage");
+      toast.error("That move isn’t allowed for your role. Ask a manager if you need help.");
       return;
     }
     startTransition(async () => {
       const res = await updateItemStatus(organizationId, orgSlug, item.id, next);
       if (res.ok) {
-        toast.success("Status updated");
+        toast.success("Task updated");
         router.refresh();
-      } else toast.error(res.error ?? "Update failed");
+      } else toast.error(res.error ?? "Couldn’t update the task");
     });
   }
 
@@ -203,7 +203,7 @@ export function KanbanBoard({
         <div className="relative w-full max-w-md flex-1">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search items…"
+            placeholder="Search tasks…"
             className="min-h-11 pl-9"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -269,7 +269,7 @@ export function KanbanBoard({
             <KanbanColumn key={status} status={status}>
               {grouped[status].length === 0 && (
                 <p className="text-xs text-muted-foreground py-6 text-center border border-dashed rounded-lg">
-                  No items here
+                  No tasks here
                 </p>
               )}
               {grouped[status].map((item) => {

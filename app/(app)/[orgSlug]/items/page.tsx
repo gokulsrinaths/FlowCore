@@ -1,6 +1,12 @@
 import { CreateItemDialog } from "@/components/create-item-dialog";
 import { KanbanBoard } from "@/components/kanban-board";
 import { PageBackLink } from "@/components/page-back-link";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCurrentUserProfile } from "@/lib/auth";
 import { fetchItemsBoardBundle } from "@/lib/items-board-bundle";
@@ -28,9 +34,10 @@ async function ItemsContent({ orgSlug }: { orgSlug: string }) {
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Items</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Drag cards between columns or use the status control on each card.
+          <h1 className="text-2xl font-semibold tracking-tight">Tasks</h1>
+          <p className="text-muted-foreground text-sm mt-1 max-w-xl">
+            A <strong className="text-foreground font-medium">task</strong> is one piece of work.
+            It moves across columns as it progresses — drag cards or use the menu on each card.
           </p>
         </div>
         <CreateItemDialog
@@ -42,6 +49,16 @@ async function ItemsContent({ orgSlug }: { orgSlug: string }) {
           cases={caseOptions}
         />
       </div>
+      {items.length === 0 ? (
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="text-base">No tasks yet</CardTitle>
+            <CardDescription>
+              Add your first task with the button above. You can link it to a case later if you want.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : null}
       <KanbanBoard
         items={items}
         users={users}
@@ -76,7 +93,7 @@ export default async function ItemsPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8">
-      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to home" />
       <Suspense fallback={<ItemsLoading />}>
         <ItemsContent orgSlug={orgSlug} />
       </Suspense>

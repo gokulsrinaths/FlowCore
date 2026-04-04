@@ -9,10 +9,10 @@ export const STATUS_ORDER: ItemStatus[] = [
 ];
 
 export const STATUS_LABELS: Record<ItemStatus, string> = {
-  created: "Created",
-  in_progress: "In Progress",
-  under_review: "Under Review",
-  completed: "Completed",
+  created: "To do",
+  in_progress: "In progress",
+  under_review: "Ready for review",
+  completed: "Done",
 };
 
 /**

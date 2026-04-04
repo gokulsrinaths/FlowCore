@@ -23,29 +23,29 @@ export default async function BillingSettingsPage({ params }: PageProps) {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Workspace name, team, and billing.
+            Name your workspace, manage people, and see your plan.
           </p>
         </div>
         <SettingsSubnav orgSlug={orgSlug} current="billing" />
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Billing</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Plan</h2>
           <p className="text-muted-foreground text-sm mt-1">
-            Plan and usage — Stripe checkout will plug in here.
+            What you’re on today and how to upgrade when you’re ready.
           </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Current plan</CardTitle>
+          <CardTitle className="text-base">Your plan</CardTitle>
           <CardDescription>
-            You are on <strong>{planDisplayName(plan)}</strong>
-            {sub?.status && (
+            You’re on <strong>{planDisplayName(plan)}</strong>
+            {sub?.status && sub.status !== "active" ? (
               <>
                 {" "}
-                · status: {sub.status}
+                · {sub.status === "trialing" ? "trial" : sub.status.replace(/_/g, " ")}
               </>
-            )}
+            ) : null}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
@@ -53,7 +53,7 @@ export default async function BillingSettingsPage({ params }: PageProps) {
             href="/pricing"
             className={cn(buttonVariants(), "inline-flex w-full justify-center sm:w-auto")}
           >
-            View plans & upgrade
+            Compare plans
           </Link>
         </CardContent>
       </Card>

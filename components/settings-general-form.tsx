@@ -28,7 +28,7 @@ export function GeneralSettingsForm({
     start(async () => {
       const res = await updateOrganizationName(organizationId, orgSlug, name);
       if (res.ok) {
-        toast.success("Saved");
+        toast.success("Workspace name saved");
         router.refresh();
       } else {
         toast.error(res.error ?? "Could not save");
@@ -39,7 +39,7 @@ export function GeneralSettingsForm({
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="org-name">Name</Label>
+        <Label htmlFor="org-name">Workspace name</Label>
         <Input
           id="org-name"
           value={name}

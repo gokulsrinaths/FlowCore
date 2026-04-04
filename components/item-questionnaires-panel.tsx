@@ -148,7 +148,7 @@ export function ItemQuestionnairesPanel({
             onClick={() => {
               const q = questionText.trim();
               if (!q) {
-                toast.error("Question text is required");
+                toast.error("Add question text first");
                 return;
               }
               start(async () => {
@@ -162,7 +162,7 @@ export function ItemQuestionnairesPanel({
                   caseId
                 );
                 if (res.ok) {
-                  toast.success("Questionnaire added");
+                  toast.success("Task question added");
                   setQuestionText("");
                   setDescription("");
                   router.refresh();
@@ -218,7 +218,7 @@ export function ItemQuestionnairesPanel({
                           caseId
                         );
                         if (res.ok) {
-                          toast.success("Approved");
+                          toast.success("Answer approved");
                           router.refresh();
                         } else toast.error(res.error);
                       });
@@ -242,7 +242,7 @@ export function ItemQuestionnairesPanel({
                           caseId
                         );
                         if (res.ok) {
-                          toast.success("Sent back for revision");
+                          toast.success("Sent back for changes");
                           router.refresh();
                         } else toast.error(res.error);
                       });
@@ -270,7 +270,7 @@ export function ItemQuestionnairesPanel({
                         caseId
                       );
                       if (res.ok) {
-                        toast.success("Removed");
+                        toast.success("Removed from task");
                         router.refresh();
                       } else toast.error(res.error);
                     });

@@ -14,7 +14,15 @@ const USE_CASES = [
   "agency_delivery",
   "internal_requests",
   "other",
-];
+] as const;
+
+const USE_CASE_LABELS: Record<(typeof USE_CASES)[number], string> = {
+  operations: "Day-to-day operations",
+  compliance: "Compliance & audits",
+  agency_delivery: "Serving clients or the public",
+  internal_requests: "Internal requests & intake",
+  other: "Something else",
+};
 
 export function OnboardingForm() {
   const router = useRouter();
@@ -24,11 +32,11 @@ export function OnboardingForm() {
     start(async () => {
       const res = await createOrganizationAction(formData);
       if (res.ok && res.slug) {
-        toast.success("Workspace created");
+        toast.success("Your workspace is ready");
         router.push(`/${res.slug}/dashboard`);
         router.refresh();
       } else {
-        toast.error(!res.ok ? res.error : "Could not create workspace");
+        toast.error(!res.ok ? res.error : "We couldn’t create your workspace. Try again.");
       }
     });
   }
@@ -40,32 +48,34 @@ export function OnboardingForm() {
     >
       <div className="space-y-2">
         <Label htmlFor="name">Workspace name</Label>
-        <Input id="name" name="name" required placeholder="Acme Ops" />
+        <Input id="name" name="name" required placeholder="e.g. Acme team" />
         <p className="text-xs text-muted-foreground">
-          You will become the workspace owner and can invite teammates from settings.
+          You’ll be the owner and can invite people from Settings → People.
         </p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="slug">Workspace URL</Label>
+        <Label htmlFor="slug">Your workspace link</Label>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span className="shrink-0">…/</span>
           <Input
             id="slug"
             name="slug"
             required
-            placeholder="acme-ops"
+            placeholder="acme-team"
             pattern="[a-z0-9][a-z0-9-]*"
             className="font-mono text-sm"
           />
         </div>
-        <p className="text-xs text-muted-foreground">Lowercase letters, numbers, and hyphens.</p>
+        <p className="text-xs text-muted-foreground">
+          Lowercase letters, numbers, and hyphens only. This is the web address your team will use.
+        </p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="display_name">Your display name</Label>
-        <Input id="display_name" name="display_name" placeholder="Alex" />
+        <Label htmlFor="display_name">Your name (optional)</Label>
+        <Input id="display_name" name="display_name" placeholder="How you’d like to appear" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="primary_use_case">Primary use case</Label>
+        <Label htmlFor="primary_use_case">What will you use this for?</Label>
         <select
           id="primary_use_case"
           name="primary_use_case"
@@ -74,13 +84,13 @@ export function OnboardingForm() {
         >
           {USE_CASES.map((u) => (
             <option key={u} value={u}>
-              {u.replace(/_/g, " ")}
+              {USE_CASE_LABELS[u]}
             </option>
           ))}
         </select>
       </div>
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Creating…" : "Continue"}
+        {pending ? "Creating…" : "Create workspace"}
       </Button>
     </form>
   );

@@ -31,11 +31,11 @@ export function DeleteCaseButton({
     startTransition(async () => {
       const res = await deleteCaseAction(organizationId, orgSlug, caseId);
       if (res.ok) {
-        toast.success("Case deleted");
+        toast.success("Case removed");
         router.push(`/${orgSlug}/cases`);
         router.refresh();
       } else {
-        toast.error(res.error ?? "Could not delete case");
+        toast.error(res.error ?? "Couldn’t remove the case");
       }
     });
   }

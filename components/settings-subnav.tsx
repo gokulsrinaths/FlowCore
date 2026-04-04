@@ -14,8 +14,8 @@ export function SettingsSubnav({
   const base = `/${orgSlug}/settings`;
   const items: { id: SettingsSection; href: string; label: string }[] = [
     { id: "general", href: `${base}/general`, label: "General" },
-    { id: "team", href: `${base}/team`, label: "Team" },
-    { id: "billing", href: `${base}/billing`, label: "Billing" },
+    { id: "team", href: `${base}/team`, label: "People" },
+    { id: "billing", href: `${base}/billing`, label: "Plan" },
   ];
 
   return (

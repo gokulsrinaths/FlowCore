@@ -1,15 +1,16 @@
 import type { OrgRole } from "@/types";
 
-/** UI labels for investigation-style deployments — internal roles unchanged */
+/** Plain-language workspace roles for invites and team UI */
 export function displayOrgRoleLabel(role: OrgRole): string {
   switch (role) {
     case "org_owner":
+      return "Owner";
     case "org_admin":
-      return "SP";
+      return "Admin";
     case "org_manager":
-      return "DSP";
+      return "Manager";
     case "org_worker":
-      return "Officer";
+      return "Member";
     default:
       return role;
   }

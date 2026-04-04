@@ -36,14 +36,14 @@ export default async function TeamSettingsPage({ params }: PageProps) {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Workspace name, team, and billing.
+            Name your workspace, manage people, and see your plan.
           </p>
         </div>
         <SettingsSubnav orgSlug={orgSlug} current="team" />
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Team</h2>
+          <h2 className="text-lg font-semibold tracking-tight">People</h2>
           <p className="text-muted-foreground text-sm mt-1">
-            Members, roles, and invitations.
+            Who’s in the workspace, what they can do, and pending invites.
           </p>
         </div>
       </div>
@@ -53,8 +53,8 @@ export default async function TeamSettingsPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="text-base">Invite people</CardTitle>
             <CardDescription>
-              Create an invite and share the link yourself. They sign in with that email, then
-              accept from Invitations.
+              We’ll create a link you send them. They sign in with that email, then accept from{" "}
+              <strong className="text-foreground">Invites</strong> in the sidebar.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -65,7 +65,7 @@ export default async function TeamSettingsPage({ params }: PageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Members</CardTitle>
+          <CardTitle className="text-base">Who’s here</CardTitle>
         </CardHeader>
         <CardContent>
           <TeamMembersTable
@@ -83,9 +83,11 @@ export default async function TeamSettingsPage({ params }: PageProps) {
       {invites.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Open invitations</CardTitle>
+            <CardTitle className="text-base">Invites still open</CardTitle>
             <CardDescription className="text-xs">
-              Invited = not signed up yet; registered = signed in, pending accept.
+              <strong className="text-foreground">Invited</strong> — they haven’t created an account
+              yet. <strong className="text-foreground">Registered</strong> — they’re signed in and
+              can accept from Invites.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">

@@ -10,8 +10,17 @@ import {
 } from "@/app/actions/item-questionnaires";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { buttonVariants } from "@/lib/button-variants";
 import { ITEM_QUESTIONNAIRE_STATUS_LABELS } from "@/lib/permissions";
+import { cn } from "@/lib/utils";
 import type { MyItemQuestionnaireRow } from "@/types";
 
 export function MyQuestionnairesList({
@@ -29,10 +38,23 @@ export function MyQuestionnairesList({
 
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground rounded-lg border border-dashed border-border/80 p-8 text-center">
-        Nothing assigned to you right now. When someone adds a questionnaire on an item and
-        assigns it to you, it will show up here.
-      </p>
+      <Card className="border-dashed">
+        <CardHeader>
+          <CardTitle className="text-base">Nothing here yet</CardTitle>
+          <CardDescription>
+            A <strong className="text-foreground">task question</strong> is extra information
+            someone needs on a specific task. When you’re assigned one, it will appear here.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link
+            href={`/${orgSlug}/items`}
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "inline-flex")}
+          >
+            Go to task board
+          </Link>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -49,7 +71,7 @@ export function MyQuestionnairesList({
                 href={`/${orgSlug}/items/${row.item_id}`}
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                {row.item_title || "Item"}
+                {row.item_title || "Task"}
               </Link>
               {row.case_id ? (
                 <p className="text-xs text-muted-foreground">
@@ -87,7 +109,7 @@ export function MyQuestionnairesList({
                     row.case_id
                   );
                   if (res.ok) {
-                    toast.success("Accepted — you can answer when ready");
+                    toast.success("You’re set — answer when you’re ready");
                     router.refresh();
                   } else toast.error(res.error);
                 });
@@ -115,7 +137,7 @@ export function MyQuestionnairesList({
                 onClick={() => {
                   const text = (drafts[row.id] ?? row.answer_text ?? "").trim();
                   if (!text) {
-                    toast.error("Enter an answer before submitting");
+                    toast.error("Add an answer first");
                     return;
                   }
                   start(async () => {
@@ -128,13 +150,13 @@ export function MyQuestionnairesList({
                       row.case_id
                     );
                     if (res.ok) {
-                      toast.success("Submitted for review");
+                      toast.success("Sent for review");
                       router.refresh();
                     } else toast.error(res.error);
                   });
                 }}
               >
-                Submit for review
+                Send for review
               </Button>
             </div>
           ) : null}

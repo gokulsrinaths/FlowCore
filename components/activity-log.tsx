@@ -11,8 +11,8 @@ type ActivityLogProps = {
 export function ActivityLog({ entries }: ActivityLogProps) {
   if (!entries.length) {
     return (
-      <p className="text-sm text-muted-foreground py-4">
-        No activity yet.
+      <p className="text-sm text-muted-foreground py-6 text-pretty">
+        Nothing to show yet. As people update tasks and cases, you’ll see a timeline here.
       </p>
     );
   }

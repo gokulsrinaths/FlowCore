@@ -41,12 +41,12 @@ export function ItemDetailActions({
     startTransition(async () => {
       const res = await deleteItem(organizationId, orgSlug, item.id);
       if (res.ok) {
-        toast.success("Item deleted");
+        toast.success("Task removed");
         setDeleteOpen(false);
         router.push(`/${orgSlug}/items`);
         router.refresh();
       } else {
-        toast.error(res.error ?? "Delete failed");
+        toast.error(res.error ?? "Couldn’t remove the task");
       }
     });
   }

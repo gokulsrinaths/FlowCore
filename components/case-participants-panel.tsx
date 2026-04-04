@@ -32,10 +32,10 @@ const NONE_USER = "__none__";
 const ALL_DEPTS = "__all__";
 
 const ROLE_LABEL: Record<string, string> = {
-  sp: "SP",
-  dsp: "DSP",
+  sp: "Supervising",
+  dsp: "Deputy",
   officer: "Officer",
-  external: "External",
+  external: "Guest",
 };
 
 const INVITE_ROLES: OrgRole[] = ["org_worker", "org_manager", "org_admin"];
@@ -48,15 +48,15 @@ function pendingParticipantLabel(p: CaseParticipant): string {
       p.type === "external"
         ? (p.email?.trim() ?? "")
         : (p.user_name ?? p.user_email ?? p.email ?? "").trim();
-    return id ? `${id} → Invited` : "Invited";
+    return id ? `${id} — invite sent` : "Invite sent";
   }
   if (st === "registered") {
     if (p.type === "internal") {
-      const n = (p.user_name ?? p.user_email ?? "User").trim();
-      return `${n} → Registered`;
+      const n = (p.user_name ?? p.user_email ?? "Teammate").trim();
+      return `${n} — signed up, waiting to join case`;
     }
     const em = p.email?.trim() ?? "";
-    return em ? `${em} → Registered` : "Registered";
+    return em ? `${em} — signed up, waiting to join case` : "Waiting to join case";
   }
   return p.email?.trim() || p.user_email || "—";
 }
@@ -67,7 +67,7 @@ function internalRosterLine(p: CaseParticipant): ReactNode {
   const dept = p.department?.trim();
   const st = p.invite_status;
   const suffix =
-    st === "accepted" ? " → Accepted" : st === "rejected" ? " → Rejected" : "";
+    st === "accepted" ? " — on this case" : st === "rejected" ? " — declined" : "";
   return (
     <span>
       {name}
@@ -94,7 +94,7 @@ function openExternalInviteMailto(
 ): void {
   const to = p.email?.trim();
   if (!to) {
-    toast.error("No email on this participant");
+    toast.error("No email address for this person");
     return;
   }
   const inviteLink = p.invite_token?.trim()
@@ -106,11 +106,11 @@ function openExternalInviteMailto(
 function copyExternalInviteLink(p: CaseParticipant): void {
   const tok = p.invite_token?.trim();
   if (!tok) {
-    toast.error("No open invite link for this participant");
+    toast.error("No invite link is available yet");
     return;
   }
   void navigator.clipboard.writeText(publicInviteUrl(tok));
-  toast.success("Invite link copied");
+  toast.success("Link copied");
 }
 
 export function CaseParticipantsPanel({
@@ -152,7 +152,7 @@ export function CaseParticipantsPanel({
 
   function addInternal() {
     if (addUserId === NONE_USER) {
-      toast.error("Select a workspace member");
+      toast.error("Choose someone from the list");
       return;
     }
     startTransition(async () => {
@@ -160,16 +160,16 @@ export function CaseParticipantsPanel({
         userId: addUserId,
       });
       if (res.ok) {
-        toast.success("Participant added");
+        toast.success("Added to this case");
         setAddUserId(NONE_USER);
         refresh();
-      } else toast.error(res.error ?? "Could not add");
+      } else toast.error(res.error ?? "Couldn’t add them");
     });
   }
 
   function addExternal() {
     if (!extEmail.trim()) {
-      toast.error("Enter an email");
+      toast.error("Enter an email address");
       return;
     }
     startTransition(async () => {
@@ -177,16 +177,16 @@ export function CaseParticipantsPanel({
         email: extEmail.trim(),
       });
       if (res.ok) {
-        toast.success("External participant added");
+        toast.success("Guest added to this case");
         setExtEmail("");
         refresh();
-      } else toast.error(res.error ?? "Could not add");
+      } else toast.error(res.error ?? "Couldn’t add them");
     });
   }
 
   function sendCaseInvite() {
     if (!inviteEmail.trim()) {
-      toast.error("Enter an email");
+      toast.error("Enter an email address");
       return;
     }
     startTransition(async () => {
@@ -198,25 +198,25 @@ export function CaseParticipantsPanel({
         inviteRole
       );
       if (res.ok) {
-        toast.success("Invitation created — share the link manually.");
+        toast.success("Invite ready — share the link with them.");
         if (res.inviteUrl) {
           try {
             await navigator.clipboard.writeText(res.inviteUrl);
-            toast.message("Invite link copied to clipboard");
+            toast.message("Link copied");
           } catch {
             /* ignore */
           }
         }
         setInviteEmail("");
         refresh();
-      } else toast.error(res.error ?? "Could not create invite");
+      } else toast.error(res.error ?? "Couldn’t create the invite");
     });
   }
 
   function submitRequisition(e: React.FormEvent) {
     e.preventDefault();
     if (!reqEmail.trim()) {
-      toast.error("Enter an email");
+      toast.error("Enter an email address");
       return;
     }
     startTransition(async () => {
@@ -228,11 +228,11 @@ export function CaseParticipantsPanel({
         reqDesc
       );
       if (res.ok) {
-        toast.success("Requisition recorded");
+        toast.success("Saved");
         setReqEmail("");
         setReqDesc("");
         refresh();
-      } else toast.error(res.error ?? "Could not save");
+      } else toast.error(res.error ?? "Couldn’t save");
     });
   }
 
@@ -240,9 +240,9 @@ export function CaseParticipantsPanel({
     startTransition(async () => {
       const res = await removeCaseParticipantAction(organizationId, orgSlug, caseId, id);
       if (res.ok) {
-        toast.success("Removed");
+        toast.success("Removed from case");
         refresh();
-      } else toast.error(res.error ?? "Could not remove");
+      } else toast.error(res.error ?? "Couldn’t remove");
     });
   }
 
@@ -268,15 +268,15 @@ export function CaseParticipantsPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Participants</CardTitle>
+        <CardTitle className="text-base">People on this case</CardTitle>
         <CardDescription>
-          Internal roster (SP / DSP / Officer) and external contacts for this case.
+          Workspace teammates and outside contacts who can see and work this case.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <h4 className="text-sm font-medium mb-2">SP</h4>
+            <h4 className="text-sm font-medium mb-2">Supervising</h4>
             <ul className="text-sm space-y-1 text-muted-foreground">
               {internal.filter((p) => p.role === "sp").length === 0 ? (
                 <li>—</li>
@@ -305,7 +305,7 @@ export function CaseParticipantsPanel({
             </ul>
           </div>
           <div>
-            <h4 className="text-sm font-medium mb-2">DSP</h4>
+            <h4 className="text-sm font-medium mb-2">Deputy</h4>
             <ul className="text-sm space-y-1 text-muted-foreground">
               {internal.filter((p) => p.role === "dsp").length === 0 ? (
                 <li>—</li>
@@ -366,9 +366,9 @@ export function CaseParticipantsPanel({
         </div>
 
         <div>
-          <h4 className="text-sm font-medium mb-2">Pending</h4>
+          <h4 className="text-sm font-medium mb-2">Waiting to join</h4>
           <p className="text-xs text-muted-foreground mb-2">
-            Invited + registered (not accepted yet). Labels: email → Invited / name → Registered.
+            People who were invited or signed up but haven’t joined this case yet.
           </p>
           <ul className="text-sm space-y-1">
             {pendingCaseInvite.length === 0 ? (
@@ -396,7 +396,7 @@ export function CaseParticipantsPanel({
                           disabled={pending}
                           onClick={() => openExternalInviteMailto(p, caseTitle, orgName)}
                         >
-                          📧 Send Invite Email
+                          Open email draft
                         </Button>
                         {p.invite_token?.trim() ? (
                           <Button
@@ -407,7 +407,7 @@ export function CaseParticipantsPanel({
                             disabled={pending}
                             onClick={() => copyExternalInviteLink(p)}
                           >
-                            📋 Copy invite link
+                            Copy invite link
                           </Button>
                         ) : null}
                       </>
@@ -430,7 +430,7 @@ export function CaseParticipantsPanel({
         </div>
 
         <div>
-          <h4 className="text-sm font-medium mb-2">External (no open invite)</h4>
+          <h4 className="text-sm font-medium mb-2">Outside contacts</h4>
           <ul className="text-sm space-y-1">
             {external.length === 0 ? (
               <li className="text-muted-foreground">—</li>
@@ -452,7 +452,7 @@ export function CaseParticipantsPanel({
                   </span>
                   <span className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                     <Badge variant="secondary" className="w-fit text-[10px]">
-                      Active
+                      On case
                     </Badge>
                     <Button
                       type="button"
@@ -462,7 +462,7 @@ export function CaseParticipantsPanel({
                       disabled={pending}
                       onClick={() => openExternalInviteMailto(p, caseTitle, orgName)}
                     >
-                      📧 Send Invite Email
+                      Open email draft
                     </Button>
                     {p.invite_token?.trim() ? (
                       <Button
@@ -473,7 +473,7 @@ export function CaseParticipantsPanel({
                         disabled={pending}
                         onClick={() => copyExternalInviteLink(p)}
                       >
-                        📋 Copy invite link
+                        Copy invite link
                       </Button>
                     ) : null}
                     <Button
@@ -496,9 +496,9 @@ export function CaseParticipantsPanel({
         <div className="border-t border-border/60 pt-4 space-y-3">
           <h4 className="text-sm font-medium">Invite by email</h4>
           <p className="text-xs text-muted-foreground">
-            Creates a case participant and invitation. Share the invite link manually. After they
-            sign in with that email they can accept from Invitations — they are not on the case
-            until they accept.
+            We’ll create an invite they open in their browser. Share the link with them. They need to
+            sign in with that email and accept from <strong className="text-foreground">Invites</strong>{" "}
+            before they’re fully on this case.
           </p>
           <div className="flex flex-col sm:flex-row gap-2 items-end">
             <div className="flex-1 space-y-2 w-full">
@@ -512,7 +512,7 @@ export function CaseParticipantsPanel({
               />
             </div>
             <div className="w-full sm:w-44 space-y-2">
-              <Label>Org role when they join</Label>
+              <Label>Workspace role when they join</Label>
               <Select
                 value={inviteRole}
                 onValueChange={(v) => v && setInviteRole(v as OrgRole)}
@@ -536,13 +536,13 @@ export function CaseParticipantsPanel({
               onClick={sendCaseInvite}
               disabled={pending}
             >
-              Create invite
+              Send invite
             </Button>
           </div>
         </div>
 
         <div className="border-t border-border/60 pt-4 space-y-3">
-          <h4 className="text-sm font-medium">Add participant</h4>
+          <h4 className="text-sm font-medium">Add someone now</h4>
           {departments.length > 0 && (
             <div className="w-full max-w-full space-y-2 sm:max-w-xs">
               <Label>Filter by department</Label>
@@ -563,7 +563,7 @@ export function CaseParticipantsPanel({
           )}
           <div className="flex flex-col sm:flex-row gap-2 items-end">
             <div className="flex-1 space-y-2 w-full">
-              <Label>Internal (workspace member)</Label>
+              <Label>Someone already in the workspace</Label>
               <Select
                 value={addUserId}
                 onValueChange={(v) => setAddUserId(v ?? NONE_USER)}
@@ -589,7 +589,7 @@ export function CaseParticipantsPanel({
           </div>
           <div className="flex flex-col sm:flex-row gap-2 items-end">
             <div className="flex-1 space-y-2 w-full">
-              <Label>External email</Label>
+              <Label>Guest by email</Label>
               <Input
                 value={extEmail}
                 onChange={(e) => setExtEmail(e.target.value)}
@@ -604,16 +604,16 @@ export function CaseParticipantsPanel({
               onClick={addExternal}
               disabled={pending}
             >
-              Add email
+              Add guest
             </Button>
           </div>
         </div>
 
         <form onSubmit={submitRequisition} className="border-t border-border/60 pt-4 space-y-3">
-          <h4 className="text-sm font-medium">Add requisition / email</h4>
+          <h4 className="text-sm font-medium">Log an outreach (optional)</h4>
           <p className="text-xs text-muted-foreground">
-            Records activity in the app only. Use 📧 Send Invite Email on a participant row if you want
-            a mailto draft.
+            Keeps a note in FlowCore only. To send a real email, use <strong className="text-foreground">Open email draft</strong>{" "}
+            on a person’s row above.
           </p>
           <div className="space-y-2">
             <Label htmlFor="req-email">Email</Label>
@@ -642,7 +642,7 @@ export function CaseParticipantsPanel({
             className="w-full sm:w-auto"
             disabled={pending}
           >
-            Save requisition
+            Save note
           </Button>
         </form>
       </CardContent>

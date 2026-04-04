@@ -21,10 +21,10 @@ export function DemoDataButton({
     start(async () => {
       const res = await seedDemoItemsAction(organizationId, orgSlug);
       if (res.ok) {
-        toast.success("Demo items created");
+        toast.success("Sample tasks added");
         router.refresh();
       } else {
-        toast.error(res.error ?? "Could not create demo data");
+        toast.error(res.error ?? "Couldn’t add sample tasks");
       }
     });
   }
@@ -32,7 +32,7 @@ export function DemoDataButton({
   return (
     <Button type="button" variant="secondary" size="sm" onClick={run} disabled={pending} className="gap-2">
       <Sparkles className="size-4" />
-      {pending ? "Creating…" : "Load demo items"}
+      {pending ? "Adding…" : "Try sample tasks"}
     </Button>
   );
 }

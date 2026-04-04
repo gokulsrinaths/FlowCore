@@ -24,19 +24,21 @@ export default async function GeneralSettingsPage({ params }: PageProps) {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Workspace name, team, and billing.
+            Name your workspace, manage people, and see your plan.
           </p>
         </div>
         <SettingsSubnav orgSlug={orgSlug} current="general" />
         <div>
           <h2 className="text-lg font-semibold tracking-tight">General</h2>
-          <p className="text-muted-foreground text-sm mt-1">Name and basics.</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            How your workspace shows up to your team.
+          </p>
         </div>
       </div>
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Workspace name</CardTitle>
-          <CardDescription>Shown in the sidebar and dashboard.</CardDescription>
+          <CardDescription>Everyone on your team sees this in the app.</CardDescription>
         </CardHeader>
         <CardContent>
           <GeneralSettingsForm
@@ -63,7 +65,7 @@ export default async function GeneralSettingsPage({ params }: PageProps) {
               "inline-flex w-full justify-center sm:w-auto"
             )}
           >
-            View invitations →
+            Open invites →
           </Link>
         </CardContent>
       </Card>

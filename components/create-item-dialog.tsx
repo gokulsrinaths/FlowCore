@@ -109,10 +109,10 @@ export function CreateItemDialog({
     formData.set("case_id", caseId === NO_CASE ? "" : caseId);
     const res = await createItem(formData);
     if (res.ok) {
-      toast.success("Item created");
+      toast.success("Task created");
       setOpen(false);
     } else {
-      toast.error(res.error ?? "Could not create item");
+      toast.error(res.error ?? "Couldn’t create the task");
     }
   }
 
@@ -126,7 +126,7 @@ export function CreateItemDialog({
         onClick={() => setOpen(true)}
       >
         <Plus className="size-4" />
-        New item
+        New task
       </Button>
       <Dialog
         open={open}
@@ -178,7 +178,7 @@ export function CreateItemDialog({
             </div>
             {cases.length > 0 && (
               <div className="space-y-2">
-                <Label>Case (optional)</Label>
+                <Label>Link to a case (optional)</Label>
                 <Select
                   value={caseId}
                   onValueChange={(v) => setCaseId(v ?? NO_CASE)}
@@ -248,17 +248,18 @@ export function CreateItemDialog({
                 </Select>
                 {caseId !== NO_CASE && externalParticipants.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    Add external emails on the case page to assign tasks to them.
+                    Add guest emails on the case page if you need to assign work to people outside
+                    the workspace.
                   </p>
                 )}
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Only managers and admins can assign items at creation time.
+                Only managers and admins can assign tasks when they’re created.
               </p>
             )}
             <DialogFooter>
-              <Button type="submit">Create</Button>
+              <Button type="submit">Add task</Button>
             </DialogFooter>
           </form>
         </DialogContent>

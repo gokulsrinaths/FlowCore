@@ -20,17 +20,17 @@ export default async function ActivityPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8">
-      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to home" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Organization-scoped audit trail and system events.
+        <p className="text-muted-foreground text-sm mt-1 max-w-xl">
+          A simple history of what changed in this workspace — tasks, cases, and team actions.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Workflow & item events</CardTitle>
+          <CardTitle className="text-base">Tasks & cases</CardTitle>
         </CardHeader>
         <CardContent>
           <ActivityLog entries={feed} />
@@ -41,7 +41,7 @@ export default async function ActivityPage({ params }: PageProps) {
         membership.organization.role === "org_admin") && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">System audit</CardTitle>
+            <CardTitle className="text-base">Admin log</CardTitle>
           </CardHeader>
           <CardContent>
             <ActivityLog entries={system} />

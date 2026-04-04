@@ -143,9 +143,12 @@ export function FormBuilderEditor({
           normalized
         );
         if (res.ok && res.id) {
-          toast.success("Form created");
+          toast.success("Form saved — you can share or edit it anytime");
           router.push(`${base}/${res.id}`);
-        } else toast.error(res.ok ? "No id returned" : res.error);
+        } else
+          toast.error(
+            res.ok ? "Something went wrong. Please try again." : (res.error ?? "Couldn’t save")
+          );
       } else if (formId) {
         const res = await updateFormTemplateAction(
           organizationId,
@@ -156,7 +159,7 @@ export function FormBuilderEditor({
           normalized
         );
         if (res.ok) toast.success("Saved");
-        else toast.error(res.error);
+        else toast.error(res.error ?? "Couldn’t save");
       }
     });
   }
@@ -167,7 +170,7 @@ export function FormBuilderEditor({
     start(async () => {
       const res = await deleteFormTemplateAction(organizationId, orgSlug, formId);
       if (res.ok) {
-        toast.success("Form deleted");
+        toast.success("Form removed");
         router.push(base);
       } else toast.error(res.error);
     });

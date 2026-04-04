@@ -90,21 +90,21 @@ export function ItemDetailControls({
     if (next === item.status) return;
     if (questionnaireStatusLocked) {
       toast.error(
-        "This item’s status follows the questionnaire workflow. Owners and admins can still change it."
+        "This task’s status follows its questions until they’re done. Owners or admins can still change it."
       );
       return;
     }
     if (!canChangeStatus(wf, item.status, next)) {
-      toast.error("You cannot move this item to that stage");
+      toast.error("That move isn’t allowed for your role. Ask a manager if you need help.");
       return;
     }
     startTransition(async () => {
       const res = await updateItemStatus(organizationId, orgSlug, item.id, next);
       if (res.ok) {
-        toast.success("Status updated");
+        toast.success("Task updated");
         router.refresh();
       } else {
-        toast.error(res.error ?? "Update failed");
+        toast.error(res.error ?? "Couldn’t update the task");
       }
     });
   }
@@ -120,9 +120,9 @@ export function ItemDetailControls({
           null
         );
         if (res.ok) {
-          toast.success("Assignee updated");
+          toast.success("Assignment saved");
           router.refresh();
-        } else toast.error(res.error ?? "Update failed");
+        } else toast.error(res.error ?? "Couldn’t update assignment");
         return;
       }
       if (v.startsWith("u:")) {
@@ -133,9 +133,9 @@ export function ItemDetailControls({
           v.slice(2)
         );
         if (res.ok) {
-          toast.success("Assignee updated");
+          toast.success("Assignment saved");
           router.refresh();
-        } else toast.error(res.error ?? "Update failed");
+        } else toast.error(res.error ?? "Couldn’t update assignment");
         return;
       }
       if (v.startsWith("p:")) {
@@ -146,9 +146,9 @@ export function ItemDetailControls({
           v.slice(2)
         );
         if (res.ok) {
-          toast.success("Assignee updated");
+          toast.success("Assignment saved");
           router.refresh();
-        } else toast.error(res.error ?? "Update failed");
+        } else toast.error(res.error ?? "Couldn’t update assignment");
       }
     });
   }
@@ -170,14 +170,14 @@ export function ItemDetailControls({
     startTransition(async () => {
       const iso = raw ? new Date(raw).toISOString() : null;
       if (raw && Number.isNaN(new Date(raw).getTime())) {
-        toast.error("Invalid due date");
+        toast.error("Please enter a valid date");
         return;
       }
       const res = await setItemDueDate(organizationId, orgSlug, item.id, iso);
       if (res.ok) {
         toast.success(iso ? "Due date saved" : "Due date cleared");
         router.refresh();
-      } else toast.error(res.error ?? "Update failed");
+      } else toast.error(res.error ?? "Couldn’t save the due date");
     });
   }
 
@@ -298,7 +298,7 @@ export function ItemDetailControls({
                   if (res.ok) {
                     toast.success("Due date cleared");
                     router.refresh();
-                  } else toast.error(res.error ?? "Update failed");
+                  } else toast.error(res.error ?? "Couldn’t save the due date");
                 });
               }}
             >

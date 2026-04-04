@@ -51,11 +51,11 @@ export function EditItemDialog({
     });
     setPending(false);
     if (res.ok) {
-      toast.success("Item updated");
+      toast.success("Task saved");
       onOpenChange(false);
       router.refresh();
     } else {
-      toast.error(res.error ?? "Update failed");
+      toast.error(res.error ?? "Couldn’t save changes");
     }
   }
 
@@ -64,7 +64,7 @@ export function EditItemDialog({
       <DialogContent className="sm:max-w-lg">
         <form onSubmit={onSubmit}>
           <DialogHeader>
-            <DialogTitle>Edit item</DialogTitle>
+            <DialogTitle>Edit task</DialogTitle>
             <DialogDescription>Update fields and save — changes are audited.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

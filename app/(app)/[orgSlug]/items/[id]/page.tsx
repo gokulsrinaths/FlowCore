@@ -60,7 +60,7 @@ export default async function ItemDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <PageBackLink href={`/${orgSlug}/items`} label="Back to items" />
+      <PageBackLink href={`/${orgSlug}/items`} label="Back to task board" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">
@@ -68,7 +68,7 @@ export default async function ItemDetailPage({ params }: PageProps) {
           </p>
           <h1 className="text-2xl font-semibold tracking-tight mt-1">{item.title}</h1>
           <p className="text-muted-foreground text-sm mt-2 whitespace-pre-wrap">
-            {item.description ?? "No description."}
+            {item.description ?? "No details added yet."}
           </p>
         </div>
         {(canEdit || canDelete) && (
@@ -148,7 +148,7 @@ export default async function ItemDetailPage({ params }: PageProps) {
       </Card>
 
       <div>
-        <h2 className="text-lg font-medium mb-3">Comments</h2>
+        <h2 className="text-lg font-medium mb-3">Discussion</h2>
         <CommentSection
           itemId={item.id}
           organizationId={orgId}

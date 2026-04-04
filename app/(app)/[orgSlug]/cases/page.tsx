@@ -37,12 +37,14 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
 
   return (
     <>
-      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to home" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Cases</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Domain cases — tasks stay generic and link here when needed.
+          <p className="text-muted-foreground text-sm mt-1 max-w-xl">
+            A <strong className="text-foreground font-medium">case</strong> groups related people,
+            tasks, and questions. Open one to work the full story — tasks on the board can link here
+            when it helps.
           </p>
         </div>
         <CreateCaseDialog organizationId={orgId} orgSlug={orgSlug} orgUsers={orgUsers} />
@@ -53,7 +55,8 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
           <CardHeader>
             <CardTitle className="text-base">No cases yet</CardTitle>
             <CardDescription>
-              No cases yet — create your first investigation
+              Start a case to gather people, tasks, and answers in one place. Use the button above
+              when you are ready.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -63,9 +66,9 @@ async function CasesContent({ orgSlug }: { orgSlug: string }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
-                <TableHead className="hidden sm:table-cell">District / crime number</TableHead>
+                <TableHead className="hidden sm:table-cell">District / reference</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Tasks</TableHead>
+                <TableHead className="text-right">Tasks linked</TableHead>
                 <TableHead className="hidden md:table-cell text-right">Created</TableHead>
               </TableRow>
             </TableHeader>

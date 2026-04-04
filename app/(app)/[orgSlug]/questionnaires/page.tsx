@@ -20,11 +20,12 @@ export default async function QuestionnairesPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to dashboard" />
+      <PageBackLink href={`/${orgSlug}/dashboard`} label="Back to home" />
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Questionnaires</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Questions assigned to you on items. Accept, answer, and submit for review.
+        <h1 className="text-2xl font-semibold tracking-tight">Task questions</h1>
+        <p className="text-muted-foreground text-sm mt-1 max-w-xl">
+          A <strong className="text-foreground font-medium">questionnaire</strong> here is a question
+          tied to a task — accept it, write your answer, and send it for review when you’re done.
         </p>
       </div>
       <MyQuestionnairesList rows={rows} organizationId={orgId} orgSlug={orgSlug} />

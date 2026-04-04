@@ -96,7 +96,7 @@ export function EditCaseDialog({
     try {
       const res = await updateCaseAction(formData);
       if (!res.ok) {
-        toast.error(res.error ?? "Could not update case");
+        toast.error(res.error ?? "Couldn’t update the case");
         return;
       }
       for (const uid of addMemberIds) {
@@ -104,13 +104,13 @@ export function EditCaseDialog({
           userId: uid,
         });
         if (!add.ok) {
-          toast.error(add.error ?? "Could not add a case member");
+          toast.error(add.error ?? "Couldn’t add someone to this case");
           router.refresh();
           return;
         }
       }
       toast.success(
-        addMemberIds.size > 0 ? "Case updated and access updated" : "Case updated"
+        addMemberIds.size > 0 ? "Case saved — access updated" : "Case saved"
       );
       setAddMemberIds(new Set());
       setOpen(false);

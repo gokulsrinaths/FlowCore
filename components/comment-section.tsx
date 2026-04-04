@@ -40,10 +40,10 @@ export function CommentSection({
       const res = await addComment(organizationId, orgSlug, itemId, body);
       if (res.ok) {
         setText("");
-        toast.success("Comment added");
+        toast.success("Comment posted");
         router.refresh();
       } else {
-        toast.error(res.error ?? "Failed to add comment");
+        toast.error(res.error ?? "Couldn’t post your comment");
       }
     });
   }
@@ -52,10 +52,10 @@ export function CommentSection({
     startTransition(async () => {
       const res = await deleteComment(organizationId, orgSlug, commentId, itemId);
       if (res.ok) {
-        toast.success("Comment removed");
+        toast.success("Note removed");
         router.refresh();
       } else {
-        toast.error(res.error ?? "Failed to delete");
+        toast.error(res.error ?? "Couldn’t remove the comment");
       }
     });
   }
@@ -64,7 +64,7 @@ export function CommentSection({
     <div className="space-y-4">
       <div className="space-y-2">
         <Textarea
-          placeholder="Write a comment…"
+          placeholder="Write an update for your team…"
           rows={3}
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -76,13 +76,13 @@ export function CommentSection({
           onClick={submit}
           disabled={pending || !text.trim()}
         >
-          Post comment
+          Post
         </Button>
       </div>
       <Separator />
       <ul className="space-y-4">
         {initialComments.length === 0 && (
-          <li className="text-sm text-muted-foreground">No comments yet.</li>
+          <li className="text-sm text-muted-foreground">No updates yet.</li>
         )}
         {initialComments.map((c) => {
           const author = c.user?.name ?? c.user?.email ?? "Unknown";
