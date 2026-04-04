@@ -25,6 +25,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { publicInviteUrl } from "@/lib/invite-link";
 import { generateInviteMailto } from "@/lib/mailto";
+import { displayOrgRoleLabel } from "@/lib/org-role-labels";
 import type { CaseParticipant, OrgRole, UserRow } from "@/types";
 
 const NONE_USER = "__none__";
@@ -523,7 +524,7 @@ export function CaseParticipantsPanel({
                 <SelectContent>
                   {INVITE_ROLES.map((r) => (
                     <SelectItem key={r} value={r}>
-                      {r.replace("org_", "")}
+                      {displayOrgRoleLabel(r)}
                     </SelectItem>
                   ))}
                 </SelectContent>

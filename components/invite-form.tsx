@@ -17,7 +17,8 @@ import {
 import { displayOrgRoleLabel } from "@/lib/org-role-labels";
 import type { OrgRole } from "@/types";
 
-const INVITE_ROLES: OrgRole[] = ["org_admin", "org_manager", "org_worker"];
+/** Same order as case “Invite by email” role list */
+const INVITE_ROLES: OrgRole[] = ["org_worker", "org_manager", "org_admin"];
 
 export function InviteForm({
   organizationId,
@@ -57,36 +58,47 @@ export function InviteForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4 max-w-md">
-      <div className="space-y-2">
-        <Label htmlFor="invite-email">Email</Label>
-        <Input
-          id="invite-email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="colleague@company.com"
-        />
+    <form onSubmit={submit} className="w-full">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div className="flex-1 space-y-2 w-full">
+          <Label htmlFor="invite-email">Email</Label>
+          <Input
+            id="invite-email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@example.com"
+            disabled={pending}
+          />
+        </div>
+        <div className="w-full space-y-2 sm:w-44">
+          <Label htmlFor="invite-role">Org role when they join</Label>
+          <Select
+            value={role}
+            onValueChange={(v) => setRole(v as OrgRole)}
+            disabled={pending}
+          >
+            <SelectTrigger id="invite-role">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {INVITE_ROLES.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {displayOrgRoleLabel(r)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <Button
+          type="submit"
+          className="w-full shrink-0 sm:w-auto"
+          disabled={pending}
+        >
+          {pending ? "Creating…" : "Create invite"}
+        </Button>
       </div>
-      <div className="space-y-2">
-        <Label>Role</Label>
-        <Select value={role} onValueChange={(v) => setRole(v as OrgRole)}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {INVITE_ROLES.map((r) => (
-              <SelectItem key={r} value={r}>
-                {displayOrgRoleLabel(r)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <Button type="submit" className="w-full sm:w-auto" disabled={pending}>
-        {pending ? "Creating…" : "Create invite"}
-      </Button>
     </form>
   );
 }
