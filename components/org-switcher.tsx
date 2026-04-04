@@ -40,9 +40,12 @@ function hrefForWorkspaceSwitch(
 export function OrgSwitcher({
   current,
   organizations,
+  triggerClassName,
 }: {
   current: OrganizationWithRole;
   organizations: OrganizationWithRole[];
+  /** Merged onto the dropdown trigger (e.g. width constraints in the top bar). */
+  triggerClassName?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -60,7 +63,8 @@ export function OrgSwitcher({
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "outline" }),
-          "min-h-11 w-full touch-manipulation justify-between gap-2 py-2.5 pl-3 pr-2 font-normal h-auto"
+          "min-h-11 w-full touch-manipulation justify-between gap-2 py-2.5 pl-3 pr-2 font-normal h-auto",
+          triggerClassName
         )}
       >
         <span className="flex items-center gap-2 min-w-0">
@@ -69,7 +73,7 @@ export function OrgSwitcher({
         </span>
         <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="start">
+      <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
             Workspaces

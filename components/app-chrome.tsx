@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { signOutAction } from "@/app/actions/auth";
 import { OrgSwitcher } from "@/components/org-switcher";
 import { SidebarNav } from "@/components/sidebar-nav";
@@ -59,14 +60,18 @@ export function AppChrome({
         </Button>
         <Link
           href={`${base}/dashboard`}
-          className="font-semibold tracking-tight touch-manipulation"
+          className="shrink-0 font-semibold tracking-tight touch-manipulation"
           onClick={() => setMenuOpen(false)}
         >
           FlowCore
         </Link>
-        <span className="ml-auto min-w-0 truncate text-right text-xs text-muted-foreground">
-          {organization.name}
-        </span>
+        <div className="ml-auto min-w-0 max-w-[min(11rem,calc(100vw-8rem))] pl-2">
+          <OrgSwitcher
+            current={organization}
+            organizations={allOrgs}
+            triggerClassName="min-h-9 w-full py-2"
+          />
+        </div>
       </header>
 
       <Dialog open={menuOpen} onOpenChange={setMenuOpen}>
@@ -77,9 +82,6 @@ export function AppChrome({
           <DialogHeader className="sr-only">
             <DialogTitle>Workspace menu</DialogTitle>
           </DialogHeader>
-          <div className="border-b border-border/60 p-3">
-            <OrgSwitcher current={organization} organizations={allOrgs} />
-          </div>
           <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3">
             <SidebarNav
               items={nav}
@@ -105,28 +107,73 @@ export function AppChrome({
         </DialogContent>
       </Dialog>
 
-      {/* Desktop sidebar */}
-      <aside className="hidden w-56 shrink-0 flex-col border-border/80 bg-card/40 md:flex md:min-h-screen md:border-r">
-        <div className="flex items-center justify-between gap-2 border-b border-border/60 p-4">
-          <Link href={`${base}/dashboard`} className="font-semibold tracking-tight">
-            FlowCore
-          </Link>
-        </div>
-        <div className="border-b border-border/60 p-3">
-          <OrgSwitcher current={organization} organizations={allOrgs} />
-        </div>
-        <nav className="flex-1 space-y-1 p-3">
-          <SidebarNav items={nav} base={base} />
-        </nav>
-        <div className="border-t border-border/60 p-3 space-y-2">
-          <p className="truncate text-xs text-muted-foreground">
-            {profile.name ?? profile.email ?? "Signed in"}
-          </p>
-          <form action={signOutAction}>
-            <Button type="submit" variant="outline" size="sm" className="w-full touch-manipulation">
-              Sign out
-            </Button>
-          </form>
+      {/* Desktop sidebar: collapsed rail (logo mark); expands on hover / focus-within */}
+      <aside
+        className={cn(
+          "group/sidebar relative z-30 hidden shrink-0 flex-col border-border/80 bg-card/40 md:flex",
+          "md:min-h-screen md:border-r",
+          "w-14 overflow-hidden motion-safe:transition-[width] motion-safe:duration-200 motion-safe:ease-out",
+          "hover:w-56 focus-within:w-56"
+        )}
+      >
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div
+            className={cn(
+              "flex shrink-0 items-center justify-center border-b border-border/60 px-2 py-3",
+              "group-hover/sidebar:justify-start group-hover/sidebar:px-3",
+              "group-focus-within/sidebar:justify-start group-focus-within/sidebar:px-3"
+            )}
+          >
+            <Link
+              href={`${base}/dashboard`}
+              className="flex min-h-10 min-w-0 items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              aria-label="FlowCore — Dashboard"
+            >
+              <span
+                className={cn(
+                  "flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground",
+                  "group-hover/sidebar:hidden group-focus-within/sidebar:hidden"
+                )}
+                aria-hidden
+              >
+                FC
+              </span>
+              <span
+                className={cn(
+                  "hidden truncate font-semibold tracking-tight",
+                  "group-hover/sidebar:block group-focus-within/sidebar:block"
+                )}
+              >
+                FlowCore
+              </span>
+            </Link>
+          </div>
+
+          <div
+            className={cn(
+              "hidden min-h-0 flex-1 flex-col",
+              "group-hover/sidebar:flex group-focus-within/sidebar:flex"
+            )}
+          >
+            <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain p-3">
+              <SidebarNav items={nav} base={base} />
+            </nav>
+            <div className="shrink-0 space-y-2 border-t border-border/60 p-3">
+              <p className="truncate text-xs text-muted-foreground">
+                {profile.name ?? profile.email ?? "Signed in"}
+              </p>
+              <form action={signOutAction}>
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  className="w-full touch-manipulation"
+                >
+                  Sign out
+                </Button>
+              </form>
+            </div>
+          </div>
         </div>
       </aside>
 

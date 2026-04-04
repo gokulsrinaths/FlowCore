@@ -1,9 +1,6 @@
-import { LogOut } from "lucide-react";
-import Link from "next/link";
 import { AppChrome } from "@/components/app-chrome";
-import { Button } from "@/components/ui/button";
+import { OrgSwitcher } from "@/components/org-switcher";
 import { NotificationBell } from "@/components/notification-bell";
-import { signOutAction } from "@/app/actions/auth";
 import { getActionableQuestionnaireCountForNav } from "@/app/actions/item-questionnaires";
 import { getPendingInvitationCountForNav } from "@/app/actions/invitations";
 import { getOrganizationsForUser } from "@/lib/organizations";
@@ -56,20 +53,13 @@ export async function AppShell({
     >
       <header className="sticky top-12 z-40 border-b border-border/80 bg-card/30 backdrop-blur-sm md:top-0">
         <div className="flex flex-wrap items-center justify-end gap-2 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-3">
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <Link
-              href="/help"
-              className="inline-flex min-h-9 shrink-0 items-center rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              Help
-            </Link>
-            <NotificationBell orgSlug={organization.slug} />
-            <form action={signOutAction} className="hidden sm:block">
-              <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground">
-                <LogOut className="size-4 sm:mr-2" />
-                <span className="hidden sm:inline">Sign out</span>
-              </Button>
-            </form>
+          <NotificationBell orgSlug={organization.slug} />
+          <div className="min-w-0 max-w-[min(16rem,calc(100vw-5rem))]">
+            <OrgSwitcher
+              current={organization}
+              organizations={allOrgs}
+              triggerClassName="w-full"
+            />
           </div>
         </div>
       </header>
