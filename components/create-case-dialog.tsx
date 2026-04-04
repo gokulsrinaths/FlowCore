@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { AccusedDetails } from "@/lib/case-accused";
 import { CASE_STATUS_LABELS } from "@/lib/case-labels";
 import type { CaseStatus } from "@/types";
 
@@ -34,8 +33,6 @@ const STATUSES: CaseStatus[] = [
   "under_investigation",
   "closed",
 ];
-
-const EMPTY_ACCUSED: AccusedDetails = { a1: "", a2: "", a3: "" };
 
 type CreateCaseDialogProps = {
   organizationId: string;
@@ -114,7 +111,7 @@ export function CreateCaseDialog({ organizationId, orgSlug }: CreateCaseDialogPr
             </div>
             <AccusedDetailsFields
               key={open ? "case-form-open" : "case-form-closed"}
-              initial={EMPTY_ACCUSED}
+              initialEntries={[""]}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

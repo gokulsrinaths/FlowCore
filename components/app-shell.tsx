@@ -33,6 +33,7 @@ export async function AppShell({
     { href: `${base}/dashboard`, label: "Dashboard", icon: "dashboard" as const },
     { href: `${base}/search`, label: "Search", icon: "search" as const },
     { href: `${base}/cases`, label: "Cases", icon: "cases" as const },
+    { href: `${base}/forms`, label: "Forms", icon: "forms" as const },
     { href: `${base}/items`, label: "Items", icon: "items" as const },
     { href: `${base}/activity`, label: "Activity", icon: "activity" as const },
     { href: `${base}/settings/team`, label: "Team", icon: "team" as const },

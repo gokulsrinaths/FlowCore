@@ -1,75 +1,132 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { AccusedDetails } from "@/lib/case-accused";
+import { Plus, Trash2 } from "lucide-react";
 
 type AccusedDetailsFieldsProps = {
-  /** Initial values when dialog opens (edit) */
-  initial: AccusedDetails;
+  /** Initial rows when the dialog opens (from `accusedJsonToEntries`). */
+  initialEntries: string[];
 };
 
-const PLACEHOLDERS = ["a1", "a2", "a3"] as const;
-
 /**
- * Three accused blocks (a1–a3). Double Enter in a field moves focus to the next field.
+ * Dynamic list of accused detail blocks. Add/remove as needed; stored as `{ entries: string[] }`.
  */
-export function AccusedDetailsFields({ initial }: AccusedDetailsFieldsProps) {
-  const ref0 = useRef<HTMLTextAreaElement>(null);
-  const ref1 = useRef<HTMLTextAreaElement>(null);
-  const ref2 = useRef<HTMLTextAreaElement>(null);
-  const refs = [ref0, ref1, ref2] as const;
+export function AccusedDetailsFields({ initialEntries }: AccusedDetailsFieldsProps) {
+  const [entries, setEntries] = useState<string[]>(() =>
+    initialEntries.length > 0 ? [...initialEntries] : [""]
+  );
 
   const lastEnterRef = useRef<{ at: number; index: number } | null>(null);
+  const refs = useRef<(HTMLTextAreaElement | null)[]>([]);
+
+  const setRef = useCallback((el: HTMLTextAreaElement | null, index: number) => {
+    refs.current[index] = el;
+  }, []);
 
   const onKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>, index: 0 | 1 | 2) => {
-      if (e.key !== "Enter" || e.shiftKey) {
-        return;
-      }
+    (e: React.KeyboardEvent<HTMLTextAreaElement>, index: number) => {
+      if (e.key !== "Enter" || e.shiftKey) return;
       const now = Date.now();
       const prev = lastEnterRef.current;
-      if (
-        prev &&
-        prev.index === index &&
-        now - prev.at < 550 &&
-        index < 2
-      ) {
+      if (prev && prev.index === index && now - prev.at < 550 && index < entries.length - 1) {
         e.preventDefault();
         lastEnterRef.current = null;
-        refs[index + 1].current?.focus();
+        refs.current[index + 1]?.focus();
         return;
       }
       lastEnterRef.current = { at: now, index };
     },
-    []
+    [entries.length]
   );
+
+  function addRow() {
+    setEntries((prev) => [...prev, ""]);
+  }
+
+  function removeRow(index: number) {
+    setEntries((prev) => {
+      if (prev.length <= 1) {
+        const next = [...prev];
+        next[0] = "";
+        return next;
+      }
+      return prev.filter((_, i) => i !== index);
+    });
+  }
+
+  function updateRow(index: number, value: string) {
+    setEntries((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  }
 
   return (
     <div className="space-y-3">
-      <div>
-        <Label>Accused details</Label>
-        <p className="text-muted-foreground mt-1 text-xs">
-          Three blocks (a1, a2, a3). Press Enter twice quickly to move to the next block.
-        </p>
-      </div>
-      {PLACEHOLDERS.map((ph, i) => (
-        <div key={ph} className="space-y-1.5">
-          <Label htmlFor={`accused-${ph}`} className="text-muted-foreground text-xs font-normal">
-            {ph}
-          </Label>
-          <Textarea
-            ref={refs[i]}
-            id={`accused-${ph}`}
-            name={`accused_${ph}`}
-            rows={3}
-            defaultValue={initial[["a1", "a2", "a3"][i] as keyof AccusedDetails]}
-            placeholder={ph}
-            onKeyDown={(e) => onKeyDown(e, i as 0 | 1 | 2)}
-          />
+      <input
+        type="hidden"
+        name="accused_payload"
+        value={JSON.stringify({ entries })}
+        readOnly
+        aria-hidden
+      />
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <Label>Accused details</Label>
+          <p className="text-muted-foreground mt-1 text-xs text-pretty">
+            Add one block per accused person or entity. Use <strong>Add accused</strong> for more
+            rows. Press Enter twice quickly to jump to the next block.
+          </p>
         </div>
-      ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full shrink-0 touch-manipulation sm:w-auto"
+          onClick={addRow}
+        >
+          <Plus className="size-4 mr-1" />
+          Add accused
+        </Button>
+      </div>
+      <ul className="space-y-3">
+        {entries.map((value, i) => (
+          <li key={i} className="flex gap-2 items-start">
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <Label
+                htmlFor={`accused-entry-${i}`}
+                className="text-muted-foreground text-xs font-normal"
+              >
+                Accused {i + 1}
+              </Label>
+              <Textarea
+                ref={(el) => setRef(el, i)}
+                id={`accused-entry-${i}`}
+                rows={3}
+                value={value}
+                onChange={(e) => updateRow(i, e.target.value)}
+                onKeyDown={(e) => onKeyDown(e, i)}
+                placeholder="Name, role, identifiers, notes…"
+                className="touch-manipulation"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="mt-6 size-9 shrink-0 text-muted-foreground hover:text-destructive touch-manipulation"
+              aria-label={`Remove accused ${i + 1}`}
+              onClick={() => removeRow(i)}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

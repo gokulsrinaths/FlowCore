@@ -1,17 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { detailsToAccusedJson } from "@/lib/case-accused";
+import { accusedPayloadFromForm } from "@/lib/case-accused";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { parseFlowcoreRpc } from "@/lib/supabase-rpc";
 import type { CaseStatus } from "@/types";
-
-function accusedFromForm(formData: FormData): unknown | null {
-  const a1 = String(formData.get("accused_a1") ?? "");
-  const a2 = String(formData.get("accused_a2") ?? "");
-  const a3 = String(formData.get("accused_a3") ?? "");
-  return detailsToAccusedJson({ a1, a2, a3 });
-}
 
 export type CaseActionResult =
   | { ok: true; id?: string }
@@ -42,7 +35,7 @@ export async function createCaseAction(formData: FormData): Promise<CaseActionRe
     const financialRaw = String(formData.get("financial_impact") ?? "").trim();
     const status = String(formData.get("status") ?? "open").trim() as CaseStatus;
 
-    const accused = accusedFromForm(formData);
+    const accused = accusedPayloadFromForm(formData);
 
     const financial_impact =
       financialRaw === "" ? null : Number.parseFloat(financialRaw);
@@ -88,7 +81,7 @@ export async function updateCaseAction(formData: FormData): Promise<CaseActionRe
     const financialRaw = String(formData.get("financial_impact") ?? "").trim();
     const status = String(formData.get("status") ?? "").trim() as CaseStatus;
 
-    const accused = accusedFromForm(formData);
+    const accused = accusedPayloadFromForm(formData);
 
     const financial_impact =
       financialRaw === "" ? null : Number.parseFloat(financialRaw);

@@ -295,3 +295,57 @@ export type SubscriptionRow = {
   current_period_end: string | null;
   updated_at: string;
 };
+
+/** Google Forms–style org templates (migration 030). */
+export type FormFieldType = "short_text" | "long_text" | "mcq_single" | "mcq_multi";
+
+export type FormShowWhenOperator =
+  | "equals"
+  | "not_equals"
+  | "contains"
+  | "is_empty"
+  | "is_not_empty";
+
+export type FormFieldShowWhen = {
+  fieldId: string;
+  operator: FormShowWhenOperator;
+  /** Compared to parent answer (MCQ option value or text). Omit for is_empty / is_not_empty. */
+  value?: string;
+};
+
+export type FormTemplateField = {
+  id: string;
+  type: FormFieldType;
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  options?: string[];
+  showWhen?: FormFieldShowWhen | null;
+  orderIndex: number;
+};
+
+export type FormTemplateListRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  updated_at: string;
+  response_count: number;
+};
+
+export type FormTemplateDetail = {
+  id: string;
+  organization_id: string;
+  title: string;
+  description: string | null;
+  fields: FormTemplateField[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type FormSubmissionRow = {
+  id: string;
+  answers: Record<string, unknown>;
+  submitted_by: string | null;
+  case_id: string | null;
+  created_at: string;
+};

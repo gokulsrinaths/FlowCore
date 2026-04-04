@@ -1,54 +1,99 @@
 /**
- * Accused details stored as JSON: { a1, a2, a3 } with legacy fallbacks.
+ * Accused details as JSON.
+ * - New shape: { entries: string[] }
+ * - Legacy: { a1, a2, a3 } or plain string
  */
 
-export type AccusedDetails = {
-  a1: string;
-  a2: string;
-  a3: string;
-};
+const LEGACY_KEYS = ["a1", "a2", "a3"] as const;
 
-export function accusedJsonToDetails(accused: unknown): AccusedDetails {
-  if (accused == null) return { a1: "", a2: "", a3: "" };
+/** Normalize stored JSON into a list of strings for the UI (at least one row). */
+export function accusedJsonToEntries(accused: unknown): string[] {
+  if (accused == null) return [""];
   if (typeof accused === "object" && accused !== null && !Array.isArray(accused)) {
     const o = accused as Record<string, unknown>;
-    const a1 = o.a1 != null ? String(o.a1) : "";
-    const a2 = o.a2 != null ? String(o.a2) : "";
-    const a3 = o.a3 != null ? String(o.a3) : "";
-    if (a1 !== "" || a2 !== "" || a3 !== "") {
-      return { a1, a2, a3 };
+    if (Array.isArray(o.entries)) {
+      const list = o.entries.map((x) => String(x ?? ""));
+      return list.length > 0 ? list : [""];
+    }
+    const legacy = LEGACY_KEYS.map((k) => (o[k] != null ? String(o[k]) : ""));
+    if (legacy.some((s) => s.trim() !== "")) {
+      return legacy;
     }
     if (typeof o.raw === "string" && o.raw.trim()) {
-      return { a1: o.raw, a2: "", a3: "" };
+      return [o.raw];
     }
+    try {
+      const s = JSON.stringify(accused, null, 2);
+      if (s && s !== "{}") return [s];
+    } catch {
+      /* fall through */
+    }
+    return [""];
   }
   if (typeof accused === "string") {
-    return { a1: accused, a2: "", a3: "" };
+    return accused.trim() ? [accused] : [""];
   }
   try {
-    return { a1: JSON.stringify(accused, null, 2), a2: "", a3: "" };
+    const s = JSON.stringify(accused, null, 2);
+    return s ? [s] : [""];
   } catch {
-    return { a1: String(accused), a2: "", a3: "" };
+    return [String(accused)];
   }
 }
 
-export function detailsToAccusedJson(d: AccusedDetails): unknown | null {
-  const a1 = d.a1.trim();
-  const a2 = d.a2.trim();
-  const a3 = d.a3.trim();
-  if (!a1 && !a2 && !a3) return null;
-  return { a1: a1 || null, a2: a2 || null, a3: a3 || null };
+/** Persist: only non-empty trimmed lines; null if none. */
+export function entriesToAccusedJson(entries: string[]): unknown | null {
+  const trimmed = entries.map((e) => e.trim()).filter((e) => e.length > 0);
+  if (trimmed.length === 0) return null;
+  return { entries: trimmed };
+}
+
+export function accusedPayloadFromForm(formData: FormData): unknown | null {
+  const raw = String(formData.get("accused_payload") ?? "").trim();
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (
+        parsed != null &&
+        typeof parsed === "object" &&
+        !Array.isArray(parsed) &&
+        Array.isArray((parsed as Record<string, unknown>).entries)
+      ) {
+        const list = (parsed as { entries: unknown[] }).entries.map((x) =>
+          String(x ?? "")
+        );
+        return entriesToAccusedJson(list);
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+  const a1 = String(formData.get("accused_a1") ?? "");
+  const a2 = String(formData.get("accused_a2") ?? "");
+  const a3 = String(formData.get("accused_a3") ?? "");
+  return entriesToAccusedJson([a1, a2, a3]);
 }
 
 export function formatAccusedForDisplay(accused: unknown): string {
-  const { a1, a2, a3 } = accusedJsonToDetails(accused);
-  const lines: string[] = [];
-  if (a1.trim()) lines.push(`a1: ${a1.trim()}`);
-  if (a2.trim()) lines.push(`a2: ${a2.trim()}`);
-  if (a3.trim()) lines.push(`a3: ${a3.trim()}`);
-  if (lines.length > 0) return lines.join("\n\n");
   if (accused == null) return "—";
-  if (typeof accused === "string") return accused || "—";
+  if (typeof accused === "object" && accused !== null && !Array.isArray(accused)) {
+    const o = accused as Record<string, unknown>;
+    if (Array.isArray(o.entries)) {
+      const parts = o.entries
+        .map((x) => String(x ?? "").trim())
+        .filter((s) => s.length > 0);
+      if (parts.length > 0) {
+        return parts.map((text, i) => `Accused ${i + 1}: ${text}`).join("\n\n");
+      }
+    }
+    const legacy = LEGACY_KEYS.map((k) => (o[k] != null ? String(o[k]).trim() : "")).filter(
+      (s) => s.length > 0
+    );
+    if (legacy.length > 0) {
+      return legacy.map((text, i) => `Accused ${i + 1}: ${text}`).join("\n\n");
+    }
+  }
+  if (typeof accused === "string") return accused.trim() || "—";
   try {
     return JSON.stringify(accused, null, 2);
   } catch {

@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { accusedJsonToDetails } from "@/lib/case-accused";
+import { accusedJsonToEntries } from "@/lib/case-accused";
 import { CASE_STATUS_LABELS } from "@/lib/case-labels";
 import type { CaseRow, CaseStatus } from "@/types";
 
@@ -59,7 +59,7 @@ export function EditCaseDialog({ organizationId, orgSlug, caseRow }: EditCaseDia
     }
   }
 
-  const accusedInitial = accusedJsonToDetails(caseRow.accused);
+  const accusedInitialEntries = accusedJsonToEntries(caseRow.accused);
 
   return (
     <>
@@ -128,7 +128,7 @@ export function EditCaseDialog({ organizationId, orgSlug, caseRow }: EditCaseDia
             </div>
             <AccusedDetailsFields
               key={`${caseRow.id}-${open ? "o" : "c"}`}
-              initial={accusedInitial}
+              initialEntries={accusedInitialEntries}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">

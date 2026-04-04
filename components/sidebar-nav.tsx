@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Briefcase,
+  ClipboardList,
   Kanban,
   LayoutDashboard,
   Mail,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 const ICONS = {
   dashboard: LayoutDashboard,
   search: Search,
+  forms: ClipboardList,
   cases: Briefcase,
   items: Kanban,
   activity: ScrollText,
@@ -47,6 +49,8 @@ export function SidebarNav({
           active = pathname === "/invitations" || pathname.startsWith("/invitations/");
         } else if (label === "Search") {
           active = pathname.startsWith(`${base}/search`);
+        } else if (label === "Forms") {
+          active = pathname.startsWith(`${base}/forms`);
         } else if (label === "Team") {
           active = pathname.startsWith(`${base}/settings/team`);
         } else if (label === "Cases") {
