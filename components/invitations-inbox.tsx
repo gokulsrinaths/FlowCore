@@ -1,23 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import {
-  acceptInvitationAction,
-  rejectInvitationAction,
-} from "@/app/actions/invitations";
-import { publicInviteUrl } from "@/lib/invite-link";
-import { buttonVariants } from "@/lib/button-variants";
+import { acceptInvitationAction, rejectInvitationAction } from "@/app/actions/invitations";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/lib/button-variants";
+import { publicInviteUrl } from "@/lib/invite-link";
 import { cn } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import type { InvitationInboxItem, UserInvitationsInbox } from "@/types";
 
 function formatInvitedOn(iso: string): string {
@@ -31,8 +23,8 @@ function formatInvitedOn(iso: string): string {
   }
 }
 
-function statusLabel(s: InvitationInboxItem["status"]): string {
-  switch (s) {
+function statusLabel(status: InvitationInboxItem["status"]): string {
+  switch (status) {
     case "invited":
       return "Invite sent";
     case "registered":
@@ -42,8 +34,18 @@ function statusLabel(s: InvitationInboxItem["status"]): string {
     case "rejected":
       return "Declined";
     default:
-      return s;
+      return status;
   }
+}
+
+function EmptySection({ description }: { description: string }) {
+  return (
+    <Card className="border-dashed">
+      <CardContent className="pt-6">
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
+  );
 }
 
 function InboxCard({
@@ -61,14 +63,13 @@ function InboxCard({
   onReject: (id: string) => void;
   onCopy: (token: string) => void;
 }) {
-  const caseLine =
-    inv.case_title?.trim() ? inv.case_title : "Workspace invitation (no case)";
+  const caseLine = inv.case_title?.trim() ? inv.case_title : "Workspace invitation";
 
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base">{inv.org_name}</CardTitle>
-        <CardDescription>About: {caseLine}</CardDescription>
+        <CardDescription>Case / scope: {caseLine}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <dl className="grid gap-2 text-sm">
@@ -84,7 +85,7 @@ function InboxCard({
 
         {section === "pending" && inv.status === "invited" ? (
           <p className="text-sm text-muted-foreground">
-            Please register with the invited email (or sign in) to respond.
+            Please register with the invited email, or sign in with it, before responding.
           </p>
         ) : null}
 
@@ -116,7 +117,7 @@ function InboxCard({
                 variant="secondary"
                 className="w-full sm:w-auto"
                 disabled={busy}
-                onClick={() => onCopy(inv.token!)}
+                onClick={() => onCopy(inv.token)}
               >
                 Copy link
               </Button>
@@ -126,9 +127,9 @@ function InboxCard({
 
         {section === "accepted" ? (
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <p className="text-sm font-medium text-muted-foreground">You’re in</p>
+            <p className="text-sm font-medium text-muted-foreground">You&apos;re in</p>
             {inv.org_slug ? (
-              <a
+              <Link
                 href={`/${inv.org_slug}/dashboard`}
                 className={cn(
                   buttonVariants({ size: "sm", variant: "secondary" }),
@@ -136,7 +137,7 @@ function InboxCard({
                 )}
               >
                 Open workspace
-              </a>
+              </Link>
             ) : null}
           </div>
         ) : null}
@@ -163,7 +164,7 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
     start(async () => {
       const res = await acceptInvitationAction(id);
       if (res.ok) {
-        toast.success("Welcome — you’re in");
+        toast.success("Welcome, you're in");
         const path = res.slug ? `/${res.slug}/dashboard` : "/invitations";
         if (res.slug) {
           window.location.assign(path);
@@ -181,14 +182,14 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
       const res = await rejectInvitationAction(id);
       if (res.ok) {
         toast.success("Invite declined");
-        setGroups((g) => {
-          const row = g.pending.find((x) => x.id === id);
+        setGroups((grouped) => {
+          const row = grouped.pending.find((inv) => inv.id === id);
           return {
-            pending: g.pending.filter((x) => x.id !== id),
-            accepted: g.accepted,
+            pending: grouped.pending.filter((inv) => inv.id !== id),
+            accepted: grouped.accepted,
             rejected: row
-              ? [{ ...row, status: "rejected" as const }, ...g.rejected]
-              : g.rejected,
+              ? [{ ...row, status: "rejected" as const }, ...grouped.rejected]
+              : grouped.rejected,
           };
         });
         router.refresh();
@@ -199,9 +200,7 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
   }
 
   const hasAny =
-    groups.pending.length > 0 ||
-    groups.accepted.length > 0 ||
-    groups.rejected.length > 0;
+    groups.pending.length > 0 || groups.accepted.length > 0 || groups.rejected.length > 0;
 
   if (!hasAny) {
     return (
@@ -209,8 +208,8 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
         <CardHeader>
           <CardTitle>You have no invitations</CardTitle>
           <CardDescription>
-            When a workspace invites your email, invitations appear here. Use the same email to
-            sign in, then accept or reject from this inbox.
+            When a workspace invites your email, invitations appear here. Use the same email to sign
+            in, then accept or reject from this inbox.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -223,13 +222,13 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
         <div>
           <h2 className="text-lg font-semibold tracking-tight">Needs your response</h2>
           <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Invite sent</span> — finish signing up
+            <span className="font-medium text-foreground">Invite sent</span> means finish signing up
             with that email first. <span className="font-medium text-foreground">Ready to accept</span>{" "}
-            — you can join or decline below.
+            means you can join or decline below.
           </p>
         </div>
         {groups.pending.length === 0 ? (
-          <p className="text-sm text-muted-foreground">None.</p>
+          <EmptySection description="Nothing is waiting on you right now." />
         ) : (
           <div className="space-y-4">
             {groups.pending.map((inv) => (
@@ -250,7 +249,7 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
       <section className="space-y-4">
         <h2 className="text-lg font-semibold tracking-tight">Accepted invitations</h2>
         {groups.accepted.length === 0 ? (
-          <p className="text-sm text-muted-foreground">None.</p>
+          <EmptySection description="You have not accepted any invitations yet." />
         ) : (
           <div className="space-y-4">
             {groups.accepted.map((inv) => (
@@ -271,7 +270,7 @@ export function InvitationsInbox({ initial }: { initial: UserInvitationsInbox })
       <section className="space-y-4">
         <h2 className="text-lg font-semibold tracking-tight">Declined</h2>
         {groups.rejected.length === 0 ? (
-          <p className="text-sm text-muted-foreground">None.</p>
+          <EmptySection description="No invitations have been declined." />
         ) : (
           <div className="space-y-4">
             {groups.rejected.map((inv) => (
