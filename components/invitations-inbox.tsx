@@ -117,7 +117,9 @@ function InboxCard({
                 variant="secondary"
                 className="w-full sm:w-auto"
                 disabled={busy}
-                onClick={() => onCopy(inv.token)}
+                onClick={() => {
+                  if (inv.token) onCopy(inv.token);
+                }}
               >
                 Copy link
               </Button>
