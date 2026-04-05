@@ -1,29 +1,22 @@
 import Link from "next/link";
-import { IBM_Plex_Mono, Outfit } from "next/font/google";
+import type { CSSProperties } from "react";
 import { LandingChartsSection } from "@/components/landing/landing-charts-section";
 import { buttonVariants } from "@/lib/button-variants";
 import { cn } from "@/lib/utils";
-
-const display = Outfit({
-  subsets: ["latin"],
-  variable: "--landing-display",
-});
-
-const telemetry = IBM_Plex_Mono({
-  weight: ["400", "500"],
-  subsets: ["latin"],
-  variable: "--landing-mono",
-});
 
 export default function MarketingHome() {
   return (
     <div
       className={cn(
-        display.variable,
-        telemetry.variable,
         "min-h-screen flex flex-col bg-[#030508] text-slate-200 antialiased",
         "[font-family:var(--landing-display),system-ui,sans-serif]"
       )}
+      style={
+        {
+          "--landing-display": "ui-sans-serif, system-ui, sans-serif",
+          "--landing-mono": "ui-monospace, SFMono-Regular, monospace",
+        } as CSSProperties
+      }
     >
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,rgba(46,230,255,0.12),transparent_50%),radial-gradient(ellipse_80%_50%_at_100%_50%,rgba(255,176,32,0.06),transparent_45%)]" />
       <div
@@ -98,7 +91,7 @@ export default function MarketingHome() {
                 <strong className="font-medium text-slate-300">Kanban stages</strong>,{" "}
                 <strong className="font-medium text-slate-300">role-based access</strong>, and an{" "}
                 <strong className="font-medium text-slate-300">audit trail</strong> enforced in the
-                database — so your team sees the same truth, instantly.
+                database â€” so your team sees the same truth, instantly.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -153,14 +146,14 @@ export default function MarketingHome() {
               Sequence of operations
             </h2>
             <p className="mt-2 max-w-2xl text-2xl font-semibold tracking-tight text-white">
-              How it works — three burns, no drift.
+              How it works â€” three burns, no drift.
             </p>
             <ol className="mt-10 grid gap-5 sm:grid-cols-3">
               {[
                 {
                   step: "01",
                   title: "Provision workspace",
-                  body: "Create an org, invite operators. Roles are scoped — owners, admins, managers, workers.",
+                  body: "Create an org, invite operators. Roles are scoped â€” owners, admins, managers, workers.",
                 },
                 {
                   step: "02",
@@ -170,7 +163,7 @@ export default function MarketingHome() {
                 {
                   step: "03",
                   title: "Review the log",
-                  body: "Every meaningful change leaves a trail — ready for stand-ups and compliance-style reviews.",
+                  body: "Every meaningful change leaves a trail â€” ready for stand-ups and compliance-style reviews.",
                 },
               ].map((item) => (
                 <li
@@ -217,18 +210,18 @@ export default function MarketingHome() {
       </main>
 
       <footer className="relative z-10 border-t border-cyan-500/10 bg-[rgba(3,5,8,0.9)] py-8 text-center text-xs text-slate-500">
-        © {new Date().getFullYear()} FlowCore ·{" "}
+        Â© {new Date().getFullYear()} FlowCore Â·{" "}
         <Link href="/login" className="text-cyan-500/80 underline-offset-4 hover:text-cyan-400 hover:underline">
           Sign in
         </Link>
-        {" · "}
+        {" Â· "}
         <Link
           href="/login?signup=1"
           className="text-cyan-500/80 underline-offset-4 hover:text-cyan-400 hover:underline"
         >
           Create account
         </Link>
-        {" · "}
+        {" Â· "}
         <Link href="/help" className="text-cyan-500/80 underline-offset-4 hover:text-cyan-400 hover:underline">
           Help
         </Link>

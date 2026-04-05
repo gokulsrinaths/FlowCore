@@ -32,7 +32,6 @@ export const getOrgMembershipBySlug = cache(
   async (
     slug: string
   ): Promise<{ organization: OrganizationWithRole } | null> => {
-    const supabase = await createSupabaseServerClient();
     const orgs = await getOrganizationsForUser();
     const hit = orgs.find((o) => o.slug === slug);
     if (!hit) return null;

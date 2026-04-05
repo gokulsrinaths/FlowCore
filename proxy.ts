@@ -1,17 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { isAnonymousAccessibleRoute } from "@/lib/proxy-routes";
 
 /**
- * Public routes: marketing, auth, static.
- * Authenticated: onboarding, invite, /[orgSlug]/...
+ * Public routes: marketing, auth, recovery, invite, static.
+ * Authenticated: onboarding, /[orgSlug]/...
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // Avoid a Supabase round-trip on static marketing — major win for TTFB / cold regions (e.g. India → EU/US API).
-  const isPublicMarketing =
-    path === "/" || path === "/pricing" || path === "/help";
-  if (isPublicMarketing) {
+  // Avoid a Supabase round-trip on public routes - major win for TTFB in cold regions.
+  const isPublicRoute = isAnonymousAccessibleRoute(path);
+  if (isPublicRoute) {
     return NextResponse.next();
   }
 
@@ -26,9 +26,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
@@ -42,16 +40,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLogin = path === "/login" || path.startsWith("/login/");
-
-  if (!user && !isLogin && !isPublicMarketing) {
+  if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
-
-  // Keep /login reachable when signed in so "Sign in" always shows the auth page
-  // (continue / sign out). Session cookies are refreshed via getUser() above.
 
   return response;
 }

@@ -35,37 +35,18 @@ export type SidebarNavItem = {
   badge?: number;
 };
 
-/** Active state from routes only so nav labels can change without breaking highlights. */
-export function isNavHrefActive(pathname: string, href: string, base: string): boolean {
+function isNavHrefActive(pathname: string, href: string, base: string): boolean {
   if (href === "/invitations") {
-    return pathname === "/invitations" || pathname.startsWith("/invitations/");
-  }
-  if (href.startsWith(`${base}/questionnaires`)) {
-    return pathname.startsWith(`${base}/questionnaires`);
-  }
-  if (href === `${base}/forms`) {
     return pathname === href || pathname.startsWith(`${href}/`);
-  }
-  if (href === `${base}/cases`) {
-    return pathname.startsWith(`${base}/cases`);
-  }
-  if (href === `${base}/items`) {
-    return pathname === href || pathname.startsWith(`${href}/`);
-  }
-  if (href === `${base}/activity`) {
-    return pathname.startsWith(`${base}/activity`);
   }
   if (href === `${base}/settings/team`) {
     return pathname.startsWith(`${base}/settings/team`);
   }
-  if (href.includes("/settings/general")) {
+  if (href === `${base}/settings/general`) {
     return (
       pathname.startsWith(`${base}/settings`) &&
       !pathname.startsWith(`${base}/settings/team`)
     );
-  }
-  if (href === `${base}/dashboard`) {
-    return pathname === href || pathname.startsWith(`${href}/`);
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -86,12 +67,14 @@ export function SidebarNav({
       {items.map(({ href, label, icon, badge }) => {
         const Icon = ICONS[icon];
         const active = isNavHrefActive(pathname, href, base);
+
         return (
           <li key={href}>
             <Link
               href={href}
               onClick={() => onNavigate?.()}
               title={label}
+              aria-current={active ? "page" : undefined}
               className={cn(
                 "flex min-h-10 items-center gap-2.5 rounded-lg px-2 py-2 text-sm transition-colors touch-manipulation",
                 active
@@ -116,3 +99,5 @@ export function SidebarNav({
     </ul>
   );
 }
+
+export default SidebarNav;

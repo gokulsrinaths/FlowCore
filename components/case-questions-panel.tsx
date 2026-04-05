@@ -28,7 +28,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -39,13 +38,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { CaseParticipant, CaseQuestionRow, CaseQuestionStatus } from "@/types";
+import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 
 const CASE_Q_STATUS_LABELS: Record<CaseQuestionStatus, string> = {
   pending: "Not started",
   in_progress: "In progress",
   answered: "Answered",
 };
-import { ArrowDown, ArrowUp, ChevronDown, Plus, Trash2 } from "lucide-react";
 
 function participantLabel(p: CaseParticipant): string {
   if (p.user_name?.trim()) return p.user_name;

@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "test:proxy": "jiti tests/proxy-routes.test.ts",
+    "test:journeys": "jiti tests/flow-journeys.test.ts",
+    "test:e2e": "npm run test:proxy && npm run test:journeys",
     "start": "next start",
     "lint": "eslint"
   },

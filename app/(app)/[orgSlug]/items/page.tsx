@@ -20,7 +20,7 @@ type PageProps = { params: Promise<{ orgSlug: string }> };
 async function ItemsContent({ orgSlug }: { orgSlug: string }) {
   const membership = await getOrgMembershipBySlug(orgSlug);
   const profile = await getCurrentUserProfile();
-  if (!membership || !profile) return null;
+  if (!membership || !profile) notFound();
 
   const orgId = membership.organization.id;
   const { items, users, cases } = await withLatencyGuard(

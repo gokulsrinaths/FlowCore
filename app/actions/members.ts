@@ -74,6 +74,8 @@ export async function leaveOrganization(
     const r = parseFlowcoreRpc(data);
     if (!r.ok) return { ok: false, error: r.error };
 
+    revalidatePath(`/${orgSlug}/settings/general`);
+    revalidatePath(`/${orgSlug}/settings/team`);
     revalidatePath("/", "layout");
     return { ok: true };
   } catch (e) {

@@ -48,7 +48,7 @@ type CreateItemDialogProps = {
  */
 export function CreateItemDialog({
   users,
-  profile: _profile,
+  profile,
   organizationId,
   orgSlug,
   orgRole,
@@ -61,6 +61,7 @@ export function CreateItemDialog({
   const [participants, setParticipants] = useState<CaseParticipant[]>([]);
   const [deptFilter, setDeptFilter] = useState(ALL_DEPTS);
   const assignAllowed = canAssign(orgRole);
+  void profile;
 
   const departments = useMemo(() => {
     const s = new Set<string>();
@@ -77,10 +78,7 @@ export function CreateItemDialog({
   }, [users, deptFilter]);
 
   useEffect(() => {
-    if (caseId === NO_CASE) {
-      setParticipants([]);
-      return;
-    }
+    if (caseId === NO_CASE) return;
     let cancelled = false;
     listCaseParticipantsAction(organizationId, caseId)
       .then((rows) => {
@@ -94,11 +92,13 @@ export function CreateItemDialog({
     };
   }, [caseId, organizationId]);
 
-  useEffect(() => {
-    if (caseId === NO_CASE && assignment.startsWith("p:")) {
+  function handleCaseChange(next: string) {
+    setCaseId(next);
+    if (next === NO_CASE) {
+      setParticipants([]);
       setAssignment(UNASSIGNED);
     }
-  }, [caseId, assignment]);
+  }
 
   async function onSubmit(formData: FormData) {
     formData.set("organization_id", organizationId);
@@ -135,6 +135,7 @@ export function CreateItemDialog({
           if (!next) {
             setAssignment(UNASSIGNED);
             setCaseId(defaultCaseId ?? NO_CASE);
+            setParticipants([]);
             setDeptFilter(ALL_DEPTS);
           }
         }}
@@ -181,7 +182,7 @@ export function CreateItemDialog({
                 <Label>Link to a case (optional)</Label>
                 <Select
                   value={caseId}
-                  onValueChange={(v) => setCaseId(v ?? NO_CASE)}
+                  onValueChange={(v) => handleCaseChange(v ?? NO_CASE)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="No case" />

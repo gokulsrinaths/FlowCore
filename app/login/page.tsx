@@ -3,11 +3,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   getCurrentUserProfile,
   getSessionUser,
-  userOnboardingCompleted,
 } from "@/lib/auth";
 import { getOrganizationsForUser } from "@/lib/organizations";
 import { LoginForm } from "./login-form";
 import { LoggedInPanel } from "./logged-in-panel";
+import { resolvePostLoginContinueHref } from "@/lib/onboarding-flow";
 
 function LoginFallback() {
   return (
@@ -27,14 +27,8 @@ export default async function LoginPage() {
   if (user) {
     try {
       const profile = await getCurrentUserProfile();
-      if (!userOnboardingCompleted(profile)) {
-        continueHref = "/onboarding";
-      } else {
-        const orgs = await getOrganizationsForUser();
-        if (orgs.length > 0) {
-          continueHref = `/${orgs[0].slug}/dashboard`;
-        }
-      }
+      const orgs = await getOrganizationsForUser();
+      continueHref = resolvePostLoginContinueHref(profile, orgs.map((org) => org.slug));
     } catch {
       /* keep /onboarding */
     }

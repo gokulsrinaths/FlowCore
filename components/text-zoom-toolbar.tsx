@@ -57,10 +57,13 @@ export function TextZoomToolbar() {
   }, []);
 
   useEffect(() => {
-    setMounted(true);
     const stored = readStoredLevel();
-    setLevel(stored);
     applyLevelToDocument(stored);
+    const timer = window.setTimeout(() => {
+      setLevel(stored);
+      setMounted(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   if (!mounted) return null;

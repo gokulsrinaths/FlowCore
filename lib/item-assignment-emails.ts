@@ -5,9 +5,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * Kept as a no-op for call sites that previously sent email.
  */
 export async function sendAssignmentEmailsSideEffect(
-  _supabase: SupabaseClient,
-  _organizationId: string,
-  _orgSlug: string,
-  _itemId: string,
-  _actorUserId: string
-): Promise<void> {}
+  supabase: SupabaseClient,
+  organizationId: string,
+  orgSlug: string,
+  itemId: string,
+  actorUserId: string
+): Promise<void> {
+  void supabase;
+  void organizationId;
+  void orgSlug;
+  void itemId;
+  void actorUserId;
+}

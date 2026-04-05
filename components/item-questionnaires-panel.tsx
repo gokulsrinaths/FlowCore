@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   createItemQuestionnaireAction,
@@ -60,14 +60,10 @@ export function ItemQuestionnairesPanel({
     [users, currentUserId]
   );
   const assignOptions = isWorkspaceAdmin ? users : teammates;
-  const [assignTo, setAssignTo] = useState("");
-
-  useEffect(() => {
-    setAssignTo((prev) => {
-      if (prev && assignOptions.some((t) => t.id === prev)) return prev;
-      return assignOptions[0]?.id ?? "";
-    });
-  }, [assignOptions]);
+  const [assignTo, setAssignTo] = useState(assignOptions[0]?.id ?? "");
+  const selectedAssignTo = assignOptions.some((t) => t.id === assignTo)
+    ? assignTo
+    : assignOptions[0]?.id ?? "";
 
   const canCreate = canCreateItemQuestionnaire(
     orgRole,
@@ -123,7 +119,7 @@ export function ItemQuestionnairesPanel({
           <div className="space-y-2">
             <Label>Assign to</Label>
             <Select
-              value={assignTo}
+              value={selectedAssignTo}
               onValueChange={(v) => {
                 if (v) setAssignTo(v);
               }}
@@ -144,7 +140,7 @@ export function ItemQuestionnairesPanel({
           <Button
             type="button"
             size="sm"
-            disabled={pending || !assignTo}
+            disabled={pending || !selectedAssignTo}
             onClick={() => {
               const q = questionText.trim();
               if (!q) {
@@ -158,7 +154,7 @@ export function ItemQuestionnairesPanel({
                   item.id,
                   q,
                   description.trim(),
-                  assignTo,
+                  selectedAssignTo,
                   caseId
                 );
                 if (res.ok) {

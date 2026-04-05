@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { isOnboardingComplete } from "@/lib/onboarding-flow";
 import type { User, UserRole, UserRow } from "@/types";
 
 /**
@@ -76,8 +77,7 @@ export const getCurrentUserProfile = cache(async (): Promise<UserRow | null> => 
  * Resolves onboarding flag for UI (defaults to true if column missing).
  */
 export function userOnboardingCompleted(profile: UserRow | null): boolean {
-  if (!profile) return false;
-  return profile.onboarding_completed !== false;
+  return isOnboardingComplete(profile);
 }
 
 /**

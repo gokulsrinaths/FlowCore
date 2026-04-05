@@ -4,6 +4,7 @@ import { fetchUserInvitationsInboxAction } from "@/app/actions/invitations";
 import { InvitationsInbox } from "@/components/invitations-inbox";
 import { buttonVariants } from "@/lib/button-variants";
 import { getOrganizationsForUser } from "@/lib/organizations";
+import { resolveWorkspaceFallbackHref } from "@/lib/onboarding-flow";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,8 +17,7 @@ export default async function InvitationsPage() {
     getOrganizationsForUser(),
   ]);
 
-  const backHref =
-    orgs.length > 0 ? `/${orgs[0].slug}/dashboard` : "/onboarding";
+  const backHref = resolveWorkspaceFallbackHref(orgs.map((org) => org.slug));
 
   if (!res.ok) {
     return (
