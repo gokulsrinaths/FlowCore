@@ -24,6 +24,8 @@ function parseInvitationRow(row: unknown): InvitationListRow | null {
     id,
     organization_id: String(x.organization_id ?? ""),
     organization_name: String(x.organization_name ?? ""),
+    organization_slug:
+      x.organization_slug != null ? String(x.organization_slug) : undefined,
     case_id: x.case_id != null ? String(x.case_id) : null,
     case_title: x.case_title != null ? String(x.case_title) : null,
     role: x.role as OrgRole,
